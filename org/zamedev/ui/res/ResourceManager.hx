@@ -32,17 +32,15 @@ class ResourceManager {
     }
 
     public function getColor(id:String):UInt {
-        var value = colors[id];
-
-        if (value == null) {
-            value = colors["@color/" + id];
-
-            if (value == null) {
-                throw new Error("Color not found: " + id);
-            }
+        if (colors.exists(id)) {
+            return colors[id];
         }
 
-        return value;
+        if (colors.exists("@color/" + id)) {
+            return colors["@color/" + id];
+        }
+
+        throw new Error("Color not found: " + id);
     }
 
     public function getDimension(id:String):Dimension {
