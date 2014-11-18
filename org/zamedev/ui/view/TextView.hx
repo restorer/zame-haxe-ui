@@ -2,6 +2,7 @@ package org.zamedev.ui.view;
 
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 
 class TextView extends View {
@@ -22,7 +23,7 @@ class TextView extends View {
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
 
-        addChild(textField);
+        sprite.addChild(textField);
 
         // textField.backgroundColor = 0x800000;
         // textField.background = true;
@@ -54,29 +55,78 @@ class TextView extends View {
         return false;
     }
 
-    override public function onMeasure(child:View = null):Void {
-        textField.width = 1000;
-        textField.height = 1000;
+    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+        if (super.measureAndLayout(widthSpec, heightSpec)) {
+            return true;
+        }
 
-        #if js
-            textField.width = textField.textWidth;
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                textField.width = 1000;
 
-            if (_textFormat.size == null) {
-                textField.height = textField.textHeight;
-            } else if (_textFormat.size <= 16) {
-                textField.height = _textFormat.size * 1.185;
-            } else {
-                textField.height = _textFormat.size;
-            }
-        #else
-            #if android
-                textField.width = textField.textWidth * 1.1;
-            #else
-                textField.width = textField.textWidth + 4;
-            #end
+            case MeasureSpec.EXACT(size) | MeasureSpec.AT_MOST(size):
+                textField.width = size;
+        }
 
-            textField.height = textField.textHeight;
-        #end
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                textField.height = 1000;
+
+            case MeasureSpec.EXACT(size) | MeasureSpec.AT_MOST(size):
+                textField.height = size;
+        }
+
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                #if js
+                    _width = textField.textWidth;
+                #elseif android
+                    _width = textField.textWidth * 1.1;
+                #else
+                    _width = textField.textWidth + 4;
+                #end
+
+                switch (widthSpec) {
+                    case MeasureSpec.AT_MOST(size):
+                        _width = Math.min(size, _width);
+
+                    default:
+                }
+
+                textField.width = _width;
+
+            case MeasureSpec.EXACT(size):
+                _width = size;
+        }
+
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                #if js
+                    if (_textFormat.size == null) {
+                        _height = textField.textHeight;
+                    } else if (_textFormat.size <= 16) {
+                        _height = _textFormat.size * 1.185;
+                    } else {
+                        _height = _textFormat.size;
+                    }
+                #else
+                    _height = textField.textHeight;
+                #end
+
+                switch (heightSpec) {
+                    case MeasureSpec.AT_MOST(size):
+                        _height = Math.min(size, _height);
+
+                    default:
+                }
+
+                textField.height = _height;
+
+            case MeasureSpec.EXACT(size):
+                _height = size;
+        }
+
+        return true;
     }
 
     @:noCompletion
@@ -102,7 +152,7 @@ class TextView extends View {
         _textFormat.size = value;
         textField.defaultTextFormat = _textFormat;
         textField.setTextFormat(_textFormat);
-        measure();
+        requestLayout();
         return value;
     }
 
@@ -117,7 +167,7 @@ class TextView extends View {
         textField.embedFonts = true;
         textField.defaultTextFormat = _textFormat;
         textField.setTextFormat(_textFormat);
-        measure();
+        requestLayout();
         return value;
     }
 
@@ -129,7 +179,7 @@ class TextView extends View {
     @:noCompletion
     private function set_text(value:String):String {
         textField.text = value;
-        measure();
+        requestLayout();
         return value;
     }
 }

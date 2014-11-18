@@ -16,8 +16,6 @@ class Manager extends Scene {
 	private var currentScene:Scene = null;
 	private var scenes:List<Scene>;
 
-	public var resources:Resources = new Resources();
-
 	#if debug
 		private var fps:FPS;
 	#end
@@ -45,11 +43,6 @@ class Manager extends Scene {
 
 		addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		stage.addEventListener(Event.RESIZE, onStageResize);
-	}
-
-	private function useResources(resources:Resources):Void {
-		this.resources = resources;
-		resources.load();
 	}
 
 	#if !flash override #end private function get_width():Float {

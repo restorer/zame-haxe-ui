@@ -2,10 +2,12 @@ package org.zamedev.ui.res;
 
 import openfl.Assets;
 import openfl.errors.Error;
-import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.graphics.Color;
+import org.zamedev.ui.graphics.Dimension;
+import org.zamedev.ui.graphics.DimensionTools;
+import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.internal.XmlExt;
+import org.zamedev.ui.view.View;
 
 using StringTools;
 
@@ -22,7 +24,7 @@ class ResourceManager {
     private var dimensions:Map<String, Dimension>;
     private var drawables:Map<String, Drawable>;
     private var strings:Map<String, String>;
-    private var styles:Map<String, Map<String, String>>;
+    private var styles:Map<String, Map<String, TypedValue>>;
 
     public function new(context:Context) {
         this.context = context;
@@ -43,7 +45,7 @@ class ResourceManager {
         return value;
     }
 
-    public function getDimen(id:String):Dimension {
+    public function getDimension(id:String):Dimension {
         var value = dimensions[id];
 
         if (value == null) {
@@ -97,6 +99,42 @@ class ResourceManager {
         }
     }
 
+    public function getString(id:String):String {
+        var value = strings[id];
+
+        if (value == null) {
+            value = strings["@string/" + id];
+
+            if (value == null) {
+                throw new Error("String not found: " + id);
+            }
+        }
+
+        return value;
+    }
+
+    public function getStyle(id:String):Map<String, TypedValue> {
+        var value = styles[id];
+
+        if (value == null) {
+            value = styles["@style/" + id];
+
+            if (value == null) {
+                throw new Error("Style not found: " + id);
+            }
+        }
+
+        return value;
+    }
+
+    public function inflateLayout(id:String):View {
+        if (~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/.match(id)) {
+            return Inflater.parse(this, id);
+        } else {
+            return Inflater.parse(this, "@layout/" + id);
+        }
+    }
+
     public function _getSelectorText(id:String):String {
         var re = ~/^\s*@selector\/([a-zA-Z0-9_]+)\s*$/;
 
@@ -113,32 +151,20 @@ class ResourceManager {
         return Assets.getText(assetId);
     }
 
-    public function getString(id:String):String {
-        var value = strings[id];
+    public function _getLayoutText(id:String):String {
+        var re = ~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/;
 
-        if (value == null) {
-            value = strings["@string/" + id];
-
-            if (value == null) {
-                throw new Error("String not found: " + id);
-            }
+        if (!re.match(id)) {
+            throw new Error("Layout not found: " + id);
         }
 
-        return value;
-    }
+        var assetId = "assets/layouts/" + re.matched(1) + ".xml";
 
-    public function getStyle(id:String):Map<String, String> {
-        var value = styles[id];
-
-        if (value == null) {
-            value = styles["@style/" + id];
-
-            if (value == null) {
-                throw new Error("Style not found: " + id);
-            }
+        if (!Assets.exists(assetId, AssetType.TEXT)) {
+            throw new Error("Layout not found: " + id);
         }
 
-        return value;
+        return Assets.getText(assetId);
     }
 
     public function reload() {
@@ -147,7 +173,7 @@ class ResourceManager {
         drawables = new Map<String, Drawable>();
         fonts = new Map<String, String>();
         strings = new Map<String, String>();
-        styles = new Map<String, Map<String, String>>();
+        styles = new Map<String, Map<String, TypedValue>>();
 
         for (assetId in Assets.list(AssetType.IMAGE)) {
             var re = ~/^assets\/drawables\/([a-zA-Z0-9_]+)\.([a-z]+)$/;
@@ -200,7 +226,7 @@ class ResourceManager {
                     colors["@color/" + name] = Color.parse(XmlExt.getNodeValue(resolved));
 
                 case "dimen":
-                    dimensions["@dimen/" + name] = Dimension.parse(XmlExt.getNodeValue(resolved));
+                    dimensions["@dimen/" + name] = DimensionTools.parse(XmlExt.getNodeValue(resolved));
 
                 case "font":
                     fonts["@font/" + name] = Assets.getFont("assets/fonts/" + XmlExt.getNodeValue(resolved).trim()).fontName;
@@ -273,12 +299,12 @@ class ResourceManager {
         return resolveResourceValue(resourceMap, resourceMap.get(referenceKey), visitedMap);
     }
 
-    private static function resolveStyle(
+    private function resolveStyle(
         styleSpecMap:Map<String, StyleSpec>,
         styleSpec:StyleSpec,
         visitedMap:Map<String, Bool> = null
-    ):Map<String, String> {
-        var resolvedStyle = new Map<String, String>();
+    ):Map<String, TypedValue> {
+        var resolvedStyle = new Map<String, TypedValue>();
 
         if (visitedMap == null) {
             visitedMap = new Map<String, Bool>();
@@ -321,7 +347,7 @@ class ResourceManager {
                 }
             }
 
-            resolvedStyle[name] = value;
+            resolvedStyle[name] = new TypedValue(this, value);
         }
 
         return resolvedStyle;

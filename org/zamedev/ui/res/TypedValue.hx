@@ -2,7 +2,11 @@ package org.zamedev.ui.res;
 
 import openfl.errors.ArgumentError;
 import org.zamedev.ui.graphics.Color;
+import org.zamedev.ui.graphics.Dimension;
+import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.Drawable;
+
+using StringTools;
 
 class TypedValue {
     private var resourceManager:ResourceManager;
@@ -23,7 +27,15 @@ class TypedValue {
 
     public function resolveFloat():Float {
         if (textValue.substr(0, 1) == "@") {
-            return resourceManager.getDimen(textValue).value;
+            var dimen = resourceManager.getDimension(textValue);
+
+            switch (dimen) {
+                case Dimension.EXACT(value):
+                    return value;
+
+                default:
+                    throw new ArgumentError("Must be exact value: " + textValue);
+            }
         } else {
             var value = Std.parseFloat(textValue);
 
@@ -32,6 +44,14 @@ class TypedValue {
             }
 
             return value;
+        }
+    }
+
+    public function resolveDimension():Dimension {
+        if (textValue.substr(0, 1) == "@") {
+            return resourceManager.getDimension(textValue);
+        } else {
+            return DimensionTools.parse(textValue);
         }
     }
 
@@ -56,6 +76,20 @@ class TypedValue {
             return resourceManager.getFont(textValue);
         } else {
             return textValue;
+        }
+    }
+
+    public function resolveSelector():Selector {
+        return resourceManager.getSelector(textValue);
+    }
+
+    public function resolveBool():Bool {
+        switch (textValue.trim().toLowerCase()) {
+            case "1" | "true" | "on" | "yes":
+                return true;
+
+            default:
+                return false;
         }
     }
 }

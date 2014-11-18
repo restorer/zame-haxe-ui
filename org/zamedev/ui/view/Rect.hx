@@ -1,20 +1,18 @@
 package org.zamedev.ui.view;
 
 import openfl.display.Shape;
+import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.MeasureSpec;
 
 class Rect extends View {
     private var shape:Shape;
-    private var shapeWidth:Float;
-    private var shapeHeight:Float;
 
     public var fillColor(default, set):UInt;
 
     public function new() {
         super();
 
-        addChild(shape = new Shape());
-        shapeWidth = 0.0;
-        shapeHeight = 0.0;
+        sprite.addChild(shape = new Shape());
         fillColor = 0;
     }
 
@@ -32,42 +30,42 @@ class Rect extends View {
         return false;
     }
 
-    private function updateShape():Void {
+    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+        if (super.measureAndLayout(widthSpec, heightSpec)) {
+            return true;
+        }
+
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _width = 0;
+
+            case MeasureSpec.AT_MOST(size) | MeasureSpec.EXACT(size):
+                _width = size;
+        }
+
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _height = 0;
+
+            case MeasureSpec.AT_MOST(size) | MeasureSpec.EXACT(size):
+                _height = size;
+        }
+
         shape.graphics.clear();
 
-        if (shapeWidth > 0 && shapeHeight > 0) {
+        if (_width > 0 && _height > 0) {
             shape.graphics.beginFill(fillColor);
-            shape.graphics.drawRect(0, 0, shapeWidth, shapeHeight);
+            shape.graphics.drawRect(0, 0, _width, _height);
             shape.graphics.endFill();
         }
+
+        return true;
     }
 
     @:noCompletion
     private function set_fillColor(value:UInt):UInt {
         fillColor = value;
-        updateShape();
-        return value;
-    }
-
-    #if !flash override #end private function get_width():Float {
-        return shapeWidth;
-    }
-
-    #if !flash override #end private function set_width(value:Float):Float {
-        shapeWidth = value;
-        updateShape();
-        measure();
-        return value;
-    }
-
-    #if !flash override #end private function get_height():Float {
-        return shapeHeight;
-    }
-
-    #if !flash override #end private function set_height(value:Float):Float {
-        shapeHeight = value;
-        updateShape();
-        measure();
+        requestLayout();
         return value;
     }
 }

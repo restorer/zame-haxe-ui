@@ -4,14 +4,13 @@ import openfl.events.Event;
 import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import org.zamedev.ui.graphics.Drawable;
+import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.TextView;
-import org.zamedev.ui.view.View;
+import org.zamedev.ui.view.ViewGroup;
 
-class Button extends View {
-    private static inline var CUSTOM_CLICK:String = "customClick";
-
+class Button extends ViewGroup {
     private var backgroundView:ImageView;
     private var iconView:ImageView;
     private var textView:TextView;
@@ -32,7 +31,7 @@ class Button extends View {
     public var textSize(get, set):Null<Float>;
     public var font(get, set):String;
     public var text(get, set):String;
-    public var iconMargin(default, set):Float;
+    public var iconMarginRight(default, set):Float;
     public var enabled:Bool;
 
     public function new() {
@@ -43,13 +42,13 @@ class Button extends View {
         addChild(textView = new TextView());
 
         listenersAttached = false;
-        iconMargin = 16;
+        iconMarginRight = 16;
         enabled = true;
 
-        addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-        addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-        addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-        addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
+        sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+        sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+        sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+        sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {
@@ -106,8 +105,8 @@ class Button extends View {
                 text = value.resolveString();
                 return true;
 
-            case "iconMargin":
-                iconMargin = value.resolveFloat();
+            case "iconMarginRight":
+                iconMarginRight = value.resolveFloat();
                 return true;
 
         }
@@ -115,106 +114,85 @@ class Button extends View {
         return false;
     }
 
-    override public function onMeasure(child:View = null):Void {
-        if (backgroundView.drawable == null) {
-            if (iconView.drawable == null) {
-                iconView.x = 0;
-                iconView.y = 0;
-                textView.x = 0;
-                textView.y = 0;
-            } else {
-                var cy = Math.max(iconView.height, textView.height) / 2;
+    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+        if (super.measureAndLayout(widthSpec, heightSpec)) {
+            return true;
+        }
 
-                iconView.x = 0;
-                iconView.cy = cy;
-                textView.x = iconView.width + iconMargin;
-                textView.cy = cy;
-            }
+        backgroundView.measureAndLayout(widthSpec, heightSpec);
+        iconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        textView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        var iconWidth = iconView.width = (iconView.drawable == null ? 0 : iconMarginRight);
+
+        _width = Math.max(backgroundView.width, iconWidth + textView.width);
+        _height = Math.max(Math.max(backgroundView.height, iconView.height), textView.height);
+
+        if (iconView.drawable == null) {
+            iconView.x = 0;
+            textView.cx = _width / 2;
         } else {
-            var cx = backgroundView.cx;
-            var cy = backgroundView.cy;
+            var pos = (_width + iconMarginRight + iconView.width) / 2;
 
-            if (iconView.drawable == null) {
-                iconView.x = 0;
-                iconView.y = 0;
-                textView.cx = cx;
-                textView.cy = cy;
-            } else {
-                cx += (iconMargin + iconView.width) / 2;
-
-                iconView.ex = cx - (textView.width / 2) - iconMargin;
-                iconView.cy = cy;
-                textView.cx = cx;
-                textView.cy = cy;
-            }
-        }
-    }
-
-    override public function addEventListener(
-        type:String,
-        listener:Dynamic->Void,
-        useCapture:Bool = false,
-        priority:Int = 0,
-        useWeakReference:Bool = false
-    ):Void {
-        if (type == MouseEvent.CLICK) {
-            type = CUSTOM_CLICK;
+            iconView.ex = pos - (textView.width / 2) - iconMarginRight;
+            textView.cx = pos;
         }
 
-        super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+        iconView.cy = _height / 2;
+        textView.cy = _height / 2;
+
+        return true;
     }
 
-    override public function removeEventListener(type:String, listener:Dynamic->Void, capture:Bool = false):Void {
-        if (type == MouseEvent.CLICK) {
-            type = CUSTOM_CLICK;
-        }
-
-        super.removeEventListener(type, listener, capture);
-    }
-
-    @:noCompletion private function onMouseDown(e:Event):Void {
+    @:noCompletion
+    private function onMouseDown(e:Event):Void {
         if (!listenersAttached && enabled) {
             listenersAttached = true;
             updateState("pressed", true);
 
-            if (stage != null) {
-                stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-                stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            if (sprite.stage != null) {
+                sprite.stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+                sprite.stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
             }
         }
     }
 
-    @:noCompletion private function onMouseUp(e:Event):Void {
+    @:noCompletion
+    private function onMouseUp(e:Event):Void {
         if (listenersAttached) {
-            dispatchEvent(new Event(CUSTOM_CLICK));
+            dispatchEvent(new Event(MouseEvent.CLICK));
         }
     }
 
-    @:noCompletion private function onMouseMove(e:Event):Void {
+    @:noCompletion
+    private function onMouseMove(e:Event):Void {
         if (listenersAttached) {
             e.stopPropagation();
             updateState("pressed", true);
         }
     }
 
-    @:noCompletion private function onRemovedFromStage(_):Void {
+    @:noCompletion
+    private function onRemovedFromStage(_):Void {
         if (listenersAttached) {
-            stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-            stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+            sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
     }
 
-    @:noCompletion private function onStageMouseMove(_):Void {
+    @:noCompletion
+    private function onStageMouseMove(_):Void {
         updateState("pressed", false);
     }
 
-    @:noCompletion private function onStageMouseUp(_):Void {
+    @:noCompletion
+    private function onStageMouseUp(_):Void {
         if (listenersAttached) {
             listenersAttached = false;
             updateState("pressed", false);
 
-            stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-            stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+            sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
     }
 
@@ -384,8 +362,8 @@ class Button extends View {
     }
 
     @:noCompletion
-    private function set_iconMargin(value:Float):Float {
-        iconMargin = value;
+    private function set_iconMarginRight(value:Float):Float {
+        iconMarginRight = value;
         return value;
     }
 }

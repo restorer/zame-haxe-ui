@@ -57,15 +57,15 @@ class Selector {
 
     public static function parse(resourceManager:ResourceManager, resId:String):Selector {
         var list = new Array<Array<SelectorItem>>();
-        parseInner(resourceManager, resId, list);
+        _parse(resourceManager, resId, list, new Map<String, Bool>());
         return new Selector(list);
     }
 
-    private static function parseInner(
+    private static function _parse(
         resourceManager:ResourceManager,
         resId:String,
         list:Array<Array<SelectorItem>>,
-        visitedMap:Map<String, Bool> = null
+        visitedMap:Map<String, Bool>
     ):Void {
         var xmlString = resourceManager._getSelectorText(resId);
         var root = Xml.parse(xmlString).elementsNamed("selector").next();
@@ -84,14 +84,10 @@ class Selector {
                     throw new Error("Parse error: " + resId);
                 }
 
-                if (visitedMap == null) {
-                    visitedMap = new Map<String, Bool>();
-                }
-
                 visitedMap[resId] = true;
 
                 if (!visitedMap.exists(includeId)) {
-                    parseInner(resourceManager, includeId, list, visitedMap);
+                    _parse(resourceManager, includeId, list, visitedMap);
                 }
 
                 continue;

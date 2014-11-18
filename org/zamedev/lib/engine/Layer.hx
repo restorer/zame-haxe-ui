@@ -48,20 +48,4 @@ class Layer extends Sprite {
 		graphics.beginBitmapFill(bitmapData, sharedMatrix, false, true);
 		graphics.drawRect(x, y, width, height);
 	}
-
-	public function getFont(key:String):String {
-		return manager.resources.fonts[key];
-	}
-
-	public function getColor(key:String):UInt {
-		return manager.resources.colors[key];
-	}
-
-	public function getString(key:String):String {
-		return manager.resources.strings[key];
-	}
-
-	public function getDimension(key:String):Int {
-		return manager.resources.dimensions[key];
-	}
 }

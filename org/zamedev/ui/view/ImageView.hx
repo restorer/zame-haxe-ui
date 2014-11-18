@@ -1,13 +1,16 @@
 package org.zamedev.ui.view;
 
-import org.zamedev.ui.res.TypedValue;
-import org.zamedev.ui.graphics.Drawable;
 import openfl.display.DisplayObject;
+import org.zamedev.ui.graphics.Drawable;
+import org.zamedev.ui.res.MeasureSpec;
+import org.zamedev.ui.res.TypedValue;
 
 class ImageView extends View {
     private var _drawable:Drawable;
     private var displayObject:DisplayObject;
     private var displayObjectCache:Map<String, DisplayObject>;
+    private var imageWidth:Float;
+    private var imageHeight:Float;
 
     public var drawable(get, set):Drawable;
 
@@ -17,6 +20,8 @@ class ImageView extends View {
         _drawable = null;
         displayObject = null;
         displayObjectCache = new Map<String, DisplayObject>();
+        imageWidth = 0.0;
+        imageHeight = 0.0;
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {
@@ -33,6 +38,41 @@ class ImageView extends View {
         return false;
     }
 
+    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+        if (super.measureAndLayout(widthSpec, heightSpec)) {
+            return true;
+        }
+
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _width = imageWidth;
+
+            case MeasureSpec.EXACT(size):
+                _width = size;
+
+            case MeasureSpec.AT_MOST(size):
+                _width = Math.min(size, imageWidth);
+        }
+
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _height = imageHeight;
+
+            case MeasureSpec.EXACT(size):
+                _height = size;
+
+            case MeasureSpec.AT_MOST(size):
+                _height = Math.min(size, imageHeight);
+        }
+
+        if (displayObject != null) {
+            displayObject.width = _width;
+            displayObject.height = _height;
+        }
+
+        return true;
+    }
+
     @:noCompletion
     private function get_drawable():Drawable {
         return _drawable;
@@ -40,12 +80,12 @@ class ImageView extends View {
 
     @:noCompletion
     private function set_drawable(value:Drawable):Drawable {
-        if (_drawable == value) {
+        if (Drawable.eq(_drawable, value)) {
             return value;
         }
 
-        if (displayObject != null && displayObject.parent == this) {
-            removeChild(displayObject);
+        if (displayObject != null && displayObject.parent == sprite) {
+            sprite.removeChild(displayObject);
         }
 
         _drawable = value;
@@ -58,10 +98,15 @@ class ImageView extends View {
                 displayObjectCache[value.computeKey()] = displayObject;
             }
 
-            addChild(displayObject);
+            sprite.addChild(displayObject);
+            imageWidth = displayObject.width;
+            imageHeight = displayObject.height;
+        } else {
+            imageWidth = 0.0;
+            imageHeight = 0.0;
         }
 
-        measure();
+        requestLayout();
         return value;
     }
 }

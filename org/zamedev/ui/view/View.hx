@@ -1,47 +1,80 @@
 package org.zamedev.ui.view;
 
-import openfl.display.DisplayObject;
+import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
+import openfl.errors.Error;
+import openfl.events.EventDispatcher;
 import openfl.geom.Point;
 import org.zamedev.ui.res.Inflatable;
+import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Selector;
 import org.zamedev.ui.res.TypedValue;
 
-class View extends Sprite implements Inflatable {
+class View extends EventDispatcher implements Inflatable {
+    private var sprite:Sprite;
+    private var _width:Float;
+    private var _height:Float;
+    private var _parent:ViewGroup;
+    private var widthSpec:MeasureSpec;
+    private var heightSpec:MeasureSpec;
     private var _state:Map<String, Bool>;
     private var _selector:Selector;
-    private var prevWidth:Float;
-    private var prevHeight:Float;
-    private var inMeasure:Bool;
+    private var isInLayout:Bool;
+    private var layoutParamsMap:Map<String, TypedValue>;
 
     public var id:String;
-    public var layoutParams:Map<String, TypedValue>;
+    public var tag:String;
+    public var layoutParams:LayoutParams;
     public var state(get, set):Map<String, Bool>;
     public var selector(get, set):Selector;
 
-    public var offset(get, set):Point;
-    public var offsetX(get, set):Float;
-    public var offsetY(get, set):Float;
+    public var parent(get, null):ViewGroup;
+    public var x(default, set):Float;
+    public var y(default, set):Float;
+    public var offsetX(default, set):Float;
+    public var offsetY(default, set):Float;
+    public var width(get, null):Float;
+    public var height(get, null):Float;
     public var cx(get, set):Float;
     public var cy(get, set):Float;
     public var ex(get, set):Float;
     public var ey(get, set):Float;
-    public var cpoint(get, set):Point;
+    public var xy(get, set):Point;
+    public var offset(get, set):Point;
+    public var cxy(get, set):Point;
 
     public function new() {
         super();
 
+        sprite = new Sprite();
+        _width = 0.0;
+        _height = 0.0;
+        _parent = null;
+        widthSpec = null;
+        heightSpec = null;
         _state = new Map<String, Bool>();
         _selector = null;
-        prevWidth = 0.0;
-        prevHeight = 0.0;
-        inMeasure = false;
-        layoutParams = new Map<String, TypedValue>();
+        isInLayout = false;
+        layoutParamsMap = new Map<String, TypedValue>();
+
+        id = null;
+        tag = null;
+        layoutParams = null;
+        x = 0.0;
+        y = 0.0;
+        offsetX = 0.0;
+        offsetY = 0.0;
     }
 
     public function inflate(name:String, value:TypedValue):Bool {
         if (name.substr(0, 7) == "layout_") {
-            layoutParams[name.substr(7)] = value;
+            var layoutName = name.substr(7);
+            layoutParamsMap[layoutName] = value;
+
+            if (layoutParams != null) {
+                layoutParams.inflate(layoutName, value);
+            }
+
             return true;
         }
 
@@ -49,32 +82,90 @@ class View extends Sprite implements Inflatable {
             case "id":
                 id = value.resolveString();
                 return true;
+
+            case "tag":
+                tag = value.resolveString();
+                return true;
+
+            case "selector":
+                selector = value.resolveSelector();
+                return true;
         }
 
         return false;
     }
 
-    public function measure(child:View = null):Void {
-        if (inMeasure) {
+    private function inflateLayoutParams(layoutParams:LayoutParams) {
+        this.layoutParams = layoutParams;
+
+        for (name in layoutParamsMap.keys()) {
+            if (!layoutParams.inflate(name, layoutParamsMap[name])) {
+                throw new Error("Parse error: unsupported layout param " + name);
+            }
+        }
+    }
+
+    public function addToDisplayObjectContainer(displayObjectContainer:DisplayObjectContainer):Void {
+        measureAndLayout(MeasureSpec.AT_MOST(displayObjectContainer.width), MeasureSpec.AT_MOST(displayObjectContainer.height));
+        displayObjectContainer.addChild(sprite);
+    }
+
+    public function requestLayout() {
+        if (isInLayout || this.widthSpec == null || this.heightSpec == null) {
             return;
         }
 
-        inMeasure = true;
-        onMeasure(child);
+        isInLayout = true;
 
-        if (prevWidth != width || prevHeight != height) {
-            prevWidth = width;
-            prevHeight = height;
+        var prevWidth = _width;
+        var prevHeight = _height;
+        var widthSpec = this.widthSpec;
+        var heightSpec = this.heightSpec;
 
-            if (parent != null && Std.is(parent, View)) {
-                cast(parent, View).measure(this);
-            }
+        this.widthSpec = null;
+        this.heightSpec = null;
+
+        measureAndLayout(widthSpec, heightSpec);
+
+        if (_parent != null && (prevWidth != _width || prevHeight != _height)) {
+            _parent.requestLayout();
         }
 
-        inMeasure = false;
+        isInLayout = false;
     }
 
-    public function onMeasure(child:View = null):Void {
+    private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+        if (Type.enumEq(widthSpec, this.widthSpec) && Type.enumEq(heightSpec, this.heightSpec)) {
+            return true;
+        }
+
+        this.widthSpec = widthSpec;
+        this.heightSpec = heightSpec;
+        return false;
+    }
+
+    private function measureAndLayoutDefault(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _width = sprite.width;
+
+            case MeasureSpec.EXACT(size):
+                _width = size;
+
+            case MeasureSpec.AT_MOST(size):
+                _width = Math.min(size, sprite.width);
+        }
+
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _height = sprite.height;
+
+            case MeasureSpec.EXACT(size):
+                _height = size;
+
+            case MeasureSpec.AT_MOST(size):
+                _height = Math.min(size, sprite.height);
+        }
     }
 
     private function stateUpdated():Void {
@@ -108,6 +199,11 @@ class View extends Sprite implements Inflatable {
     }
 
     @:noCompletion
+    private function get_parent():ViewGroup {
+        return _parent;
+    }
+
+    @:noCompletion
     private function get_state():Map<String, Bool> {
         return _state;
     }
@@ -132,162 +228,120 @@ class View extends Sprite implements Inflatable {
     }
 
     @:noCompletion
-    private function get_offset():Point {
-        return new Point(transform.matrix.tx, transform.matrix.ty);
-    }
-
-    @:noCompletion
-    private function set_offset(value:Point):Point {
-        var matrix = transform.matrix;
-        matrix.tx = value.x;
-        matrix.ty = value.y;
-        transform.matrix = matrix;
-
+    private function set_x(value:Float):Float {
+        x = value;
+        sprite.x = value + offsetX;
         return value;
     }
 
     @:noCompletion
-    private function get_offsetX():Float {
-        return transform.matrix.tx;
+    private function set_y(value:Float):Float {
+        y = value;
+        sprite.y = value + offsetY;
+        return value;
     }
 
     @:noCompletion
     private function set_offsetX(value:Float):Float {
-        var matrix = transform.matrix;
-        matrix.tx = value;
-        transform.matrix = matrix;
-
+        offsetX = value;
+        sprite.x = x + value;
         return value;
-    }
-
-    @:noCompletion
-    private function get_offsetY():Float {
-        return transform.matrix.ty;
     }
 
     @:noCompletion
     private function set_offsetY(value:Float):Float {
-        var matrix = transform.matrix;
-        matrix.ty = value;
-        transform.matrix = matrix;
-
+        offsetY = value;
+        sprite.y = y + value;
         return value;
     }
 
     @:noCompletion
+    private function get_width():Float {
+        return _width;
+    }
+
+    @:noCompletion
+    private function get_height():Float {
+        return _height;
+    }
+
+    @:noCompletion
     private function get_cx():Float {
-        return getCx(this);
+        return x + width / 2;
     }
 
     @:noCompletion
     private function set_cx(value:Float):Float {
-        setCx(this, value);
+        x = value - width / 2;
         return value;
     }
 
     @:noCompletion
     private function get_cy():Float {
-        return getCy(this);
+        return y + height / 2;
     }
 
     @:noCompletion
     private function set_cy(value:Float):Float {
-        setCy(this, value);
+        y = value - height / 2;
         return value;
     }
 
     @:noCompletion
     private function get_ex():Float {
-        return getEx(this);
+        return x + width;
     }
 
     @:noCompletion
     private function set_ex(value:Float):Float {
-        setEx(this, value);
+        x = value - width;
         return value;
     }
 
     @:noCompletion
     private function get_ey():Float {
-        return getEy(this);
+        return y + height;
     }
 
     @:noCompletion
     private function set_ey(value:Float):Float {
-        setEy(this, value);
+        y = value - height;
         return value;
     }
 
     @:noCompletion
-    private function get_cpoint():Point {
-        return getCpoint(this);
+    private function get_xy():Point {
+        return new Point(x, y);
     }
 
     @:noCompletion
-    private function set_cpoint(value:Point):Point {
-        setCpoint(this, value);
+    private function set_xy(value:Point):Point {
+        x = value.x;
+        y = value.y;
         return value;
     }
 
-    public static function setX<T:DisplayObject>(view:T, x:Float):T {
-        view.x = x;
-        return view;
+    @:noCompletion
+    private function get_offset():Point {
+        return new Point(offsetX, offsetY);
     }
 
-    public static function setY<T:DisplayObject>(view:T, y:Float):T {
-        view.y = y;
-        return view;
+    @:noCompletion
+    private function set_offset(value:Point):Point {
+        offsetX = value.x;
+        offsetY = value.y;
+        return value;
     }
 
-    public static function getCx(view:DisplayObject):Float {
-        return view.x + view.width / 2;
+    @:noCompletion
+    private function get_cxy():Point {
+        return new Point(cx, cy);
     }
 
-    public static function setCx<T:DisplayObject>(view:T, cx:Float):T {
-        view.x = cx - view.width / 2;
-        return view;
-    }
-
-    public static function getCy(view:DisplayObject):Float {
-        return view.y + view.height / 2;
-    }
-
-    public static function setCy<T:DisplayObject>(view:T, cy:Float):T {
-        view.y = cy - view.height / 2;
-        return view;
-    }
-
-    public static function getEx(view:DisplayObject):Float {
-        return view.x + view.width;
-    }
-
-    public static function setEx<T:DisplayObject>(view:T, ex:Float):T {
-        view.x = ex - view.width;
-        return view;
-    }
-
-    public static function getEy(view:DisplayObject):Float {
-        return view.y + view.height;
-    }
-
-    public static function setEy<T:DisplayObject>(view:T, ey:Float):T {
-        view.y = ey - view.height;
-        return view;
-    }
-
-    public static function getCpoint(view:DisplayObject):Point {
-        return new Point(view.x + view.width / 2, view.y + view.height / 2);
-    }
-
-    public static function setCpoint<T:DisplayObject>(view:T, point:Point):T {
-        view.x = point.x - view.width / 2;
-        view.y = point.y - view.height / 2;
-        return view;
-    }
-
-    public static function setCxy<T:DisplayObject>(view:T, cx:Float, cy:Float):T {
-        view.x = cx - view.width / 2;
-        view.y = cy - view.height / 2;
-        return view;
+    @:noCompletion
+    private function set_cxy(value:Point):Point {
+        cx = value.x;
+        cy = value.y;
+        return value;
     }
 }
