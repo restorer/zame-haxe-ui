@@ -14,7 +14,7 @@ class Button extends ViewGroup {
     private var backgroundView:ImageView;
     private var iconView:ImageView;
     private var textView:TextView;
-    private var listenersAttached:Bool;
+    private var listenersAdded:Bool;
 
     public var background(get, set):Drawable;
     public var icon(get, set):Drawable;
@@ -41,7 +41,7 @@ class Button extends ViewGroup {
         addChild(iconView = new ImageView());
         addChild(textView = new TextView());
 
-        listenersAttached = false;
+        listenersAdded = false;
         iconMarginRight = 16;
         enabled = true;
 
@@ -146,8 +146,8 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function onMouseDown(e:Event):Void {
-        if (!listenersAttached && enabled) {
-            listenersAttached = true;
+        if (!listenersAdded && enabled) {
+            listenersAdded = true;
             updateState("pressed", true);
 
             if (sprite.stage != null) {
@@ -159,14 +159,14 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function onMouseUp(e:Event):Void {
-        if (listenersAttached) {
+        if (listenersAdded) {
             dispatchEvent(new Event(MouseEvent.CLICK));
         }
     }
 
     @:noCompletion
     private function onMouseMove(e:Event):Void {
-        if (listenersAttached) {
+        if (listenersAdded) {
             e.stopPropagation();
             updateState("pressed", true);
         }
@@ -174,7 +174,7 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function onRemovedFromStage(_):Void {
-        if (listenersAttached) {
+        if (listenersAdded) {
             sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
             sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
@@ -187,8 +187,8 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function onStageMouseUp(_):Void {
-        if (listenersAttached) {
-            listenersAttached = false;
+        if (listenersAdded) {
+            listenersAdded = false;
             updateState("pressed", false);
 
             sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
