@@ -5,12 +5,18 @@ import org.zamedev.ui.res.ResourceManager;
 
 class ContextWrapper implements Context {
     public var context(default, null):Context;
+    public var application(get, null):Application;
     public var applicationStage(get, null):ApplicationStage;
     public var locale(get, set):String;
     public var resourceManager(get, null):ResourceManager;
 
     public function new(context:Context) {
         this.context = context;
+    }
+
+    @:noCompletion
+    private function get_application():Application {
+        return context.application;
     }
 
     @:noCompletion

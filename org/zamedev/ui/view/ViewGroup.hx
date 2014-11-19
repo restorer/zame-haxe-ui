@@ -23,7 +23,7 @@ class ViewGroup extends View {
         view._parent = this;
         view.inflateLayoutParams(createLayoutParams());
         children.push(view);
-        sprite.addChild(view.sprite);
+        _sprite.addChild(view._sprite);
     }
 
     public function removeChild(view:View):Void {
@@ -31,7 +31,7 @@ class ViewGroup extends View {
             throw new Error("View is not added to this ViewGroup");
         }
 
-        sprite.removeChild(view.sprite);
+        _sprite.removeChild(view._sprite);
         view._parent = null;
         view.layoutParams = null;
     }

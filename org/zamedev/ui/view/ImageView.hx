@@ -84,8 +84,8 @@ class ImageView extends View {
             return value;
         }
 
-        if (displayObject != null && displayObject.parent == sprite) {
-            sprite.removeChild(displayObject);
+        if (displayObject != null && displayObject.parent == _sprite) {
+            _sprite.removeChild(displayObject);
         }
 
         _drawable = value;
@@ -98,7 +98,7 @@ class ImageView extends View {
                 displayObjectCache[value.computeKey()] = displayObject;
             }
 
-            sprite.addChild(displayObject);
+            _sprite.addChild(displayObject);
             imageWidth = displayObject.width;
             imageHeight = displayObject.height;
         } else {

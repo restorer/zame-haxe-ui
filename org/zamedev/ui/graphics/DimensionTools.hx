@@ -16,6 +16,9 @@ class DimensionTools {
             case Dimension.EXACT(size):
                 size;
 
+            case Dimension.PERCENT(weight):
+                layoutSize * weight;
+
             case Dimension.WEIGHT(weight):
                 layoutSize * weight / layoutWeight;
         };
@@ -53,7 +56,7 @@ class DimensionTools {
                 throw new ArgumentError("Parse error: " + s);
             }
 
-            return Dimension.WEIGHT(value / 100.0);
+            return Dimension.PERCENT(value / 100.0);
         }
 
         re = ~/^[+\-0-9.]+$/;

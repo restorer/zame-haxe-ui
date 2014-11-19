@@ -4,5 +4,6 @@ enum Dimension {
     MATCH_PARENT;
     WRAP_CONTENT;
     EXACT(size:Float);
-    WEIGHT(size:Float);
+    PERCENT(weight:Float);
+    WEIGHT(weight:Float);
 }

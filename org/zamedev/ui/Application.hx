@@ -13,9 +13,10 @@ class Application extends Sprite implements Context {
     private var _applicationStage:ApplicationStage;
     private var _locale:String;
     private var _resourceManager:ResourceManager;
-    private var currentScene:Scene;
+    private var _currentScene:Scene;
 
     public var context(get, null):Context;
+    public var application(get, null):Application;
     public var applicationStage(get, null):ApplicationStage;
     public var locale(get, set):String;
     public var resourceManager(get, null):ResourceManager;
@@ -26,7 +27,7 @@ class Application extends Sprite implements Context {
         _applicationStage = new ApplicationStage();
         _locale = null;
         _resourceManager = new ResourceManager(this);
-        currentScene = null;
+        _currentScene = null;
 
         create();
     }
@@ -40,23 +41,28 @@ class Application extends Sprite implements Context {
     }
 
     public function changeScene(scene:Scene):Void {
-        if (currentScene == scene) {
+        if (_currentScene == scene) {
             return;
         }
 
-        if (currentScene != null) {
-            currentScene.removeFromApplicationStage();
+        if (_currentScene != null) {
+            _currentScene.removeFromApplicationStage();
         }
 
-        currentScene = scene;
+        _currentScene = scene;
 
-        if (currentScene != null) {
-            currentScene.addToApplicationStage();
+        if (_currentScene != null) {
+            _currentScene.addToApplicationStage();
         }
     }
 
     @:noCompletion
     private function get_context():Context {
+        return this;
+    }
+
+    @:noCompletion
+    private function get_application():Application {
         return this;
     }
 

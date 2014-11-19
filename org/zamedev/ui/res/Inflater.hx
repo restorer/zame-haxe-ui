@@ -80,6 +80,7 @@ class Inflater {
             }
         }
 
+        view.onInflateFinished();
         return view;
     }
 }

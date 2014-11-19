@@ -12,18 +12,18 @@ import org.zamedev.ui.view.ViewGroup;
 
 class Button extends ViewGroup {
     private var backgroundView:ImageView;
-    private var iconView:ImageView;
+    private var leftIconView:ImageView;
     private var textView:TextView;
     private var listenersAdded:Bool;
 
     public var background(get, set):Drawable;
-    public var icon(get, set):Drawable;
+    public var leftIcon(get, set):Drawable;
     public var backgroundOffset(get, set):Point;
     public var backgroundOffsetX(get, set):Float;
     public var backgroundOffsetY(get, set):Float;
-    public var iconOffset(get, set):Point;
-    public var iconOffsetX(get, set):Float;
-    public var iconOffsetY(get, set):Float;
+    public var leftIconOffset(get, set):Point;
+    public var leftIconOffsetX(get, set):Float;
+    public var leftIconOffsetY(get, set):Float;
     public var textOffset(get, set):Point;
     public var textOffsetX(get, set):Float;
     public var textOffsetY(get, set):Float;
@@ -31,24 +31,24 @@ class Button extends ViewGroup {
     public var textSize(get, set):Null<Float>;
     public var font(get, set):String;
     public var text(get, set):String;
-    public var iconMarginRight(default, set):Float;
+    public var leftIconMargin(default, set):Float;
     public var enabled:Bool;
 
     public function new() {
         super();
 
         addChild(backgroundView = new ImageView());
-        addChild(iconView = new ImageView());
+        addChild(leftIconView = new ImageView());
         addChild(textView = new TextView());
 
         listenersAdded = false;
-        iconMarginRight = 16;
+        leftIconMargin = 0.0;
         enabled = true;
 
-        sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-        sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-        sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-        sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
+        _sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+        _sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+        _sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+        _sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {
@@ -61,8 +61,8 @@ class Button extends ViewGroup {
                 background = value.resolveDrawable();
                 return true;
 
-            case "icon":
-                icon = value.resolveDrawable();
+            case "leftIcon":
+                leftIcon = value.resolveDrawable();
                 return true;
 
             case "backgroundOffsetX":
@@ -73,11 +73,11 @@ class Button extends ViewGroup {
                 backgroundOffsetY = value.resolveFloat();
                 return true;
 
-            case "iconOffsetX":
+            case "leftIconOffsetX":
                 backgroundOffset.x = value.resolveFloat();
                 return true;
 
-            case "iconOffsetY":
+            case "leftIconOffsetY":
                 backgroundOffsetY = value.resolveFloat();
                 return true;
 
@@ -105,8 +105,8 @@ class Button extends ViewGroup {
                 text = value.resolveString();
                 return true;
 
-            case "iconMarginRight":
-                iconMarginRight = value.resolveFloat();
+            case "leftIconMargin":
+                leftIconMargin = value.resolveFloat();
                 return true;
 
         }
@@ -120,25 +120,25 @@ class Button extends ViewGroup {
         }
 
         backgroundView.measureAndLayout(widthSpec, heightSpec);
-        iconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        leftIconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
         textView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
-        var iconWidth = iconView.width = (iconView.drawable == null ? 0 : iconMarginRight);
+        var leftIconWidth = leftIconView.width + (leftIconView.drawable == null ? 0 : leftIconMargin);
 
-        _width = Math.max(backgroundView.width, iconWidth + textView.width);
-        _height = Math.max(Math.max(backgroundView.height, iconView.height), textView.height);
+        _width = Math.max(backgroundView.width, leftIconWidth + textView.width);
+        _height = Math.max(Math.max(backgroundView.height, leftIconView.height), textView.height);
 
-        if (iconView.drawable == null) {
-            iconView.x = 0;
+        if (leftIconView.drawable == null) {
+            leftIconView.x = 0;
             textView.cx = _width / 2;
         } else {
-            var pos = (_width + iconMarginRight + iconView.width) / 2;
+            var pos = (_width + leftIconMargin + leftIconView.width) / 2;
 
-            iconView.ex = pos - (textView.width / 2) - iconMarginRight;
+            leftIconView.ex = pos - (textView.width / 2) - leftIconMargin;
             textView.cx = pos;
         }
 
-        iconView.cy = _height / 2;
+        leftIconView.cy = _height / 2;
         textView.cy = _height / 2;
 
         return true;
@@ -146,15 +146,21 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function onMouseDown(e:Event):Void {
-        if (!listenersAdded && enabled) {
+        if (!enabled) {
+            return;
+        }
+
+        if (!listenersAdded) {
             listenersAdded = true;
             updateState("pressed", true);
 
-            if (sprite.stage != null) {
-                sprite.stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-                sprite.stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            if (_sprite.stage != null) {
+                _sprite.stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+                _sprite.stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
             }
         }
+
+        dispatchEvent(new Event(MouseEvent.MOUSE_DOWN));
     }
 
     @:noCompletion
@@ -175,8 +181,8 @@ class Button extends ViewGroup {
     @:noCompletion
     private function onRemovedFromStage(_):Void {
         if (listenersAdded) {
-            sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-            sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
     }
 
@@ -191,8 +197,8 @@ class Button extends ViewGroup {
             listenersAdded = false;
             updateState("pressed", false);
 
-            sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-            sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
     }
 
@@ -208,13 +214,13 @@ class Button extends ViewGroup {
     }
 
     @:noCompletion
-    private function get_icon():Drawable {
-        return iconView.drawable;
+    private function get_leftIcon():Drawable {
+        return leftIconView.drawable;
     }
 
     @:noCompletion
-    private function set_icon(value:Drawable):Drawable {
-        iconView.drawable = value;
+    private function set_leftIcon(value:Drawable):Drawable {
+        leftIconView.drawable = value;
         return value;
     }
 
@@ -252,35 +258,35 @@ class Button extends ViewGroup {
     }
 
     @:noCompletion
-    private function get_iconOffset():Point {
-        return iconView.offset;
+    private function get_leftIconOffset():Point {
+        return leftIconView.offset;
     }
 
     @:noCompletion
-    private function set_iconOffset(value:Point):Point {
-        iconView.offset = value;
+    private function set_leftIconOffset(value:Point):Point {
+        leftIconView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_iconOffsetX():Float {
-        return iconView.offsetX;
+    private function get_leftIconOffsetX():Float {
+        return leftIconView.offsetX;
     }
 
     @:noCompletion
-    private function set_iconOffsetX(value:Float):Float {
-        iconView.offsetX = value;
+    private function set_leftIconOffsetX(value:Float):Float {
+        leftIconView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_iconOffsetY():Float {
-        return iconView.offsetY;
+    private function get_leftIconOffsetY():Float {
+        return leftIconView.offsetY;
     }
 
     @:noCompletion
-    private function set_iconOffsetY(value:Float):Float {
-        iconView.offsetY = value;
+    private function set_leftIconOffsetY(value:Float):Float {
+        leftIconView.offsetY = value;
         return value;
     }
 
@@ -302,7 +308,8 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function set_textOffsetX(value:Float):Float {
-        textView.offsetX = value;
+        motion.Actuate.tween(textView, 1, { offsetX: value });
+        // textView.offsetX = value;
         return value;
     }
 
@@ -362,8 +369,9 @@ class Button extends ViewGroup {
     }
 
     @:noCompletion
-    private function set_iconMarginRight(value:Float):Float {
-        iconMarginRight = value;
+    private function set_leftIconMargin(value:Float):Float {
+        leftIconMargin = value;
+        requestLayout();
         return value;
     }
 }

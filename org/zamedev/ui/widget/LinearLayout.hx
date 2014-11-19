@@ -161,7 +161,7 @@ class LinearLayout extends ViewGroup {
             case Dimension.EXACT(size):
                 size;
 
-            case Dimension.WEIGHT(weight):
+            case Dimension.PERCENT(weight) | Dimension.WEIGHT(weight):
                 (computeSize ? 0.0 : layoutSize * weight);
 
             case Dimension.MATCH_PARENT:
@@ -183,7 +183,7 @@ class LinearLayout extends ViewGroup {
             case Dimension.EXACT(size):
                 MeasureSpec.AT_MOST(Math.min(layoutSize, size));
 
-            case Dimension.WEIGHT(weight):
+            case Dimension.PERCENT(weight) | Dimension.WEIGHT(weight):
                 (computeSize ? MeasureSpec.UNSPECIFIED : MeasureSpec.AT_MOST(Math.min(layoutSize, layoutSize * weight)));
         };
     }

@@ -88,6 +88,9 @@ class AbsoluteLayout extends ViewGroup {
             case Dimension.EXACT(size):
                 MeasureSpec.AT_MOST(Math.min(layoutSize, size));
 
+            case Dimension.PERCENT(weight):
+                MeasureSpec.AT_MOST(Math.min(layoutSize, layoutSize * weight));
+
             case Dimension.WEIGHT(weight):
                 MeasureSpec.AT_MOST(Math.min(layoutSize, layoutSize * weight / layoutWeight));
         };

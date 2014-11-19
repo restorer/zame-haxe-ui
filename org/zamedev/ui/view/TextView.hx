@@ -1,13 +1,13 @@
 package org.zamedev.ui.view;
 
-import openfl.text.TextField;
 import openfl.text.TextFormat;
+import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 
 class TextView extends View {
     private var _textFormat:TextFormat;
-    private var textField:TextField;
+    private var textField:TextFieldExt;
 
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
@@ -18,12 +18,12 @@ class TextView extends View {
         super();
 
         _textFormat = new TextFormat();
-        textField = new TextField();
+        textField = new TextFieldExt();
 
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
 
-        sprite.addChild(textField);
+        _sprite.addChild(textField);
 
         // textField.backgroundColor = 0x800000;
         // textField.background = true;
@@ -101,17 +101,7 @@ class TextView extends View {
 
         switch (heightSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                #if js
-                    if (_textFormat.size == null) {
-                        _height = textField.textHeight;
-                    } else if (_textFormat.size <= 16) {
-                        _height = _textFormat.size * 1.185;
-                    } else {
-                        _height = _textFormat.size;
-                    }
-                #else
-                    _height = textField.textHeight;
-                #end
+                _height = textField.textHeight;
 
                 switch (heightSpec) {
                     case MeasureSpec.AT_MOST(size):

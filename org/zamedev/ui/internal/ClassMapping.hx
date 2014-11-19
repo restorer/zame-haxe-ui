@@ -8,6 +8,7 @@ import org.zamedev.ui.widget.AbsoluteLayout;
 import org.zamedev.ui.widget.Button;
 import org.zamedev.ui.widget.LinearLayout;
 import org.zamedev.ui.widget.Radio;
+import org.zamedev.ui.widget.Toggle;
 
 class ClassMapping {
     public static var classMap:Map<String, String>;
@@ -23,5 +24,6 @@ class ClassMapping {
         classMap["Button"] = "org.zamedev.ui.widget.Button";
         classMap["LinearLayout"] = "org.zamedev.ui.widget.LinearLayout";
         classMap["Radio"] = "org.zamedev.ui.widget.Radio";
+        classMap["Toggle"] = "org.zamedev.ui.widget.Toggle";
     }
 }

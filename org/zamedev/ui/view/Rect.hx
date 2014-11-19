@@ -12,7 +12,7 @@ class Rect extends View {
     public function new() {
         super();
 
-        sprite.addChild(shape = new Shape());
+        _sprite.addChild(shape = new Shape());
         fillColor = 0;
     }
 

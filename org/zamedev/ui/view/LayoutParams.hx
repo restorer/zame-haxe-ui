@@ -25,4 +25,7 @@ class LayoutParams {
 
         return false;
     }
+
+    public function onInflateFinished():Void {
+    }
 }

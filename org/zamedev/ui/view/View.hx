@@ -11,7 +11,7 @@ import org.zamedev.ui.res.Selector;
 import org.zamedev.ui.res.TypedValue;
 
 class View extends EventDispatcher implements Inflatable {
-    private var sprite:Sprite;
+    private var _sprite:Sprite;
     private var _width:Float;
     private var _height:Float;
     private var _parent:ViewGroup;
@@ -20,19 +20,24 @@ class View extends EventDispatcher implements Inflatable {
     private var _state:Map<String, Bool>;
     private var _selector:Selector;
     private var isInLayout:Bool;
+    private var inflateFinished:Bool;
     private var layoutParamsMap:Map<String, TypedValue>;
+    private var _x:Float;
+    private var _y:Float;
+    private var _offsetX:Float;
+    private var _offsetY:Float;
 
     public var id:String;
     public var tag:String;
     public var layoutParams:LayoutParams;
     public var state(get, set):Map<String, Bool>;
     public var selector(get, set):Selector;
-
+    public var sprite(get, null):Sprite;
     public var parent(get, null):ViewGroup;
-    public var x(default, set):Float;
-    public var y(default, set):Float;
-    public var offsetX(default, set):Float;
-    public var offsetY(default, set):Float;
+    public var x(get, set):Float;
+    public var y(get, set):Float;
+    public var offsetX(get, set):Float;
+    public var offsetY(get, set):Float;
     public var width(get, null):Float;
     public var height(get, null):Float;
     public var cx(get, set):Float;
@@ -42,11 +47,12 @@ class View extends EventDispatcher implements Inflatable {
     public var xy(get, set):Point;
     public var offset(get, set):Point;
     public var cxy(get, set):Point;
+    public var rotation(get, set):Float;
 
     public function new() {
         super();
 
-        sprite = new Sprite();
+        _sprite = new Sprite();
         _width = 0.0;
         _height = 0.0;
         _parent = null;
@@ -55,15 +61,16 @@ class View extends EventDispatcher implements Inflatable {
         _state = new Map<String, Bool>();
         _selector = null;
         isInLayout = false;
+        inflateFinished = false;
         layoutParamsMap = new Map<String, TypedValue>();
 
         id = null;
         tag = null;
         layoutParams = null;
-        x = 0.0;
-        y = 0.0;
-        offsetX = 0.0;
-        offsetY = 0.0;
+        _x = 0.0;
+        _y = 0.0;
+        _offsetX = 0.0;
+        _offsetY = 0.0;
     }
 
     public function inflate(name:String, value:TypedValue):Bool {
@@ -95,6 +102,10 @@ class View extends EventDispatcher implements Inflatable {
         return false;
     }
 
+    public function onInflateFinished():Void {
+        inflateFinished = true;
+    }
+
     private function inflateLayoutParams(layoutParams:LayoutParams) {
         this.layoutParams = layoutParams;
 
@@ -106,21 +117,21 @@ class View extends EventDispatcher implements Inflatable {
     }
 
     public function addToContainer(container:DisplayObjectContainer):Void {
-        if (sprite.parent == container) {
+        if (_sprite.parent == container) {
             return;
         }
 
-        if (sprite.parent != null) {
-            sprite.parent.removeChild(sprite);
+        if (_sprite.parent != null) {
+            _sprite.parent.removeChild(_sprite);
         }
 
         measureAndLayout(MeasureSpec.AT_MOST(container.width), MeasureSpec.AT_MOST(container.height));
-        container.addChild(sprite);
+        container.addChild(_sprite);
     }
 
     public function removeFromContainer():Void {
-        if (sprite.parent != null) {
-            sprite.parent.removeChild(sprite);
+        if (_sprite.parent != null) {
+            _sprite.parent.removeChild(_sprite);
         }
     }
 
@@ -161,24 +172,24 @@ class View extends EventDispatcher implements Inflatable {
     private function measureAndLayoutDefault(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED:
-                _width = sprite.width;
+                _width = _sprite.width;
 
             case MeasureSpec.EXACT(size):
                 _width = size;
 
             case MeasureSpec.AT_MOST(size):
-                _width = Math.min(size, sprite.width);
+                _width = Math.min(size, _sprite.width);
         }
 
         switch (heightSpec) {
             case MeasureSpec.UNSPECIFIED:
-                _height = sprite.height;
+                _height = _sprite.height;
 
             case MeasureSpec.EXACT(size):
                 _height = size;
 
             case MeasureSpec.AT_MOST(size):
-                _height = Math.min(size, sprite.height);
+                _height = Math.min(size, _sprite.height);
         }
     }
 
@@ -201,6 +212,11 @@ class View extends EventDispatcher implements Inflatable {
         return this;
     }
 
+    public function hasState(name:String):Bool {
+        var value = _state[name];
+        return (value != null && value);
+    }
+
     public function updateState(name:String, value:Bool):View {
         var prevValue = _state[name];
 
@@ -210,6 +226,11 @@ class View extends EventDispatcher implements Inflatable {
         }
 
         return this;
+    }
+
+    @:noCompletion
+    private function get_sprite():Sprite {
+        return _sprite;
     }
 
     @:noCompletion
@@ -242,30 +263,50 @@ class View extends EventDispatcher implements Inflatable {
     }
 
     @:noCompletion
+    private function get_x():Float {
+        return _x;
+    }
+
+    @:noCompletion
     private function set_x(value:Float):Float {
-        x = value;
-        sprite.x = value + offsetX;
+        _x = value;
+        _sprite.x = value + _offsetX;
         return value;
+    }
+
+    @:noCompletion
+    private function get_y():Float {
+        return _y;
     }
 
     @:noCompletion
     private function set_y(value:Float):Float {
-        y = value;
-        sprite.y = value + offsetY;
+        _y = value;
+        _sprite.y = value + _offsetY;
         return value;
+    }
+
+    @:noCompletion
+    private function get_offsetX():Float {
+        return _offsetX;
     }
 
     @:noCompletion
     private function set_offsetX(value:Float):Float {
-        offsetX = value;
-        sprite.x = x + value;
+        _offsetX = value;
+        _sprite.x = _x + value;
         return value;
     }
 
     @:noCompletion
+    private function get_offsetY():Float {
+        return _offsetY;
+    }
+
+    @:noCompletion
     private function set_offsetY(value:Float):Float {
-        offsetY = value;
-        sprite.y = y + value;
+        _offsetY = value;
+        _sprite.y = _y + value;
         return value;
     }
 
@@ -356,6 +397,17 @@ class View extends EventDispatcher implements Inflatable {
     private function set_cxy(value:Point):Point {
         cx = value.x;
         cy = value.y;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_rotation():Float {
+        return _sprite.rotation;
+    }
+
+    @:noCompletion
+    private function set_rotation(value:Float):Float {
+        _sprite.rotation = value;
         return value;
     }
 }
