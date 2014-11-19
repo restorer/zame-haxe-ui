@@ -4,9 +4,9 @@ import openfl.display.Shape;
 import openfl.display.Sprite;
 import openfl.events.Event;
 
-class RootSprite extends Sprite {
-    private var sceneWidth:Float;
-    private var sceneHeight:Float;
+class ApplicationStage extends Sprite {
+    private var appStageWidth:Float;
+    private var appStageHeight:Float;
     private var maskShape:Shape;
     private var listenerAdded:Bool;
 
@@ -15,8 +15,8 @@ class RootSprite extends Sprite {
     public function new() {
         super();
 
-        sceneWidth = 0.0;
-        sceneHeight = 0.0;
+        appStageWidth = 0.0;
+        appStageHeight = 0.0;
         maskShape = new Shape();
         listenerAdded = false;
 
@@ -29,10 +29,10 @@ class RootSprite extends Sprite {
         }
     }
 
-    public function setSceneSize(width:Float, height:Float):Void {
-        if (sceneWidth != width || sceneHeight != height) {
-            sceneWidth = width;
-            sceneHeight = height;
+    public function setStageSize(width:Float, height:Float):Void {
+        if (appStageWidth != width || appStageHeight != height) {
+            appStageWidth = width;
+            appStageHeight = height;
 
             if (stage != null) {
                 onStageResize(null);
@@ -62,14 +62,14 @@ class RootSprite extends Sprite {
         @:noCompletion
         @:getter(width)
         private function get_width():Float {
-            return sceneWidth;
+            return appStageWidth;
         }
 
         @:noCompletion
         @:setter(width)
         private function set_width(value:Float):Void {
-            if (sceneWidth != value) {
-                sceneWidth = value;
+            if (appStageWidth != value) {
+                appStageWidth = value;
                 onStageResize(null);
             }
         }
@@ -77,27 +77,27 @@ class RootSprite extends Sprite {
         @:noCompletion
         @:getter(height)
         private function get_height():Float {
-            return sceneHeight;
+            return appStageHeight;
         }
 
         @:noCompletion
         @:setter(height)
         private function set_height(value:Float):Void {
-            if (sceneHeight != value) {
-                sceneHeight = value;
+            if (appStageHeight != value) {
+                appStageHeight = value;
                 onStageResize(null);
             }
         }
     #else
         @:noCompletion
         override private function get_width():Float {
-            return sceneWidth;
+            return appStageWidth;
         }
 
         @:noCompletion
         override private function set_width(value:Float):Float {
-            if (sceneWidth != value) {
-                sceneWidth = value;
+            if (appStageWidth != value) {
+                appStageWidth = value;
                 onStageResize(null);
             }
 
@@ -106,13 +106,13 @@ class RootSprite extends Sprite {
 
         @:noCompletion
         override private function get_height():Float {
-            return sceneHeight;
+            return appStageHeight;
         }
 
         @:noCompletion
         override private function set_height(value:Float):Float {
-            if (sceneHeight != value) {
-                sceneHeight = value;
+            if (appStageHeight != value) {
+                appStageHeight = value;
                 onStageResize(null);
             }
 
@@ -123,9 +123,9 @@ class RootSprite extends Sprite {
     private function updateMask():Void {
         maskShape.graphics.clear();
 
-        if (clippingEnabled && sceneWidth > 0 && sceneHeight > 0) {
+        if (clippingEnabled && appStageWidth > 0 && appStageHeight > 0) {
             maskShape.graphics.beginFill(0x000000);
-            maskShape.graphics.drawRect(0, 0, sceneWidth, sceneHeight);
+            maskShape.graphics.drawRect(0, 0, appStageWidth, appStageHeight);
             maskShape.graphics.endFill();
         }
     }
@@ -145,23 +145,23 @@ class RootSprite extends Sprite {
     }
 
     private function onStageResize(_):Void {
-        if (stage.stageWidth < 1 || stage.stageHeight < 1 || sceneWidth < 1 || sceneHeight < 1) {
+        if (stage.stageWidth < 1 || stage.stageHeight < 1 || appStageWidth < 1 || appStageHeight < 1) {
             x = 0;
             y = 0;
             scaleX = 1.0;
             scaleY = 1.0;
         } else {
-            var desiredRatio = sceneWidth / sceneHeight;
+            var desiredRatio = appStageWidth / appStageHeight;
             var stageRatio = stage.stageWidth / stage.stageHeight;
             var scale:Float;
 
             if (stageRatio < desiredRatio) {
-                scale = stage.stageWidth / sceneWidth;
-                y = Math.round((stage.stageHeight - sceneHeight * scale) / 2);
+                scale = stage.stageWidth / appStageWidth;
+                y = Math.round((stage.stageHeight - appStageHeight * scale) / 2);
                 x = 0;
             } else {
-                scale = stage.stageHeight / sceneHeight;
-                x = Math.round((stage.stageWidth - sceneWidth * scale) / 2);
+                scale = stage.stageHeight / appStageHeight;
+                x = Math.round((stage.stageWidth - appStageWidth * scale) / 2);
                 y = 0;
             }
 

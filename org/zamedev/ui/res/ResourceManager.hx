@@ -140,7 +140,7 @@ class ResourceManager {
             throw new Error("Selector not found: " + id);
         }
 
-        var assetId = "assets/selectors/" + re.matched(1) + ".xml";
+        var assetId = "selector/" + re.matched(1) + ".xml";
 
         if (!Assets.exists(assetId, AssetType.TEXT)) {
             throw new Error("Selector not found: " + id);
@@ -156,7 +156,7 @@ class ResourceManager {
             throw new Error("Layout not found: " + id);
         }
 
-        var assetId = "assets/layouts/" + re.matched(1) + ".xml";
+        var assetId = "layout/" + re.matched(1) + ".xml";
 
         if (!Assets.exists(assetId, AssetType.TEXT)) {
             throw new Error("Layout not found: " + id);
@@ -174,7 +174,7 @@ class ResourceManager {
         styles = new Map<String, Map<String, TypedValue>>();
 
         for (assetId in Assets.list(AssetType.IMAGE)) {
-            var re = ~/^assets\/drawables\/([a-zA-Z0-9_]+)\.([a-z]+)$/;
+            var re = ~/^drawable(?:\-[a-zA-Z0-9]+)?\/([a-zA-Z0-9_]+)\.([a-z]+)$/;
 
             if (re.match(assetId)) {
                 var ext = re.matched(2).toLowerCase();
@@ -188,7 +188,7 @@ class ResourceManager {
         var styleSpecMap = new Map<String, StyleSpec>();
 
         for (assetId in Assets.list(AssetType.TEXT)) {
-            if (~/^assets\/resources\/.+\.xml$/.match(assetId)) {
+            if (~/^resource(?:\-[a-zA-Z0-9]+)?\/.+\.xml$/.match(assetId)) {
                 parseResourceXml(Assets.getText(assetId), styleSpecMap);
             }
         }
@@ -227,7 +227,7 @@ class ResourceManager {
                     dimensions["@dimen/" + name] = DimensionTools.parse(XmlExt.getNodeValue(resolved));
 
                 case "font":
-                    fonts["@font/" + name] = Assets.getFont("assets/fonts/" + XmlExt.getNodeValue(resolved).trim()).fontName;
+                    fonts["@font/" + name] = Assets.getFont("font/" + XmlExt.getNodeValue(resolved).trim()).fontName;
 
                 case "string":
                     strings["@string/" + name] = XmlExt.getNodeValue(resolved);

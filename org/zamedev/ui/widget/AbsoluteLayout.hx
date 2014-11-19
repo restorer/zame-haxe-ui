@@ -3,11 +3,40 @@ package org.zamedev.ui.widget;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.res.MeasureSpec;
+import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
 
 class AbsoluteLayout extends ViewGroup {
+    private var widthWeight:Float;
+    private var heightWeight:Float;
+
+    public function new() {
+        super();
+
+        widthWeight = 1.0;
+        heightWeight = 1.0;
+    }
+
+    override public function inflate(name:String, value:TypedValue):Bool {
+        if (super.inflate(name, value)) {
+            return true;
+        }
+
+        switch (name) {
+            case "widthWeight":
+                widthWeight = value.resolveFloat();
+                return true;
+
+            case "heightWeight":
+                heightWeight = value.resolveFloat();
+                return true;
+        }
+
+        return false;
+    }
+
     override private function createLayoutParams():LayoutParams {
         return new AbsoluteLayoutParams();
     }
@@ -37,18 +66,18 @@ class AbsoluteLayout extends ViewGroup {
             var layoutParams = cast(child.layoutParams, AbsoluteLayoutParams);
 
             child.measureAndLayout(
-                computeChildMeasureSpec(child, layoutParams.width, _width),
-                computeChildMeasureSpec(child, layoutParams.height, _height)
+                computeChildMeasureSpec(child, layoutParams.width, _width, widthWeight),
+                computeChildMeasureSpec(child, layoutParams.height, _height, heightWeight)
             );
 
-            child.x = computeChildPosition(child, layoutParams.x, layoutParams.cx, layoutParams.ex, child.width, _width);
-            child.y = computeChildPosition(child, layoutParams.y, layoutParams.cy, layoutParams.ey, child.height, _height);
+            child.x = computeChildPosition(child, layoutParams.x, layoutParams.cx, layoutParams.ex, child.width, _width, widthWeight);
+            child.y = computeChildPosition(child, layoutParams.y, layoutParams.cy, layoutParams.ey, child.height, _height, heightWeight);
         }
 
         return true;
     }
 
-    private function computeChildMeasureSpec(child:View, dimen:Dimension, layoutSize:Float):MeasureSpec {
+    private function computeChildMeasureSpec(child:View, dimen:Dimension, layoutSize:Float, layoutWeight:Float):MeasureSpec {
         return switch(dimen) {
             case Dimension.WRAP_CONTENT:
                 MeasureSpec.AT_MOST(layoutSize);
@@ -60,7 +89,7 @@ class AbsoluteLayout extends ViewGroup {
                 MeasureSpec.AT_MOST(Math.min(layoutSize, size));
 
             case Dimension.WEIGHT(weight):
-                MeasureSpec.AT_MOST(Math.min(layoutSize, layoutSize * weight));
+                MeasureSpec.AT_MOST(Math.min(layoutSize, layoutSize * weight / layoutWeight));
         };
     }
 
@@ -70,14 +99,15 @@ class AbsoluteLayout extends ViewGroup {
         centerParam:Dimension,
         endDimen:Dimension,
         childSize:Float,
-        layoutSize:Float
+        layoutSize:Float,
+        layoutWeight:Float
     ):Float {
         if (startDimen != null) {
-            return DimensionTools.resolve(startDimen, childSize, layoutSize);
+            return DimensionTools.resolve(startDimen, childSize, layoutSize, layoutWeight);
         } else if (centerParam != null) {
-            return DimensionTools.resolve(centerParam, childSize, layoutSize) - childSize / 2;
+            return DimensionTools.resolve(centerParam, childSize, layoutSize, layoutWeight) - childSize / 2;
         } else if (endDimen != null) {
-            return DimensionTools.resolve(endDimen, childSize, layoutSize) - childSize;
+            return DimensionTools.resolve(endDimen, childSize, layoutSize, layoutWeight) - childSize;
         } else {
             return 0.0;
         }

@@ -5,7 +5,7 @@ import openfl.errors.ArgumentError;
 using StringTools;
 
 class DimensionTools {
-    public static function resolve(dimen:Dimension, viewSize:Float, layoutSize:Float) {
+    public static function resolve(dimen:Dimension, viewSize:Float, layoutSize:Float, layoutWeight:Float = 1.0) {
         return switch(dimen) {
             case Dimension.WRAP_CONTENT:
                 viewSize;
@@ -17,7 +17,7 @@ class DimensionTools {
                 size;
 
             case Dimension.WEIGHT(weight):
-                layoutSize * weight;
+                layoutSize * weight / layoutWeight;
         };
     }
 
@@ -32,7 +32,19 @@ class DimensionTools {
             return Dimension.WRAP_CONTENT;
         }
 
-        var re = ~/^([+\-0-9.]+)%$/;
+        var re = ~/^([+\-0-9.]+)w$/;
+
+        if (re.match(s)) {
+            var value = Std.parseFloat(re.matched(1));
+
+            if (Math.isNaN(value)) {
+                throw new ArgumentError("Parse error: " + s);
+            }
+
+            return Dimension.WEIGHT(value);
+        }
+
+        re = ~/^([+\-0-9.]+)%$/;
 
         if (re.match(s)) {
             var value = Std.parseFloat(re.matched(1));
@@ -44,7 +56,9 @@ class DimensionTools {
             return Dimension.WEIGHT(value / 100.0);
         }
 
-        if (~/^[+\-0-9.]+$/.match(s)) {
+        re = ~/^[+\-0-9.]+$/;
+
+        if (re.match(s)) {
             var value = Std.parseFloat(s);
 
             if (Math.isNaN(value)) {

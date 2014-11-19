@@ -1,11 +1,11 @@
 package org.zamedev.ui;
 
-import org.zamedev.ui.internal.RootSprite;
+import org.zamedev.ui.internal.ApplicationStage;
 import org.zamedev.ui.res.ResourceManager;
 
 class ContextWrapper implements Context {
     public var context(default, null):Context;
-    public var rootSprite(get, null):RootSprite;
+    public var applicationStage(get, null):ApplicationStage;
     public var locale(get, set):String;
     public var resourceManager(get, null):ResourceManager;
 
@@ -14,8 +14,8 @@ class ContextWrapper implements Context {
     }
 
     @:noCompletion
-    private function get_rootSprite():RootSprite {
-        return context.rootSprite;
+    private function get_applicationStage():ApplicationStage {
+        return context.applicationStage;
     }
 
     @:noCompletion

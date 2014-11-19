@@ -105,9 +105,23 @@ class View extends EventDispatcher implements Inflatable {
         }
     }
 
-    public function addToDisplayObjectContainer(displayObjectContainer:DisplayObjectContainer):Void {
-        measureAndLayout(MeasureSpec.AT_MOST(displayObjectContainer.width), MeasureSpec.AT_MOST(displayObjectContainer.height));
-        displayObjectContainer.addChild(sprite);
+    public function addToContainer(container:DisplayObjectContainer):Void {
+        if (sprite.parent == container) {
+            return;
+        }
+
+        if (sprite.parent != null) {
+            sprite.parent.removeChild(sprite);
+        }
+
+        measureAndLayout(MeasureSpec.AT_MOST(container.width), MeasureSpec.AT_MOST(container.height));
+        container.addChild(sprite);
+    }
+
+    public function removeFromContainer():Void {
+        if (sprite.parent != null) {
+            sprite.parent.removeChild(sprite);
+        }
     }
 
     public function requestLayout() {

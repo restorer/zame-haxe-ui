@@ -2,7 +2,7 @@ package org.zamedev.ui;
 
 import openfl.display.FPS;
 import openfl.display.Sprite;
-import org.zamedev.ui.internal.RootSprite;
+import org.zamedev.ui.internal.ApplicationStage;
 import org.zamedev.ui.res.ResourceManager;
 
 class Application extends Sprite implements Context {
@@ -10,47 +10,76 @@ class Application extends Sprite implements Context {
         private var fps:FPS;
     #end
 
-    public var context(default, null):Context;
-    public var rootSprite(get, null):RootSprite;
+    private var _applicationStage:ApplicationStage;
+    private var _locale:String;
+    private var _resourceManager:ResourceManager;
+    private var currentScene:Scene;
+
+    public var context(get, null):Context;
+    public var applicationStage(get, null):ApplicationStage;
     public var locale(get, set):String;
     public var resourceManager(get, null):ResourceManager;
 
     public function new() {
         super();
 
-        context = new ApplicationContext();
-        addChild(context.rootSprite);
+        _applicationStage = new ApplicationStage();
+        _locale = null;
+        _resourceManager = new ResourceManager(this);
+        currentScene = null;
+
+        create();
+    }
+
+    private function create():Void {
+        addChild(_applicationStage);
 
         #if debug
             addChild(fps = new FPS(16, 16, 0xff0000));
         #end
     }
 
-    public function addScene(scene:Scene) {
-        if (scene.contentView != null) {
-            scene.contentView.addToDisplayObjectContainer(rootSprite);
+    public function changeScene(scene:Scene):Void {
+        if (currentScene == scene) {
+            return;
+        }
+
+        if (currentScene != null) {
+            currentScene.removeFromApplicationStage();
+        }
+
+        currentScene = scene;
+
+        if (currentScene != null) {
+            currentScene.addToApplicationStage();
         }
     }
 
     @:noCompletion
-    private function get_rootSprite():RootSprite {
-        return context.rootSprite;
+    private function get_context():Context {
+        return this;
+    }
+
+    @:noCompletion
+    private function get_applicationStage():ApplicationStage {
+        return _applicationStage;
     }
 
     @:noCompletion
     private function get_locale():String {
-        return context.locale;
+        return _locale;
     }
 
     @:noCompletion
     private function set_locale(value:String):String {
-        context.locale = value;
+        _locale = value;
+        _resourceManager.reload();
         return value;
     }
 
     @:noCompletion
     private function get_resourceManager():ResourceManager {
-        return context.resourceManager;
+        return _resourceManager;
     }
 
     /*
