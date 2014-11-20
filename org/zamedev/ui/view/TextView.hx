@@ -2,6 +2,7 @@ package org.zamedev.ui.view;
 
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.display.PixelSnapping;
 import openfl.text.TextFormat;
 import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
@@ -10,8 +11,10 @@ import org.zamedev.ui.res.TypedValue;
 class TextView extends View {
     private var _textFormat:TextFormat;
     private var textField:TextFieldExt;
-    private var cachedBitmap:Bitmap;
-    private var cachedBitmapData:BitmapData;
+
+    #if !flash
+        private var cachedBitmap:Bitmap;
+    #end
 
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
@@ -23,13 +26,16 @@ class TextView extends View {
 
         _textFormat = new TextFormat();
         textField = new TextFieldExt();
-        cachedBitmap = new Bitmap();
-        cachedBitmapData = null;
 
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
 
-        _sprite.addChild(cachedBitmap);
+        #if !flash
+            cachedBitmap = new Bitmap();
+            _sprite.addChild(cachedBitmap);
+        #else
+            _sprite.addChild(textField);
+        #end
 
         // textField.backgroundColor = 0x800000;
         // textField.background = true;
@@ -122,15 +128,27 @@ class TextView extends View {
                 _height = size;
         }
 
-        updateCache();
+        #if !flash
+            updateCache();
+        #end
+
         return true;
     }
 
-    private function updateCache():Void {
-        cachedBitmapData = new BitmapData(Math.ceil(_width), Math.ceil(_height), true, 0);
-        cachedBitmapData.draw(textField);
-        cachedBitmap.bitmapData = cachedBitmapData;
-    }
+    #if !flash
+        private function updateCache():Void {
+            var cachedBitmapData = new BitmapData(
+                Std.int(Math.max(1, Math.ceil(_width))),
+                Std.int(Math.max(1, Math.ceil(_height))),
+                true,
+                0
+            );
+
+            cachedBitmapData.draw(textField);
+            cachedBitmap.bitmapData = cachedBitmapData;
+            cachedBitmap.smoothing = true;
+        }
+    #end
 
     @:noCompletion
     private function get_textColor():Null<UInt> {
@@ -142,7 +160,11 @@ class TextView extends View {
         _textFormat.color = value;
         textField.defaultTextFormat = _textFormat;
         textField.setTextFormat(_textFormat);
-        updateCache();
+
+        #if !flash
+            updateCache();
+        #end
+
         return value;
     }
 
