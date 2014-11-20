@@ -308,8 +308,7 @@ class Button extends ViewGroup {
 
     @:noCompletion
     private function set_textOffsetX(value:Float):Float {
-        motion.Actuate.tween(textView, 1, { offsetX: value });
-        // textView.offsetX = value;
+        textView.offsetX = value;
         return value;
     }
 

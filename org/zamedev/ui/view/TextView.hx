@@ -1,5 +1,7 @@
 package org.zamedev.ui.view;
 
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 import openfl.text.TextFormat;
 import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
@@ -8,6 +10,8 @@ import org.zamedev.ui.res.TypedValue;
 class TextView extends View {
     private var _textFormat:TextFormat;
     private var textField:TextFieldExt;
+    private var cachedBitmap:Bitmap;
+    private var cachedBitmapData:BitmapData;
 
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
@@ -19,11 +23,13 @@ class TextView extends View {
 
         _textFormat = new TextFormat();
         textField = new TextFieldExt();
+        cachedBitmap = new Bitmap();
+        cachedBitmapData = null;
 
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
 
-        _sprite.addChild(textField);
+        _sprite.addChild(cachedBitmap);
 
         // textField.backgroundColor = 0x800000;
         // textField.background = true;
@@ -116,7 +122,14 @@ class TextView extends View {
                 _height = size;
         }
 
+        updateCache();
         return true;
+    }
+
+    private function updateCache():Void {
+        cachedBitmapData = new BitmapData(Math.ceil(_width), Math.ceil(_height), true, 0);
+        cachedBitmapData.draw(textField);
+        cachedBitmap.bitmapData = cachedBitmapData;
     }
 
     @:noCompletion
@@ -129,6 +142,7 @@ class TextView extends View {
         _textFormat.color = value;
         textField.defaultTextFormat = _textFormat;
         textField.setTextFormat(_textFormat);
+        updateCache();
         return value;
     }
 
