@@ -1,18 +1,22 @@
 package org.zamedev.ui;
 
+import openfl.events.Event;
 import org.zamedev.ui.view.View;
+import org.zamedev.ui.internal.SceneSprite;
 import motion.Actuate;
 
 class Scene extends ContextWrapper {
     private var _contentView:View;
+    private var sceneSprite:SceneSprite;
     private var addedToApplicationStage:Bool;
 
-    public var contentView(get, null):View;
+    public var contentView(get, set):View;
 
     public function new(context:Context) {
         super(context);
 
         _contentView = null;
+        sceneSprite = new SceneSprite(context.applicationStage);
         addedToApplicationStage = false;
 
         create();
@@ -26,9 +30,9 @@ class Scene extends ContextWrapper {
         return _contentView;
     }
 
-    private function setContentView(view:View):Void {
+    private function set_contentView(view:View):View {
         if (_contentView == view) {
-            return;
+            return view;
         }
 
         if (_contentView != null) {
@@ -36,10 +40,9 @@ class Scene extends ContextWrapper {
         }
 
         _contentView = view;
+        _contentView.addToContainer(sceneSprite);
 
-        if (addedToApplicationStage) {
-            _contentView.addToContainer(context.applicationStage);
-        }
+        return view;
     }
 
     public function addToApplicationStage():Void {
@@ -49,11 +52,12 @@ class Scene extends ContextWrapper {
 
         addedToApplicationStage = true;
 
-        if (_contentView != null) {
-            Actuate.apply(_contentView.sprite, { alpha: 0, y: context.applicationStage.height / 10.0 });
-            _contentView.addToContainer(context.applicationStage);
-            Actuate.tween(_contentView.sprite, 0.5, { alpha: 1, y: 0 });
-        }
+        Actuate.apply(sceneSprite, { alpha: 0, y: context.applicationStage.height / 10.0 });
+        context.applicationStage.addChild(sceneSprite);
+
+        Actuate.tween(sceneSprite, 0.5, { alpha: 1, y: 0 }).onComplete(function():Void {
+            sceneSprite.dispatchEvents = true;
+        });
     }
 
     public function removeFromApplicationStage():Void {
@@ -62,11 +66,8 @@ class Scene extends ContextWrapper {
         }
 
         addedToApplicationStage = false;
+        sceneSprite.dispatchEvents = false;
 
-        if (_contentView != null) {
-            Actuate.tween(_contentView.sprite, 0.5, { alpha: 0, y: context.applicationStage.height / 10.0 }).onComplete(function():Void {
-                _contentView.removeFromContainer();
-            });
-        }
+        Actuate.tween(sceneSprite, 0.5, { alpha: 0, y: context.applicationStage.height / 10.0 });
     }
 }

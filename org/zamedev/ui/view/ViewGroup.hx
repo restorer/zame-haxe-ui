@@ -11,29 +11,35 @@ class ViewGroup extends View {
         children = new Array<View>();
     }
 
-    private function createLayoutParams():LayoutParams {
+    public function createLayoutParams():LayoutParams {
         return new LayoutParams();
     }
 
-    public function addChild(view:View):Void {
+    public function addChild(view:View, reLayout:Bool = true):Void {
         if (view._parent != null) {
             throw new Error("View already added to another ViewGroup");
         }
 
         view._parent = this;
-        view.inflateLayoutParams(createLayoutParams());
         children.push(view);
         _sprite.addChild(view._sprite);
+
+        if (reLayout) {
+            requestLayout();
+        }
     }
 
-    public function removeChild(view:View):Void {
+    public function removeChild(view:View, reLayout:Bool = true):Void {
         if (!children.remove(view)) {
             throw new Error("View is not added to this ViewGroup");
         }
 
         _sprite.removeChild(view._sprite);
         view._parent = null;
-        view.layoutParams = null;
+
+        if (reLayout) {
+            requestLayout();
+        }
     }
 
     public function findChildById(id:String, deep:Bool = true):View {

@@ -2,19 +2,27 @@ package org.zamedev.ui.res;
 
 import openfl.errors.Error;
 import org.zamedev.ui.internal.ClassMapping;
+import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
 
 using StringTools;
 
 class Inflater {
-    public static function parse(resourceManager:ResourceManager, resId:String):View {
-        return _parse(resourceManager, resId, new Map<String, Bool>());
+    public static function parse(resourceManager:ResourceManager, resId:String, layoutParams:LayoutParams = null):View {
+        return _parse(resourceManager, resId, layoutParams, new Map<String, Bool>());
+    }
+
+    public static function parseInto(resourceManager:ResourceManager, resId:String, viewGroup:ViewGroup, reLayout:Bool = true):View {
+        var view = _parse(resourceManager, resId, viewGroup.createLayoutParams(), new Map<String, Bool>());
+        viewGroup.addChild(view, reLayout);
+        return view;
     }
 
     private static function _parse(
         resourceManager:ResourceManager,
         resId:String,
+        layoutParams:LayoutParams,
         visitedMap:Map<String, Bool>
     ):View {
         var xmlString = resourceManager._getLayoutText(resId);
@@ -24,12 +32,13 @@ class Inflater {
             throw new Error("Parse error: " + resId);
         }
 
-        return inflate(resourceManager, resId, root, visitedMap);
+        return inflate(resourceManager, resId, layoutParams, root, visitedMap);
     }
 
     private static function inflate(
         resourceManager:ResourceManager,
         resId:String,
+        layoutParams:LayoutParams,
         node:Xml,
         visitedMap:Map<String, Bool>
     ):View {
@@ -52,16 +61,12 @@ class Inflater {
         }
 
         var view = cast(instance, View);
+        view.layoutParams = (layoutParams == null ? new LayoutParams() : layoutParams);
+
         var styleResId = node.get("style");
 
         if (styleResId != null) {
-            var styleMap = resourceManager.getStyle(styleResId);
-
-            for (key in styleMap.keys()) {
-                if (!view.inflate(key, styleMap[key])) {
-                    throw new Error("Parse error: " + resId + ", class " + className + ", unsupported attribute " + key);
-                }
-            }
+            resourceManager.getStyle(styleResId).apply(view);
         }
 
         for (att in node.attributes()) {
@@ -76,7 +81,7 @@ class Inflater {
             var viewGroup = cast(view, ViewGroup);
 
             for (innerNode in node.elements()) {
-                viewGroup.addChild(inflate(resourceManager, resId, innerNode, visitedMap));
+                viewGroup.addChild(inflate(resourceManager, resId, viewGroup.createLayoutParams(), innerNode, visitedMap));
             }
         }
 

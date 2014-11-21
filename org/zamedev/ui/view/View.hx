@@ -21,7 +21,6 @@ class View extends EventDispatcher implements Inflatable {
     private var _selector:Selector;
     private var isInLayout:Bool;
     private var inflateFinished:Bool;
-    private var layoutParamsMap:Map<String, TypedValue>;
     private var _x:Float;
     private var _y:Float;
     private var _offsetX:Float;
@@ -62,7 +61,6 @@ class View extends EventDispatcher implements Inflatable {
         _selector = null;
         isInLayout = false;
         inflateFinished = false;
-        layoutParamsMap = new Map<String, TypedValue>();
 
         id = null;
         tag = null;
@@ -76,13 +74,13 @@ class View extends EventDispatcher implements Inflatable {
     public function inflate(name:String, value:TypedValue):Bool {
         if (name.substr(0, 7) == "layout_") {
             var layoutName = name.substr(7);
-            layoutParamsMap[layoutName] = value;
 
             if (layoutParams != null) {
                 layoutParams.inflate(layoutName, value);
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         switch (name) {
@@ -104,16 +102,6 @@ class View extends EventDispatcher implements Inflatable {
 
     public function onInflateFinished():Void {
         inflateFinished = true;
-    }
-
-    private function inflateLayoutParams(layoutParams:LayoutParams) {
-        this.layoutParams = layoutParams;
-
-        for (name in layoutParamsMap.keys()) {
-            if (!layoutParams.inflate(name, layoutParamsMap[name])) {
-                throw new Error("Parse error: unsupported layout param " + name);
-            }
-        }
     }
 
     public function addToContainer(container:DisplayObjectContainer):Void {

@@ -37,7 +37,7 @@ class AbsoluteLayout extends ViewGroup {
         return false;
     }
 
-    override private function createLayoutParams():LayoutParams {
+    override public function createLayoutParams():LayoutParams {
         return new AbsoluteLayoutParams();
     }
 

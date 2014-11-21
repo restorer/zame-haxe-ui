@@ -19,7 +19,7 @@ enum LinearLayoutOrientation {
 class LinearLayout extends ViewGroup {
     public var orientation(default, set):LinearLayoutOrientation;
 
-    override private function createLayoutParams():LayoutParams {
+    override public function createLayoutParams():LayoutParams {
         return new LinearLayoutParams();
     }
 

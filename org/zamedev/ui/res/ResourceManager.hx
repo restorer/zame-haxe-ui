@@ -7,7 +7,9 @@ import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.internal.XmlExt;
+import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
+import org.zamedev.ui.view.ViewGroup;
 
 using StringTools;
 
@@ -24,7 +26,8 @@ class ResourceManager {
     private var dimensions:Map<String, Dimension>;
     private var drawables:Map<String, Drawable>;
     private var strings:Map<String, String>;
-    private var styles:Map<String, Map<String, TypedValue>>;
+    private var styles:Map<String, Style>;
+    private var selectors:Map<String, Selector>;
 
     public function new(context:Context) {
         this.context = context;
@@ -90,11 +93,17 @@ class ResourceManager {
     }
 
     public function getSelector(id:String):Selector {
-        if (~/^\s*@selector\/([a-zA-Z0-9_]+)\s*$/.match(id)) {
-            return Selector.parse(this, id);
-        } else {
-            return Selector.parse(this, "@selector/" + id);
+        var value = selectors[id];
+
+        if (value == null) {
+            value = selectors["@selector/" + id];
+
+            if (value == null) {
+                throw new Error("Selector not found: " + id);
+            }
         }
+
+        return value;
     }
 
     public function getString(id:String):String {
@@ -111,7 +120,7 @@ class ResourceManager {
         return value;
     }
 
-    public function getStyle(id:String):Map<String, TypedValue> {
+    public function getStyle(id:String):Style {
         var value = styles[id];
 
         if (value == null) {
@@ -125,11 +134,19 @@ class ResourceManager {
         return value;
     }
 
-    public function inflateLayout(id:String):View {
+    public function inflate(id:String, layoutParams:LayoutParams = null):View {
         if (~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/.match(id)) {
-            return Inflater.parse(this, id);
+            return Inflater.parse(this, id, layoutParams);
         } else {
-            return Inflater.parse(this, "@layout/" + id);
+            return Inflater.parse(this, "@layout/" + id, layoutParams);
+        }
+    }
+
+    public function inflateInto(id:String, viewGroup:ViewGroup, reLayout:Bool = true):View {
+        if (~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/.match(id)) {
+            return Inflater.parseInto(this, id, viewGroup, reLayout);
+        } else {
+            return Inflater.parseInto(this, "@layout/" + id, viewGroup, reLayout);
         }
     }
 
@@ -171,7 +188,8 @@ class ResourceManager {
         drawables = new Map<String, Drawable>();
         fonts = new Map<String, String>();
         strings = new Map<String, String>();
-        styles = new Map<String, Map<String, TypedValue>>();
+        styles = new Map<String, Style>();
+        selectors = new Map<String, Selector>();
 
         for (assetId in Assets.list(AssetType.IMAGE)) {
             var re = ~/^drawable(?:\-[a-zA-Z0-9]+)?\/([a-zA-Z0-9_]+)\.([a-z]+)$/;
@@ -188,13 +206,20 @@ class ResourceManager {
         var styleSpecMap = new Map<String, StyleSpec>();
 
         for (assetId in Assets.list(AssetType.TEXT)) {
-            if (~/^resource(?:\-[a-zA-Z0-9]+)?\/.+\.xml$/.match(assetId)) {
-                parseResourceXml(Assets.getText(assetId), styleSpecMap);
+            var re = ~/^([a-z]+)(?:\-[a-zA-Z0-9]+)?\/(.+)\.xml$/;
+
+            if (re.match(assetId)) {
+                if (re.matched(1) == "resource") {
+                    parseResourceXml(Assets.getText(assetId), styleSpecMap);
+                } else if (re.matched(1) == "selector") {
+                    var resId = "@selector/" + re.matched(2);
+                    selectors[resId] = Selector.parse(this, resId);
+                }
             }
         }
 
         for (name in styleSpecMap.keys()) {
-            styles["@style/" + name] = resolveStyle(styleSpecMap, styleSpecMap[name]);
+            styles["@style/" + name] = new Style(resolveStyle(styleSpecMap, styleSpecMap[name]));
         }
     }
 
