@@ -1,6 +1,7 @@
 package org.zamedev.ui.view;
 
 import openfl.display.Shape;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.res.MeasureSpec;
 
@@ -9,8 +10,8 @@ class Rect extends View {
 
     public var fillColor(default, set):UInt;
 
-    public function new() {
-        super();
+    public function new(context:Context) {
+        super(context);
 
         _sprite.addChild(shape = new Shape());
         fillColor = 0;

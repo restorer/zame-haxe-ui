@@ -1,11 +1,12 @@
 package org.zamedev.ui.widget;
 
 import openfl.events.MouseEvent;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.res.TypedValue;
 
 class Radio extends Button {
-    public function new() {
-        super();
+    public function new(context:Context) {
+        super(context);
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
@@ -26,7 +27,7 @@ class Radio extends Button {
     @:noCompletion
     private function onMouseClick(_):Void {
         if (_parent != null && tag != null) {
-            for (child in _parent.findChildrenByTag(tag, false)) {
+            for (child in _parent.findViewsByTag(tag, false)) {
                 if (child != this) {
                     child.updateState("selected", false);
                 }

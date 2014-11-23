@@ -3,6 +3,7 @@ package org.zamedev.ui.widget;
 import openfl.events.Event;
 import openfl.events.MouseEvent;
 import openfl.geom.Point;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
@@ -34,12 +35,12 @@ class Button extends ViewGroup {
     public var leftIconMargin(default, set):Float;
     public var enabled:Bool;
 
-    public function new() {
-        super();
+    public function new(context:Context) {
+        super(context);
 
-        addChild(backgroundView = new ImageView());
-        addChild(leftIconView = new ImageView());
-        addChild(textView = new TextView());
+        addChild(backgroundView = new ImageView(context));
+        addChild(leftIconView = new ImageView(context));
+        addChild(textView = new TextView(context));
 
         listenersAdded = false;
         leftIconMargin = 0.0;
@@ -66,27 +67,27 @@ class Button extends ViewGroup {
                 return true;
 
             case "backgroundOffsetX":
-                backgroundOffset.x = value.resolveFloat();
+                backgroundOffset.x = computeDimension(value.resolveDimension(), false);
                 return true;
 
             case "backgroundOffsetY":
-                backgroundOffsetY = value.resolveFloat();
+                backgroundOffsetY = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "leftIconOffsetX":
-                backgroundOffset.x = value.resolveFloat();
+                backgroundOffset.x = computeDimension(value.resolveDimension(), false);
                 return true;
 
             case "leftIconOffsetY":
-                backgroundOffsetY = value.resolveFloat();
+                backgroundOffsetY = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "textOffsetX":
-                textOffsetX = value.resolveFloat();
+                textOffsetX = computeDimension(value.resolveDimension(), false);
                 return true;
 
             case "textOffsetY":
-                textOffsetY = value.resolveFloat();
+                textOffsetY = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "textColor":
@@ -94,7 +95,7 @@ class Button extends ViewGroup {
                 return true;
 
             case "textSize":
-                textSize = value.resolveFloat();
+                textSize = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "font":
@@ -106,7 +107,7 @@ class Button extends ViewGroup {
                 return true;
 
             case "leftIconMargin":
-                leftIconMargin = value.resolveFloat();
+                leftIconMargin = computeDimension(value.resolveDimension(), false);
                 return true;
 
         }

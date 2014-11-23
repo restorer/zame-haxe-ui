@@ -5,23 +5,30 @@ import openfl.errors.ArgumentError;
 using StringTools;
 
 class DimensionTools {
-    public static function resolve(dimen:Dimension, viewSize:Float, layoutSize:Float, layoutWeight:Float = 1.0) {
-        return switch(dimen) {
-            case Dimension.WRAP_CONTENT:
-                viewSize;
+    public static function resolveVertical(relWidth:Float, relHeight:Float, type:DimensionType, vertical:Bool):Bool {
+        switch (type) {
+            case DimensionType.UNSPECIFIED:
+                return vertical;
 
-            case Dimension.MATCH_PARENT:
-                layoutSize;
+            case DimensionType.HEIGHT:
+                return true;
 
-            case Dimension.EXACT(size):
-                size;
+            case DimensionType.WIDTH:
+                return false;
 
-            case Dimension.PERCENT(weight):
-                layoutSize * weight;
+            case DimensionType.MIN:
+                return (relHeight < relWidth);
 
-            case Dimension.WEIGHT(weight):
-                layoutSize * weight / layoutWeight;
-        };
+            case DimensionType.MAX:
+                return (relHeight > relWidth);
+        }
+    }
+
+    public static function resolveWeight(weight:Float, size:Float, sizeWeightSum:Float, useWeightSum:Bool):Float {
+        return (useWeightSum
+            ? (weight * size / sizeWeightSum)
+            : (weight * size)
+        );
     }
 
     public static function parse(s:String):Dimension {
@@ -35,7 +42,7 @@ class DimensionTools {
             return Dimension.WRAP_CONTENT;
         }
 
-        var re = ~/^([+\-0-9.]+)w$/;
+        var re = ~/^([+\-0-9.]+)(%)?(?:(p|s)(w|h|min|max)?)?$/;
 
         if (re.match(s)) {
             var value = Std.parseFloat(re.matched(1));
@@ -44,31 +51,38 @@ class DimensionTools {
                 throw new ArgumentError("Parse error: " + s);
             }
 
-            return Dimension.WEIGHT(value);
-        }
-
-        re = ~/^([+\-0-9.]+)%$/;
-
-        if (re.match(s)) {
-            var value = Std.parseFloat(re.matched(1));
-
-            if (Math.isNaN(value)) {
-                throw new ArgumentError("Parse error: " + s);
+            if (re.matched(2) == null && re.matched(3) == null && re.matched(4) == null) {
+                return Dimension.EXACT(value);
             }
 
-            return Dimension.PERCENT(value / 100.0);
-        }
+            var useWeightSum = (re.matched(2) == null);
 
-        re = ~/^[+\-0-9.]+$/;
-
-        if (re.match(s)) {
-            var value = Std.parseFloat(s);
-
-            if (Math.isNaN(value)) {
-                throw new ArgumentError("Parse error: " + s);
+            if (!useWeightSum) {
+                value /= 100.0;
             }
 
-            return Dimension.EXACT(value);
+            var dimensionType = switch(re.matched(4)) {
+                case "w":
+                    DimensionType.WIDTH;
+
+                case "h":
+                    DimensionType.HEIGHT;
+
+                case "min":
+                    DimensionType.MIN;
+
+                case "max":
+                    DimensionType.MAX;
+
+                default:
+                    DimensionType.UNSPECIFIED;
+            };
+
+            if (re.matched(3) == "s") {
+                return Dimension.WEIGHT_STAGE(value, dimensionType, useWeightSum);
+            } else {
+                return Dimension.WEIGHT_PARENT(value, dimensionType, useWeightSum);
+            }
         }
 
         throw new ArgumentError("Parse error: " + s);

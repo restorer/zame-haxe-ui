@@ -2,10 +2,17 @@ package org.zamedev.ui.view;
 
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.MeasureSpec;
 
 class LayoutParams {
     public var width:Dimension;
     public var height:Dimension;
+
+    public var _widthSpec:MeasureSpec;
+    public var _heightSpec:MeasureSpec;
+    public var _measured:Bool;
+    public var _measuredWidth:Float;
+    public var _measuredHeight:Float;
 
     public function new() {
         width = Dimension.WRAP_CONTENT;
@@ -24,6 +31,9 @@ class LayoutParams {
         }
 
         return false;
+    }
+
+    public function onInflateStarted():Void {
     }
 
     public function onInflateFinished():Void {

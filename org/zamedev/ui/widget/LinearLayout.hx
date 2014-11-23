@@ -1,6 +1,7 @@
 package org.zamedev.ui.widget;
 
 import openfl.errors.ArgumentError;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.Gravity;
 import org.zamedev.ui.res.MeasureSpec;
@@ -17,7 +18,15 @@ enum LinearLayoutOrientation {
 }
 
 class LinearLayout extends ViewGroup {
-    public var orientation(default, set):LinearLayoutOrientation;
+    private var _orientation:LinearLayoutOrientation;
+
+    public var orientation(get, set):LinearLayoutOrientation;
+
+    public function new(context:Context) {
+        super(context);
+
+        orientation = LinearLayoutOrientation.VERTICAL;
+    }
 
     override public function createLayoutParams():LayoutParams {
         return new LinearLayoutParams();
@@ -52,68 +61,16 @@ class LinearLayout extends ViewGroup {
             return true;
         }
 
-        var computeWidth:Bool;
-        var computeHeight:Bool;
-
-        switch (widthSpec) {
-            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                _width = 0.0;
-                computeWidth = true;
-
-            case MeasureSpec.EXACT(size):
-                _width = size;
-                computeWidth = false;
-        }
-
-        switch (heightSpec) {
-            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                _height = 0.0;
-                computeHeight = true;
-
-            case MeasureSpec.EXACT(size):
-                _height = size;
-                computeHeight = false;
-        }
-
         for (child in children) {
             var layoutParams = cast(child.layoutParams, LinearLayoutParams);
 
-            layoutParams._marginLeftComputed = computeMargin(layoutParams.marginLeft, _width, computeWidth);
-            layoutParams._marginRightComputed = computeMargin(layoutParams.marginRight, _width, computeWidth);
-            layoutParams._marginTopComputed = computeMargin(layoutParams.marginTop, _height, computeHeight);
-            layoutParams._marginBottomComputed = computeMargin(layoutParams.marginBottom, _height, computeHeight);
+            layoutParams._marginLeftComputed = computeDimension(layoutParams.marginLeft, false);
+            layoutParams._marginRightComputed = computeDimension(layoutParams.marginRight, false);
+            layoutParams._marginTopComputed = computeDimension(layoutParams.marginTop, true);
+            layoutParams._marginBottomComputed = computeDimension(layoutParams.marginBottom, true);
         }
 
-        if (computeWidth || computeHeight) {
-            for (child in children) {
-                var layoutParams = cast(child.layoutParams, LinearLayoutParams);
-
-                child.measureAndLayout(
-                    computeChildMeasureSpec(child, layoutParams.width, _width, computeWidth),
-                    computeChildMeasureSpec(child, layoutParams.height, _height, computeHeight)
-                );
-
-                if (computeWidth) {
-                    var size = child.width + layoutParams._marginLeftComputed + layoutParams._marginRightComputed;
-
-                    if (orientation == LinearLayoutOrientation.HORIZONTAL) {
-                        _width += size;
-                    } else {
-                        _width = Math.max(_width, size);
-                    }
-                }
-
-                if (computeHeight) {
-                    var size = child.height + layoutParams._marginTopComputed + layoutParams._marginBottomComputed;
-
-                    if (orientation == LinearLayoutOrientation.VERTICAL) {
-                        _height += size;
-                    } else {
-                        _height = Math.max(_height, size);
-                    }
-                }
-            }
-        }
+        measureSelf(widthSpec, heightSpec);
 
         var position:Float = 0.0;
 
@@ -137,7 +94,7 @@ class LinearLayout extends ViewGroup {
                 }
             } else {
                 position += layoutParams._marginTopComputed;
-                child.x = position;
+                child.y = position;
                 position += child.height + layoutParams._marginBottomComputed;
 
                 switch (layoutParams.gravity) {
@@ -156,41 +113,67 @@ class LinearLayout extends ViewGroup {
         return true;
     }
 
-    private function computeMargin(dimen:Dimension, layoutSize:Float, computeSize:Bool):Float {
-        return switch(dimen) {
-            case Dimension.EXACT(size):
-                size;
+    override private function refineSelfMeasure(measureWidth:Bool, measureHeight:Bool):Void {
+        if (measureWidth) {
+            _width = 0.0;
+        }
 
-            case Dimension.PERCENT(weight) | Dimension.WEIGHT(weight):
-                (computeSize ? 0.0 : layoutSize * weight);
+        if (measureHeight) {
+            _height = 0.0;
+        }
 
-            case Dimension.MATCH_PARENT:
-                (computeSize ? 0.0 : layoutSize);
+        for (child in children) {
+            var layoutParams = cast(child.layoutParams, LinearLayoutParams);
 
-            case Dimension.WRAP_CONTENT:
-                0.0;
-        };
+            if (measureWidth) {
+                if (orientation == LinearLayoutOrientation.HORIZONTAL && layoutParams._measuredWidth < 0.0) {
+                    _width = -1.0;
+                    measureWidth = false;
+                }
+
+                var size = layoutParams._measuredWidth + layoutParams._marginLeftComputed + layoutParams._marginRightComputed;
+
+                if (orientation == LinearLayoutOrientation.HORIZONTAL) {
+                    _width += size;
+                } else {
+                    _width = Math.max(_width, size);
+                }
+            }
+
+            if (measureHeight) {
+                if (orientation == LinearLayoutOrientation.VERTICAL && layoutParams._measuredHeight < 0.0) {
+                    _height = -1.0;
+                    measureHeight = false;
+                }
+
+                var size = layoutParams._measuredHeight + layoutParams._marginTopComputed + layoutParams._marginBottomComputed;
+
+                if (orientation == LinearLayoutOrientation.VERTICAL) {
+                    _height += size;
+                } else {
+                    _height = Math.max(_height, size);
+                }
+            }
+        }
     }
 
-    private function computeChildMeasureSpec(child:View, dimen:Dimension, layoutSize:Float, computeSize:Bool):MeasureSpec {
-        return switch(dimen) {
-            case Dimension.WRAP_CONTENT:
-                (computeSize ? MeasureSpec.UNSPECIFIED : MeasureSpec.AT_MOST(layoutSize));
+    override private function computeMatchParentMeasureSpec(childLayoutParams:LayoutParams, size:Float, vertical:Bool):MeasureSpec {
+        var layoutParams = cast(childLayoutParams, LinearLayoutParams);
 
-            case Dimension.MATCH_PARENT:
-                (computeSize ? MeasureSpec.UNSPECIFIED : MeasureSpec.EXACT(layoutSize));
+        return MeasureSpec.EXACT(size - (vertical
+            ? (layoutParams._marginTopComputed + layoutParams._marginBottomComputed)
+            : (layoutParams._marginLeftComputed + layoutParams._marginRightComputed)
+        ));
+    }
 
-            case Dimension.EXACT(size):
-                MeasureSpec.AT_MOST(Math.min(layoutSize, size));
-
-            case Dimension.PERCENT(weight) | Dimension.WEIGHT(weight):
-                (computeSize ? MeasureSpec.UNSPECIFIED : MeasureSpec.AT_MOST(Math.min(layoutSize, layoutSize * weight)));
-        };
+    @:noCompletion
+    private function get_orientation():LinearLayoutOrientation {
+        return _orientation;
     }
 
     @:noCompletion
     private function set_orientation(value:LinearLayoutOrientation):LinearLayoutOrientation {
-        orientation = value;
+        _orientation = value;
         requestLayout();
         return value;
     }

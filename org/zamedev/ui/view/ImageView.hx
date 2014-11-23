@@ -1,6 +1,7 @@
 package org.zamedev.ui.view;
 
 import openfl.display.DisplayObject;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
@@ -14,8 +15,8 @@ class ImageView extends View {
 
     public var drawable(get, set):Drawable;
 
-    public function new() {
-        super();
+    public function new(context:Context) {
+        super(context);
 
         _drawable = null;
         displayObject = null;

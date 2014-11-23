@@ -4,6 +4,7 @@ import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
 import openfl.text.TextFormat;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
@@ -21,8 +22,8 @@ class TextView extends View {
     public var font(get, set):String;
     public var text(get, set):String;
 
-    public function new() {
-        super();
+    public function new(context:Context) {
+        super(context);
 
         _textFormat = new TextFormat();
         textField = new TextFieldExt();
@@ -52,7 +53,7 @@ class TextView extends View {
                 return true;
 
             case "textSize":
-                textSize = value.resolveFloat();
+                textSize = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "font":

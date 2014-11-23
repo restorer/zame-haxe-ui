@@ -25,28 +25,6 @@ class TypedValue {
         return resourceManager.getDrawable(textValue);
     }
 
-    public function resolveFloat():Float {
-        if (textValue.substr(0, 1) == "@") {
-            var dimen = resourceManager.getDimension(textValue);
-
-            switch (dimen) {
-                case Dimension.EXACT(value):
-                    return value;
-
-                default:
-                    throw new ArgumentError("Must be exact value: " + textValue);
-            }
-        } else {
-            var value = Std.parseFloat(textValue);
-
-            if (Math.isNaN(value)) {
-                throw new ArgumentError("Parse error: " + textValue);
-            }
-
-            return value;
-        }
-    }
-
     public function resolveDimension():Dimension {
         if (textValue.substr(0, 1) == "@") {
             return resourceManager.getDimension(textValue);

@@ -1,12 +1,13 @@
 package org.zamedev.ui.widget;
 
 import openfl.events.MouseEvent;
+import org.zamedev.ui.Context;
 import org.zamedev.ui.res.TypedValue;
 import motion.Actuate;
 
 class Toggle extends Button {
-    public function new() {
-        super();
+    public function new(context:Context) {
+        super(context);
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
@@ -31,10 +32,10 @@ class Toggle extends Button {
 
     @:noCompletion
     override private function set_textOffsetX(value:Float):Float {
-        if (inflateFinished) {
-            Actuate.tween(textView, 0.5, { offsetX: value });
-        } else {
+        if (isInLayout) {
             textView.offsetX = value;
+        } else {
+            Actuate.tween(textView, 0.5, { offsetX: value });
         }
 
         return value;

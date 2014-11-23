@@ -134,22 +134,6 @@ class ResourceManager {
         return value;
     }
 
-    public function inflate(id:String, layoutParams:LayoutParams = null):View {
-        if (~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/.match(id)) {
-            return Inflater.parse(this, id, layoutParams);
-        } else {
-            return Inflater.parse(this, "@layout/" + id, layoutParams);
-        }
-    }
-
-    public function inflateInto(id:String, viewGroup:ViewGroup, reLayout:Bool = true):View {
-        if (~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/.match(id)) {
-            return Inflater.parseInto(this, id, viewGroup, reLayout);
-        } else {
-            return Inflater.parseInto(this, "@layout/" + id, viewGroup, reLayout);
-        }
-    }
-
     public function _getSelectorText(id:String):String {
         var re = ~/^\s*@selector\/([a-zA-Z0-9_]+)\s*$/;
 
@@ -168,12 +152,7 @@ class ResourceManager {
 
     public function _getLayoutText(id:String):String {
         var re = ~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/;
-
-        if (!re.match(id)) {
-            throw new Error("Layout not found: " + id);
-        }
-
-        var assetId = "layout/" + re.matched(1) + ".xml";
+        var assetId = "layout/" + (re.match(id) ? re.matched(1) : id) + ".xml";
 
         if (!Assets.exists(assetId, AssetType.TEXT)) {
             throw new Error("Layout not found: " + id);

@@ -2,8 +2,13 @@ package org.zamedev.ui;
 
 import openfl.display.FPS;
 import openfl.display.Sprite;
+import openfl.system.Capabilities;
 import org.zamedev.ui.internal.ApplicationStage;
+import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
+
+// TODO:
+// http://www.yiiframework.com/doc-2.0/guide-tutorial-i18n.html
 
 class Application extends Sprite implements Context {
     #if debug
@@ -13,6 +18,7 @@ class Application extends Sprite implements Context {
     private var _applicationStage:ApplicationStage;
     private var _locale:String;
     private var _resourceManager:ResourceManager;
+    private var _inflater:Inflater;
     private var _currentScene:Scene;
 
     public var context(get, null):Context;
@@ -20,13 +26,15 @@ class Application extends Sprite implements Context {
     public var applicationStage(get, null):ApplicationStage;
     public var locale(get, set):String;
     public var resourceManager(get, null):ResourceManager;
+    public var inflater(get, null):Inflater;
 
     public function new() {
         super();
 
         _applicationStage = new ApplicationStage();
-        _locale = null;
+        _locale = Capabilities.language;
         _resourceManager = new ResourceManager(this);
+        _inflater = new Inflater(this);
         _currentScene = null;
 
         create();
@@ -86,6 +94,11 @@ class Application extends Sprite implements Context {
     @:noCompletion
     private function get_resourceManager():ResourceManager {
         return _resourceManager;
+    }
+
+    @:noCompletion
+    private function get_inflater():Inflater {
+        return _inflater;
     }
 
     /*

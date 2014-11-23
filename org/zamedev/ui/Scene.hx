@@ -1,9 +1,9 @@
 package org.zamedev.ui;
 
-import openfl.events.Event;
-import org.zamedev.ui.view.View;
-import org.zamedev.ui.internal.SceneSprite;
 import motion.Actuate;
+import openfl.events.Event;
+import org.zamedev.ui.internal.SceneSprite;
+import org.zamedev.ui.view.View;
 
 class Scene extends ContextWrapper {
     private var _contentView:View;
@@ -57,6 +57,7 @@ class Scene extends ContextWrapper {
 
         Actuate.tween(sceneSprite, 0.5, { alpha: 1, y: 0 }).onComplete(function():Void {
             sceneSprite.dispatchEvents = true;
+            dispatchEvent(new Event(Event.ADDED_TO_STAGE));
         });
     }
 

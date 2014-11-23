@@ -2,15 +2,22 @@ package org.zamedev.ui.view;
 
 import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
+import openfl.errors.ArgumentError;
 import openfl.errors.Error;
 import openfl.events.EventDispatcher;
 import openfl.geom.Point;
+import org.zamedev.ui.Context;
+import org.zamedev.ui.graphics.Dimension;
+import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.res.Inflatable;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Selector;
 import org.zamedev.ui.res.TypedValue;
 
+using StringTools;
+
 class View extends EventDispatcher implements Inflatable {
+    private var _context:Context;
     private var _sprite:Sprite;
     private var _width:Float;
     private var _height:Float;
@@ -20,11 +27,13 @@ class View extends EventDispatcher implements Inflatable {
     private var _state:Map<String, Bool>;
     private var _selector:Selector;
     private var isInLayout:Bool;
-    private var inflateFinished:Bool;
     private var _x:Float;
     private var _y:Float;
     private var _offsetX:Float;
     private var _offsetY:Float;
+    private var widthWeightSum:Float;
+    private var heightWeightSum:Float;
+    private var _visibility:ViewVisibility;
 
     public var id:String;
     public var tag:String;
@@ -47,10 +56,12 @@ class View extends EventDispatcher implements Inflatable {
     public var offset(get, set):Point;
     public var cxy(get, set):Point;
     public var rotation(get, set):Float;
+    public var visibility(get, set):ViewVisibility;
 
-    public function new() {
+    public function new(context:Context) {
         super();
 
+        _context = context;
         _sprite = new Sprite();
         _width = 0.0;
         _height = 0.0;
@@ -60,7 +71,6 @@ class View extends EventDispatcher implements Inflatable {
         _state = new Map<String, Bool>();
         _selector = null;
         isInLayout = false;
-        inflateFinished = false;
 
         id = null;
         tag = null;
@@ -69,6 +79,9 @@ class View extends EventDispatcher implements Inflatable {
         _y = 0.0;
         _offsetX = 0.0;
         _offsetY = 0.0;
+        widthWeightSum = 1.0;
+        heightWeightSum = 1.0;
+        _visibility = ViewVisibility.VISIBLE;
     }
 
     public function inflate(name:String, value:TypedValue):Bool {
@@ -95,13 +108,42 @@ class View extends EventDispatcher implements Inflatable {
             case "selector":
                 selector = value.resolveSelector();
                 return true;
+
+            case "widthWeightSum":
+                widthWeightSum = Math.max(1.0, computeDimension(value.resolveDimension(), false));
+                return true;
+
+            case "heightWeightSum":
+                heightWeightSum = Math.max(1.0, computeDimension(value.resolveDimension(), true));
+                return true;
+
+            case "visibility":
+                switch (value.resolveString().trim().toLowerCase()) {
+                    case "visible":
+                        visibility = ViewVisibility.VISIBLE;
+
+                    case "invisible":
+                        visibility = ViewVisibility.INVISIBLE;
+
+                    case "gone":
+                        visibility = ViewVisibility.GONE;
+
+                    default:
+                        throw new ArgumentError("Unknown visibility value: " + value.resolveString());
+                }
+
+                return true;
         }
 
         return false;
     }
 
+    public function onInflateStarted():Void {
+        isInLayout = true;
+    }
+
     public function onInflateFinished():Void {
-        inflateFinished = true;
+        isInLayout = false;
     }
 
     public function addToContainer(container:DisplayObjectContainer):Void {
@@ -113,7 +155,7 @@ class View extends EventDispatcher implements Inflatable {
             _sprite.parent.removeChild(_sprite);
         }
 
-        measureAndLayout(MeasureSpec.AT_MOST(container.width), MeasureSpec.AT_MOST(container.height));
+        measureAndLayout(MeasureSpec.EXACT(container.width), MeasureSpec.EXACT(container.height));
         container.addChild(_sprite);
     }
 
@@ -154,31 +196,14 @@ class View extends EventDispatcher implements Inflatable {
 
         this.widthSpec = widthSpec;
         this.heightSpec = heightSpec;
+
+        if (_visibility == ViewVisibility.GONE) {
+            _width = 0.0;
+            _height = 0.0;
+            return true;
+        }
+
         return false;
-    }
-
-    private function measureAndLayoutDefault(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
-        switch (widthSpec) {
-            case MeasureSpec.UNSPECIFIED:
-                _width = _sprite.width;
-
-            case MeasureSpec.EXACT(size):
-                _width = size;
-
-            case MeasureSpec.AT_MOST(size):
-                _width = Math.min(size, _sprite.width);
-        }
-
-        switch (heightSpec) {
-            case MeasureSpec.UNSPECIFIED:
-                _height = _sprite.height;
-
-            case MeasureSpec.EXACT(size):
-                _height = size;
-
-            case MeasureSpec.AT_MOST(size):
-                _height = Math.min(size, _sprite.height);
-        }
     }
 
     private function stateUpdated():Void {
@@ -214,6 +239,29 @@ class View extends EventDispatcher implements Inflatable {
         }
 
         return this;
+    }
+
+    private function computeDimension(dimension:Dimension, vertical:Bool):Float {
+        switch (dimension) {
+            case Dimension.WRAP_CONTENT | Dimension.MATCH_PARENT:
+                throw new Error("Dimension must be exact or relative to stage");
+
+            case Dimension.EXACT(size):
+                return size;
+
+            case Dimension.WEIGHT_PARENT(_, _, _):
+                throw new Error("Dimension must be exact or relative to stage");
+
+            case Dimension.WEIGHT_STAGE(weight, type, useWeightSum): {
+                var appStage = _context.applicationStage;
+
+                if (DimensionTools.resolveVertical(appStage.width, appStage.height, type, vertical)) {
+                    return DimensionTools.resolveWeight(weight, appStage.height, appStage.heightWeightSum, useWeightSum);
+                } else {
+                    return DimensionTools.resolveWeight(weight, appStage.width, appStage.widthWeightSum, useWeightSum);
+                }
+            }
+        }
     }
 
     @:noCompletion
@@ -396,6 +444,30 @@ class View extends EventDispatcher implements Inflatable {
     @:noCompletion
     private function set_rotation(value:Float):Float {
         _sprite.rotation = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_visibility():ViewVisibility {
+        return _visibility;
+    }
+
+    @:noCompletion
+    private function set_visibility(value:ViewVisibility):ViewVisibility {
+        if (_visibility != value) {
+            _sprite.visible = (value == ViewVisibility.VISIBLE);
+
+            if (_visibility == ViewVisibility.GONE || value == ViewVisibility.GONE) {
+                _visibility = value;
+
+                if (_parent != null) {
+                    _parent.requestLayout();
+                }
+            } else {
+                _visibility = value;
+            }
+        }
+
         return value;
     }
 }

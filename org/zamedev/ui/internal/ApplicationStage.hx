@@ -11,6 +11,8 @@ class ApplicationStage extends Sprite {
     private var listenerAdded:Bool;
 
     public var clippingEnabled(default, set):Bool;
+    public var widthWeightSum(default, set):Float;
+    public var heightWeightSum(default, set):Float;
 
     public function new() {
         super();
@@ -19,6 +21,8 @@ class ApplicationStage extends Sprite {
         appStageHeight = 0.0;
         maskShape = new Shape();
         listenerAdded = false;
+        widthWeightSum = 1.0;
+        heightWeightSum = 1.0;
 
         addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
         addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
@@ -38,6 +42,23 @@ class ApplicationStage extends Sprite {
                 onStageResize(null);
             }
         }
+    }
+
+    public function setWeightSums(widthWeightSum:Float, heightWeightSum:Float) {
+        this.widthWeightSum = widthWeightSum;
+        this.heightWeightSum = heightWeightSum;
+    }
+
+    @:noCompletion
+    private function set_widthWeightSum(value:Float):Float {
+        widthWeightSum = Math.max(1.0, value);
+        return value;
+    }
+
+    @:noCompletion
+    private function set_heightWeightSum(value:Float):Float {
+        heightWeightSum = Math.max(1.0, value);
+        return value;
     }
 
     @:noCompletion

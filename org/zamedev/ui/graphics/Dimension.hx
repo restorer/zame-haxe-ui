@@ -4,6 +4,6 @@ enum Dimension {
     MATCH_PARENT;
     WRAP_CONTENT;
     EXACT(size:Float);
-    PERCENT(weight:Float);
-    WEIGHT(weight:Float);
+    WEIGHT_PARENT(weight:Float, type:DimensionType, useWeightSum:Bool);
+    WEIGHT_STAGE(weight:Float, type:DimensionType, useWeightSum:Bool);
 }
