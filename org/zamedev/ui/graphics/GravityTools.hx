@@ -6,39 +6,51 @@ using StringTools;
 
 class GravityTools {
     public static function parse(s:String):Gravity {
-        switch (s.trim().toLowerCase()) {
-            case "none":
-                return Gravity.NONE;
+        var result:Gravity = { horizontalType: GravityType.NONE, verticalType: GravityType.NONE };
 
-            case "left":
-                return Gravity.LEFT;
+        for (item in s.split("|")) {
+            item = item.trim().toLowerCase();
 
-            case "right":
-                return Gravity.RIGHT;
+            if (item == "") {
+                continue;
+            }
 
-            case "top":
-                return Gravity.TOP;
+            switch (item) {
+                case "left":
+                    result.horizontalType = GravityType.START;
 
-            case "bottom":
-                return Gravity.BOTTOM;
+                case "right":
+                    result.horizontalType = GravityType.END;
 
-            case "center":
-                return Gravity.CENTER;
+                case "top":
+                    result.verticalType = GravityType.START;
 
-            case "center_horizontal":
-                return Gravity.CENTER_HORIZONTAL;
+                case "bottom":
+                    result.verticalType = GravityType.END;
 
-            case "center_vertical":
-                return Gravity.CENTER_VERTICAL;
+                case "center":
+                    result.horizontalType = GravityType.CENTER;
+                    result.verticalType = GravityType.CENTER;
 
-            case "start":
-                return Gravity.START;
+                case "center_horizontal":
+                    result.horizontalType = GravityType.CENTER;
 
-            case "end":
-                return Gravity.END;
+                case "center_vertical":
+                    result.verticalType = GravityType.CENTER;
 
-            default:
-                throw new ArgumentError("Parse error: " + s);
+                case "start":
+                    result.horizontalType = GravityType.START;
+                    result.verticalType = GravityType.START;
+
+                case "end":
+                    result.horizontalType = GravityType.END;
+                    result.verticalType = GravityType.END;
+
+                default:
+                    throw new ArgumentError("Parse error: " + s);
+            }
         }
+
+        return result;
     }
 }

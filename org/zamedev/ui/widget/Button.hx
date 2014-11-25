@@ -8,23 +8,31 @@ import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.ImageView;
+import org.zamedev.ui.view.Rect;
 import org.zamedev.ui.view.TextView;
 import org.zamedev.ui.view.ViewGroup;
 
 class Button extends ViewGroup {
     private var backgroundView:ImageView;
     private var leftIconView:ImageView;
+    private var rightIconView:ImageView;
     private var textView:TextView;
+    private var hitTestView:Rect;
     private var listenersAdded:Bool;
+    private var _disabled:Bool;
 
     public var background(get, set):Drawable;
     public var leftIcon(get, set):Drawable;
+    public var rightIcon(get, set):Drawable;
     public var backgroundOffset(get, set):Point;
     public var backgroundOffsetX(get, set):Float;
     public var backgroundOffsetY(get, set):Float;
     public var leftIconOffset(get, set):Point;
     public var leftIconOffsetX(get, set):Float;
     public var leftIconOffsetY(get, set):Float;
+    public var rightIconOffset(get, set):Point;
+    public var rightIconOffsetX(get, set):Float;
+    public var rightIconOffsetY(get, set):Float;
     public var textOffset(get, set):Point;
     public var textOffsetX(get, set):Float;
     public var textOffsetY(get, set):Float;
@@ -33,18 +41,25 @@ class Button extends ViewGroup {
     public var font(get, set):String;
     public var text(get, set):String;
     public var leftIconMargin(default, set):Float;
-    public var enabled:Bool;
+    public var rightIconMargin(default, set):Float;
+    public var disabled(get, set):Bool;
 
     public function new(context:Context) {
         super(context);
 
         addChild(backgroundView = new ImageView(context));
         addChild(leftIconView = new ImageView(context));
+        addChild(rightIconView = new ImageView(context));
         addChild(textView = new TextView(context));
+        addChild(hitTestView = new Rect(context));
 
         listenersAdded = false;
         leftIconMargin = 0.0;
-        enabled = true;
+        rightIconMargin = 0.0;
+        _disabled = false;
+
+        _sprite.buttonMode = true;
+        hitTestView.alpha = 0.0;
 
         _sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
         _sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
@@ -66,8 +81,12 @@ class Button extends ViewGroup {
                 leftIcon = value.resolveDrawable();
                 return true;
 
+            case "rightIcon":
+                rightIcon = value.resolveDrawable();
+                return true;
+
             case "backgroundOffsetX":
-                backgroundOffset.x = computeDimension(value.resolveDimension(), false);
+                backgroundOffsetX = computeDimension(value.resolveDimension(), false);
                 return true;
 
             case "backgroundOffsetY":
@@ -75,11 +94,19 @@ class Button extends ViewGroup {
                 return true;
 
             case "leftIconOffsetX":
-                backgroundOffset.x = computeDimension(value.resolveDimension(), false);
+                leftIconOffsetX = computeDimension(value.resolveDimension(), false);
                 return true;
 
             case "leftIconOffsetY":
-                backgroundOffsetY = computeDimension(value.resolveDimension(), true);
+                leftIconOffsetY = computeDimension(value.resolveDimension(), true);
+                return true;
+
+            case "rightIconOffsetX":
+                rightIconOffsetX = computeDimension(value.resolveDimension(), false);
+                return true;
+
+            case "rightIconOffsetY":
+                rightIconOffsetY = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "textOffsetX":
@@ -110,6 +137,13 @@ class Button extends ViewGroup {
                 leftIconMargin = computeDimension(value.resolveDimension(), false);
                 return true;
 
+            case "rightIconMargin":
+                rightIconMargin = computeDimension(value.resolveDimension(), false);
+                return true;
+
+            case "disabled":
+                disabled = value.resolveBool();
+                return true;
         }
 
         return false;
@@ -122,32 +156,31 @@ class Button extends ViewGroup {
 
         backgroundView.measureAndLayout(widthSpec, heightSpec);
         leftIconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        rightIconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
         textView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
-        var leftIconWidth = leftIconView.width + (leftIconView.drawable == null ? 0 : leftIconMargin);
+        var leftIconWidth = (leftIconView.drawable == null ? 0 : leftIconView.width + leftIconMargin);
+        var rightIconWidth = (rightIconView.drawable == null ? 0 : rightIconView.width + rightIconMargin);
 
-        _width = Math.max(backgroundView.width, leftIconWidth + textView.width);
-        _height = Math.max(Math.max(backgroundView.height, leftIconView.height), textView.height);
+        _width = Math.max(backgroundView.width, leftIconWidth + textView.width + rightIconWidth);
+        _height = Math.max(Math.max(Math.max(backgroundView.height, leftIconView.height), rightIconView.height), textView.height);
 
-        if (leftIconView.drawable == null) {
-            leftIconView.x = 0;
-            textView.cx = _width / 2;
-        } else {
-            var pos = (_width + leftIconMargin + leftIconView.width) / 2;
-
-            leftIconView.ex = pos - (textView.width / 2) - leftIconMargin;
-            textView.cx = pos;
-        }
-
-        leftIconView.cy = _height / 2;
+        textView.cx = (_width + leftIconWidth - rightIconWidth) / 2;
         textView.cy = _height / 2;
 
+        leftIconView.ex = textView.x - leftIconMargin;
+        leftIconView.cy = _height / 2;
+
+        rightIconView.x = textView.ex + rightIconMargin;
+        rightIconView.cy = _height / 2;
+
+        hitTestView.measureAndLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
         return true;
     }
 
     @:noCompletion
     private function onMouseDown(e:Event):Void {
-        if (!enabled) {
+        if (_disabled) {
             return;
         }
 
@@ -226,6 +259,17 @@ class Button extends ViewGroup {
     }
 
     @:noCompletion
+    private function get_rightIcon():Drawable {
+        return rightIconView.drawable;
+    }
+
+    @:noCompletion
+    private function set_rightIcon(value:Drawable):Drawable {
+        rightIconView.drawable = value;
+        return value;
+    }
+
+    @:noCompletion
     private function get_backgroundOffset():Point {
         return backgroundView.offset;
     }
@@ -288,6 +332,39 @@ class Button extends ViewGroup {
     @:noCompletion
     private function set_leftIconOffsetY(value:Float):Float {
         leftIconView.offsetY = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_rightIconOffset():Point {
+        return rightIconView.offset;
+    }
+
+    @:noCompletion
+    private function set_rightIconOffset(value:Point):Point {
+        rightIconView.offset = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_rightIconOffsetX():Float {
+        return rightIconView.offsetX;
+    }
+
+    @:noCompletion
+    private function set_rightIconOffsetX(value:Float):Float {
+        rightIconView.offsetX = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_rightIconOffsetY():Float {
+        return rightIconView.offsetY;
+    }
+
+    @:noCompletion
+    private function set_rightIconOffsetY(value:Float):Float {
+        rightIconView.offsetY = value;
         return value;
     }
 
@@ -372,6 +449,25 @@ class Button extends ViewGroup {
     private function set_leftIconMargin(value:Float):Float {
         leftIconMargin = value;
         requestLayout();
+        return value;
+    }
+
+    @:noCompletion
+    private function set_rightIconMargin(value:Float):Float {
+        rightIconMargin = value;
+        requestLayout();
+        return value;
+    }
+
+    @:noCompletion
+    private function get_disabled():Bool {
+        return _disabled;
+    }
+
+    @:noCompletion
+    private function set_disabled(value:Bool):Bool {
+        _disabled = value;
+        updateState("disabled", value);
         return value;
     }
 }

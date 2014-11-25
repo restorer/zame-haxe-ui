@@ -25,6 +25,16 @@ class TypedValue {
         return resourceManager.getDrawable(textValue);
     }
 
+    public function resolveFloat():Float {
+        var value = Std.parseFloat(textValue.trim());
+
+        if (Math.isNaN(value)) {
+            throw new ArgumentError("Parse error: " + textValue);
+        }
+
+        return value;
+    }
+
     public function resolveDimension():Dimension {
         if (textValue.substr(0, 1) == "@") {
             return resourceManager.getDimension(textValue);

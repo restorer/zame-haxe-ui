@@ -6,8 +6,10 @@ import org.zamedev.ui.view.TextView;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.widget.AbsoluteLayout;
 import org.zamedev.ui.widget.Button;
+import org.zamedev.ui.widget.FrameLayout;
 import org.zamedev.ui.widget.LinearLayout;
 import org.zamedev.ui.widget.Radio;
+import org.zamedev.ui.widget.RecyclerView;
 import org.zamedev.ui.widget.Toggle;
 
 class ClassMapping {
@@ -22,8 +24,10 @@ class ClassMapping {
         classMap["View"] = "org.zamedev.ui.view.View";
         classMap["AbsoluteLayout"] = "org.zamedev.ui.widget.AbsoluteLayout";
         classMap["Button"] = "org.zamedev.ui.widget.Button";
+        classMap["FrameLayout"] = "org.zamedev.ui.widget.FrameLayout";
         classMap["LinearLayout"] = "org.zamedev.ui.widget.LinearLayout";
         classMap["Radio"] = "org.zamedev.ui.widget.Radio";
+        classMap["RecyclerView"] = "org.zamedev.ui.widget.RecyclerView";
         classMap["Toggle"] = "org.zamedev.ui.widget.Toggle";
     }
 }

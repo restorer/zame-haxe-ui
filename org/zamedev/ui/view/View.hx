@@ -57,6 +57,7 @@ class View extends EventDispatcher implements Inflatable {
     public var cxy(get, set):Point;
     public var rotation(get, set):Float;
     public var visibility(get, set):ViewVisibility;
+    public var alpha(get, set):Float;
 
     public function new(context:Context) {
         super();
@@ -89,8 +90,7 @@ class View extends EventDispatcher implements Inflatable {
             var layoutName = name.substr(7);
 
             if (layoutParams != null) {
-                layoutParams.inflate(layoutName, value);
-                return true;
+                return layoutParams.inflate(layoutName, value);
             }
 
             return false;
@@ -132,6 +132,10 @@ class View extends EventDispatcher implements Inflatable {
                         throw new ArgumentError("Unknown visibility value: " + value.resolveString());
                 }
 
+                return true;
+
+            case "alpha":
+                alpha = value.resolveFloat();
                 return true;
         }
 
@@ -468,6 +472,17 @@ class View extends EventDispatcher implements Inflatable {
             }
         }
 
+        return value;
+    }
+
+    @:noCompletion
+    private function get_alpha():Float {
+        return _sprite.alpha;
+    }
+
+    @:noCompletion
+    private function set_alpha(value:Float):Float {
+        _sprite.alpha = value;
         return value;
     }
 }

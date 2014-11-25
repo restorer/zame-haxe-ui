@@ -3,7 +3,7 @@ package org.zamedev.ui.widget;
 import openfl.errors.ArgumentError;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.graphics.Gravity;
+import org.zamedev.ui.graphics.GravityType;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
@@ -82,30 +82,30 @@ class LinearLayout extends ViewGroup {
                 child.x = position;
                 position += child.width + layoutParams._marginRightComputed;
 
-                switch (layoutParams.gravity) {
-                    case Gravity.BOTTOM | Gravity.END:
-                        child.ey = _height;
+                switch (layoutParams.gravity.verticalType) {
+                    case GravityType.END:
+                        child.ey = _height - layoutParams._marginBottomComputed;
 
-                    case Gravity.CENTER | Gravity.CENTER_VERTICAL:
+                    case GravityType.CENTER:
                         child.cy = _height / 2;
 
                     default:
-                        child.y = 0;
+                        child.y = layoutParams._marginTopComputed;
                 }
             } else {
                 position += layoutParams._marginTopComputed;
                 child.y = position;
                 position += child.height + layoutParams._marginBottomComputed;
 
-                switch (layoutParams.gravity) {
-                    case Gravity.RIGHT | Gravity.END:
-                        child.ex = _width;
+                switch (layoutParams.gravity.horizontalType) {
+                    case GravityType.END:
+                        child.ex = _width - layoutParams._marginRightComputed;
 
-                    case Gravity.CENTER | Gravity.CENTER_HORIZONTAL:
+                    case GravityType.CENTER:
                         child.cx = _width / 2;
 
                     default:
-                        child.x = 0;
+                        child.x = layoutParams._marginLeftComputed;
                 }
             }
         }
