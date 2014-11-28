@@ -10,9 +10,9 @@ import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.Rect;
 import org.zamedev.ui.view.TextView;
-import org.zamedev.ui.view.ViewGroup;
+import org.zamedev.ui.view.View;
 
-class Button extends ViewGroup {
+class Button extends View {
     private var backgroundView:ImageView;
     private var leftIconView:ImageView;
     private var rightIconView:ImageView;
@@ -47,11 +47,17 @@ class Button extends ViewGroup {
     public function new(context:Context) {
         super(context);
 
-        addChild(backgroundView = new ImageView(context));
-        addChild(leftIconView = new ImageView(context));
-        addChild(rightIconView = new ImageView(context));
-        addChild(textView = new TextView(context));
-        addChild(hitTestView = new Rect(context));
+        backgroundView = new ImageView(context);
+        leftIconView = new ImageView(context);
+        rightIconView = new ImageView(context);
+        textView = new TextView(context);
+        hitTestView = new Rect(context);
+
+        _sprite.addChild(backgroundView._sprite);
+        _sprite.addChild(leftIconView._sprite);
+        _sprite.addChild(rightIconView._sprite);
+        _sprite.addChild(textView._sprite);
+        _sprite.addChild(hitTestView._sprite);
 
         listenersAdded = false;
         leftIconMargin = 0.0;
@@ -65,6 +71,9 @@ class Button extends ViewGroup {
         _sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
         _sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
         _sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
+
+        addEventListener(Event.ADDED_TO_STAGE, onAddedToApplicationStage);
+        addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromApplicationStage);
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {
@@ -176,6 +185,22 @@ class Button extends ViewGroup {
 
         hitTestView.measureAndLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
         return true;
+    }
+
+    private function onAddedToApplicationStage(e:Event):Void {
+        backgroundView.dispatchEvent(e);
+        leftIconView.dispatchEvent(e);
+        rightIconView.dispatchEvent(e);
+        textView.dispatchEvent(e);
+        hitTestView.dispatchEvent(e);
+    }
+
+    private function onRemovedFromApplicationStage(e:Event):Void {
+        backgroundView.dispatchEvent(e);
+        leftIconView.dispatchEvent(e);
+        rightIconView.dispatchEvent(e);
+        textView.dispatchEvent(e);
+        hitTestView.dispatchEvent(e);
     }
 
     @:noCompletion

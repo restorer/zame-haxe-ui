@@ -5,6 +5,8 @@ import org.zamedev.ui.Context;
 import org.zamedev.ui.res.TypedValue;
 
 class Radio extends Button {
+    public var selected(get, set):Bool;
+
     public function new(context:Context) {
         super(context);
         addEventListener(MouseEvent.CLICK, onMouseClick);
@@ -17,7 +19,7 @@ class Radio extends Button {
 
         switch (name) {
             case "selected":
-                updateState("selected", value.resolveBool());
+                selected = value.resolveBool();
                 return true;
         }
 
@@ -26,7 +28,18 @@ class Radio extends Button {
 
     @:noCompletion
     private function onMouseClick(_):Void {
-        if (_parent != null && tag != null) {
+        selected = true;
+    }
+
+    @:noCompletion
+    private function get_selected():Bool {
+        return hasState("selected");
+    }
+
+    private function set_selected(value:Bool):Bool {
+        updateState("selected", value);
+
+        if (!isInLayout && _parent != null && tag != null) {
             for (child in _parent.findViewsByTag(tag, false)) {
                 if (child != this) {
                     child.updateState("selected", false);
@@ -34,6 +47,6 @@ class Radio extends Button {
             }
         }
 
-        updateState("selected", true);
+        return value;
     }
 }

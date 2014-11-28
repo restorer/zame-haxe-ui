@@ -32,7 +32,7 @@ class Toggle extends Button {
 
     @:noCompletion
     override private function set_textOffsetX(value:Float):Float {
-        if (isInLayout) {
+        if (isInLayout || !isAddedToApplicationStage) {
             textView.offsetX = value;
         } else {
             Actuate.tween(textView, 0.5, { offsetX: value });

@@ -1,6 +1,7 @@
 package org.zamedev.ui.view;
 
 import openfl.errors.Error;
+import openfl.events.Event;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionType;
@@ -13,6 +14,9 @@ class ViewGroup extends View {
     public function new(context:Context) {
         super(context);
         children = new Array<View>();
+
+        addEventListener(Event.ADDED_TO_STAGE, onViewGroupAddedToApplicationStage);
+        addEventListener(Event.REMOVED_FROM_STAGE, onViewGroupRemovedFromApplicationStage);
     }
 
     public function createLayoutParams():LayoutParams {
@@ -180,6 +184,10 @@ class ViewGroup extends View {
         if (reLayout) {
             requestLayout();
         }
+
+        if (isAddedToApplicationStage) {
+            view.dispatchEvent(new Event(Event.ADDED_TO_STAGE));
+        }
     }
 
     public function removeChild(view:View, reLayout:Bool = true):Void {
@@ -192,6 +200,22 @@ class ViewGroup extends View {
 
         if (reLayout) {
             requestLayout();
+        }
+
+        if (isAddedToApplicationStage) {
+            view.dispatchEvent(new Event(Event.REMOVED_FROM_STAGE));
+        }
+    }
+
+    private function onViewGroupAddedToApplicationStage(e:Event):Void {
+        for (child in children) {
+            child.dispatchEvent(e);
+        }
+    }
+
+    private function onViewGroupRemovedFromApplicationStage(e:Event):Void {
+        for (child in children) {
+            child.dispatchEvent(e);
         }
     }
 

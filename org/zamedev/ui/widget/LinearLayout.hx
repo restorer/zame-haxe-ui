@@ -9,6 +9,7 @@ import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
+import org.zamedev.ui.view.ViewVisibility;
 
 using StringTools;
 
@@ -64,10 +65,17 @@ class LinearLayout extends ViewGroup {
         for (child in children) {
             var layoutParams = cast(child.layoutParams, LinearLayoutParams);
 
-            layoutParams._marginLeftComputed = computeDimension(layoutParams.marginLeft, false);
-            layoutParams._marginRightComputed = computeDimension(layoutParams.marginRight, false);
-            layoutParams._marginTopComputed = computeDimension(layoutParams.marginTop, true);
-            layoutParams._marginBottomComputed = computeDimension(layoutParams.marginBottom, true);
+            if (child.visibility != ViewVisibility.GONE) {
+                layoutParams._marginLeftComputed = computeDimension(layoutParams.marginLeft, false);
+                layoutParams._marginRightComputed = computeDimension(layoutParams.marginRight, false);
+                layoutParams._marginTopComputed = computeDimension(layoutParams.marginTop, true);
+                layoutParams._marginBottomComputed = computeDimension(layoutParams.marginBottom, true);
+            } else {
+                layoutParams._marginLeftComputed = 0.0;
+                layoutParams._marginRightComputed = 0.0;
+                layoutParams._marginTopComputed = 0.0;
+                layoutParams._marginBottomComputed = 0.0;
+            }
         }
 
         measureSelf(widthSpec, heightSpec);

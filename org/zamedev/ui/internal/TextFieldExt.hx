@@ -21,7 +21,9 @@ class TextFieldExt extends TextField {
         if (_divExt == null) {
             _divExt = Browser.document.createElement("div");
             _divExt.style.position = "absolute";
-            _divExt.style.top = "110%";
+            _divExt.style.top = "0";
+            _divExt.style.left = "0";
+            _divExt.style.visibility = "hidden";
             Browser.document.body.appendChild(_divExt);
 
             _isFirefox = (Browser.navigator.userAgent.toLowerCase().indexOf("firefox") >= 0);
@@ -97,10 +99,22 @@ class TextFieldExt extends TextField {
     }
 
     @:noCompletion
+    override public function set_width(value:Float):Float {
+        _isTextHeightDirty = true;
+        return super.set_width(value);
+    }
+
+    @:noCompletion
+    override public function set_height(value:Float):Float {
+        _isTextHeightDirty = true;
+        return super.set_height(value);
+    }
+
+    @:noCompletion
     override public function get_textHeight():Float {
         if (_isTextHeightDirty) {
             _divExt.style.setProperty("font", __getFont(__textFormat), null);
-            _divExt.style.width = Std.string(__width + 4) + "px";
+            _divExt.style.width = Std.string(__width) + "px";
             _divExt.innerHTML = __text;
 
             if (_isFirefox && __textFormat.size >= 22) {

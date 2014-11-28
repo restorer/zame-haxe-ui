@@ -4,6 +4,7 @@ import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
 import openfl.errors.ArgumentError;
 import openfl.errors.Error;
+import openfl.events.Event;
 import openfl.events.EventDispatcher;
 import openfl.geom.Point;
 import org.zamedev.ui.Context;
@@ -34,6 +35,7 @@ class View extends EventDispatcher implements Inflatable {
     private var widthWeightSum:Float;
     private var heightWeightSum:Float;
     private var _visibility:ViewVisibility;
+    private var isAddedToApplicationStage:Bool;
 
     public var id:String;
     public var tag:String;
@@ -72,6 +74,7 @@ class View extends EventDispatcher implements Inflatable {
         _state = new Map<String, Bool>();
         _selector = null;
         isInLayout = false;
+        isAddedToApplicationStage = false;
 
         id = null;
         tag = null;
@@ -83,6 +86,9 @@ class View extends EventDispatcher implements Inflatable {
         widthWeightSum = 1.0;
         heightWeightSum = 1.0;
         _visibility = ViewVisibility.VISIBLE;
+
+        addEventListener(Event.ADDED_TO_STAGE, onViewAddedToApplicationStage);
+        addEventListener(Event.REMOVED_FROM_STAGE, onViewRemovedFromApplicationStage);
     }
 
     public function inflate(name:String, value:TypedValue):Bool {
@@ -169,7 +175,15 @@ class View extends EventDispatcher implements Inflatable {
         }
     }
 
-    public function requestLayout() {
+    private function onViewAddedToApplicationStage(_):Void {
+        isAddedToApplicationStage = true;
+    }
+
+    private function onViewRemovedFromApplicationStage(_):Void {
+        isAddedToApplicationStage = false;
+    }
+
+    public function requestLayout():Void {
         if (isInLayout || this.widthSpec == null || this.heightSpec == null) {
             return;
         }

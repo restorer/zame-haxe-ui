@@ -13,7 +13,7 @@ class TextView extends View {
     private var _textFormat:TextFormat;
     private var textField:TextFieldExt;
 
-    #if !flash
+    #if (!flash && !webgl)
         private var cachedBitmap:Bitmap;
     #end
 
@@ -31,7 +31,7 @@ class TextView extends View {
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
 
-        #if !flash
+        #if (!flash && !webgl)
             cachedBitmap = new Bitmap();
             _sprite.addChild(cachedBitmap);
         #else
@@ -75,7 +75,7 @@ class TextView extends View {
 
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED:
-                textField.width = 1000;
+                textField.width = 512;
 
             case MeasureSpec.EXACT(size) | MeasureSpec.AT_MOST(size):
                 textField.width = size;
@@ -83,7 +83,7 @@ class TextView extends View {
 
         switch (heightSpec) {
             case MeasureSpec.UNSPECIFIED:
-                textField.height = 1000;
+                textField.height = 512;
 
             case MeasureSpec.EXACT(size) | MeasureSpec.AT_MOST(size):
                 textField.height = size;
@@ -91,9 +91,7 @@ class TextView extends View {
 
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                #if js
-                    _width = textField.textWidth;
-                #elseif android
+                #if android
                     _width = textField.textWidth * 1.1;
                 #else
                     _width = textField.textWidth + 4;
@@ -106,11 +104,15 @@ class TextView extends View {
                     default:
                 }
 
-                textField.width = _width;
-
             case MeasureSpec.EXACT(size):
                 _width = size;
         }
+
+        #if (flash || webgl)
+            textField.width = _width;
+        #else
+            textField.width = _width + 4;
+        #end
 
         switch (heightSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
@@ -123,20 +125,21 @@ class TextView extends View {
                     default:
                 }
 
-                textField.height = _height;
-
             case MeasureSpec.EXACT(size):
                 _height = size;
         }
 
-        #if !flash
+        #if (flash || webgl)
+            textField.height = _height;
+        #else
+            textField.height = _height;
             updateCache();
         #end
 
         return true;
     }
 
-    #if !flash
+    #if (!flash && !webgl)
         private function updateCache():Void {
             var cachedBitmapData = new BitmapData(
                 Std.int(Math.max(1, Math.ceil(_width))),
@@ -162,7 +165,7 @@ class TextView extends View {
         textField.defaultTextFormat = _textFormat;
         textField.setTextFormat(_textFormat);
 
-        #if !flash
+        #if (!flash && !webgl)
             updateCache();
         #end
 

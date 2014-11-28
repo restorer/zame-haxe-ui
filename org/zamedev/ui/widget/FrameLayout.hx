@@ -4,6 +4,7 @@ import org.zamedev.ui.graphics.GravityType;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.ViewGroup;
+import org.zamedev.ui.view.ViewVisibility;
 
 class FrameLayout extends ViewGroup {
     override public function createLayoutParams():LayoutParams {
@@ -13,6 +14,22 @@ class FrameLayout extends ViewGroup {
     override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
+        }
+
+        for (child in children) {
+            var layoutParams = cast(child.layoutParams, FrameLayoutParams);
+
+            if (child.visibility != ViewVisibility.GONE) {
+                layoutParams._marginLeftComputed = computeDimension(layoutParams.marginLeft, false);
+                layoutParams._marginRightComputed = computeDimension(layoutParams.marginRight, false);
+                layoutParams._marginTopComputed = computeDimension(layoutParams.marginTop, true);
+                layoutParams._marginBottomComputed = computeDimension(layoutParams.marginBottom, true);
+            } else {
+                layoutParams._marginLeftComputed = 0.0;
+                layoutParams._marginRightComputed = 0.0;
+                layoutParams._marginTopComputed = 0.0;
+                layoutParams._marginBottomComputed = 0.0;
+            }
         }
 
         measureSelf(widthSpec, heightSpec);

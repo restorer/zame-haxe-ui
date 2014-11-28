@@ -2,6 +2,7 @@ package org.zamedev.ui.widget;
 
 import openfl.errors.Error;
 import openfl.errors.ArgumentError;
+import openfl.events.Event;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.GravityType;
@@ -15,8 +16,11 @@ using StringTools;
 
 class RecyclerView extends ViewGroup {
     private var _adapter:RecyclerViewAdapter;
-    private var _activeList:List<RecyclerViewHolder>;
-    private var _inactiveMap:Map<Int, List<RecyclerViewHolder>>;
+    private var _attachedList:List<RecyclerViewHolder>;
+    private var _detachedMap:Map<Int, List<RecyclerViewHolder>>;
+    private var computedWidth:Float;
+    private var computedHeight:Float;
+    private var isChangingDataset:Bool;
 
     public var adapter(get, set):RecyclerViewAdapter;
 
@@ -24,8 +28,14 @@ class RecyclerView extends ViewGroup {
         super(context);
 
         _adapter = null;
-        _activeList = new List<RecyclerViewHolder>();
-        _inactiveMap = new Map<Int, List<RecyclerViewHolder>>();
+        _attachedList = new List<RecyclerViewHolder>();
+        _detachedMap = new Map<Int, List<RecyclerViewHolder>>();
+        computedWidth = 0.0;
+        computedHeight = 0.0;
+        isChangingDataset = false;
+
+        addEventListener(Event.ADDED_TO_STAGE, onRecyclerViewAddedToApplicationStage);
+        addEventListener(Event.REMOVED_FROM_STAGE, onRecyclerViewRemovedFromApplicationStage);
     }
 
     override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
@@ -33,20 +43,68 @@ class RecyclerView extends ViewGroup {
             return true;
         }
 
-        switch (widthSpec) {
-            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                _width = 100;
+        if (isChangingDataset) {
+            switch (widthSpec) {
+                case MeasureSpec.UNSPECIFIED:
+                    _width = computedWidth;
 
-            case MeasureSpec.EXACT(size):
-                _width = size;
-        }
+                case MeasureSpec.AT_MOST(size):
+                    _width = Math.min(size, computedWidth);
 
-        switch (heightSpec) {
-            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                _height = 100;
+                case MeasureSpec.EXACT(size):
+                    _width = size;
+            }
 
-            case MeasureSpec.EXACT(size):
-                _height = size;
+            switch (heightSpec) {
+                case MeasureSpec.UNSPECIFIED:
+                    _height = computedHeight;
+
+                case MeasureSpec.AT_MOST(size):
+                    _height = Math.min(size, computedHeight);
+
+                case MeasureSpec.EXACT(size):
+                    _height = size;
+            }
+        } else {
+            switch (widthSpec) {
+                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                    _width = 0.0;
+
+                case MeasureSpec.EXACT(size):
+                    _width = size;
+            }
+
+            switch (heightSpec) {
+                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                    _height = 0.0;
+
+                case MeasureSpec.EXACT(size):
+                    _height = size;
+            }
+
+            computedWidth = 0.0;
+            computedHeight = 0.0;
+            _handleDataSetChanged();
+
+            switch (widthSpec) {
+                case MeasureSpec.UNSPECIFIED:
+                    _width = computedWidth;
+
+                case MeasureSpec.AT_MOST(size):
+                    _width = Math.min(size, computedWidth);
+
+                case MeasureSpec.EXACT(_):
+            }
+
+            switch (heightSpec) {
+                case MeasureSpec.UNSPECIFIED:
+                    _height = computedHeight;
+
+                case MeasureSpec.AT_MOST(size):
+                    _height = Math.min(size, computedHeight);
+
+                case MeasureSpec.EXACT(size):
+            }
         }
 
         return true;
@@ -68,33 +126,62 @@ class RecyclerView extends ViewGroup {
         throw new Error("Not supported by RecyclerView");
     }
 
+    private function onRecyclerViewAddedToApplicationStage(e:Event):Void {
+        for (viewHolder in _attachedList) {
+            viewHolder._view.dispatchEvent(e);
+        }
+    }
+
+    private function onRecyclerViewRemovedFromApplicationStage(e:Event):Void {
+        for (viewHolder in _attachedList) {
+            viewHolder._view.dispatchEvent(e);
+        }
+    }
+
     private function detachViewHolder(viewHolder:RecyclerViewHolder):Void {
         _sprite.removeChild(viewHolder._view._sprite);
-        _activeList.remove(viewHolder);
+        _attachedList.remove(viewHolder);
 
-        if (!_inactiveMap.exists(viewHolder._viewType)) {
-            _inactiveMap[viewHolder._viewType] = new List<RecyclerViewHolder>();
+        if (!_detachedMap.exists(viewHolder._viewType)) {
+            _detachedMap[viewHolder._viewType] = new List<RecyclerViewHolder>();
         }
 
-        _inactiveMap[viewHolder._viewType].push(viewHolder);
+        _detachedMap[viewHolder._viewType].push(viewHolder);
+
+        if (isAddedToApplicationStage) {
+            viewHolder._view.dispatchEvent(new Event(Event.REMOVED_FROM_STAGE));
+        }
     }
 
     private function attachViewHolder(position:Int):RecyclerViewHolder {
+        var viewHolder:RecyclerViewHolder;
         var viewType = _adapter.getItemViewType(position);
 
-        if (_inactiveMap.exists(viewType) && !_inactiveMap[viewType].isEmpty()) {
-            return _inactiveMap[viewType].pop();
+        if (_detachedMap.exists(viewType) && !_detachedMap[viewType].isEmpty()) {
+            viewHolder = _detachedMap[viewType].pop();
+        } else {
+            viewHolder = _adapter.onCreateViewHolder(new LayoutParams(), viewType);
         }
 
-        var viewHolder = _adapter.onCreateViewHolder(new LayoutParams(), viewType);
-        _activeList.push(viewHolder);
+        _attachedList.push(viewHolder);
         _sprite.addChild(viewHolder._view._sprite);
+
+        if (isAddedToApplicationStage) {
+            viewHolder._view.dispatchEvent(new Event(Event.ADDED_TO_STAGE));
+        }
 
         return viewHolder;
     }
 
     public function notifyDataSetChanged():Void {
-        for (viewHolder in _activeList) {
+        isChangingDataset = true;
+        _handleDataSetChanged();
+        requestLayout();
+        isChangingDataset = false;
+    }
+
+    private function _handleDataSetChanged():Void {
+        for (viewHolder in _attachedList) {
             detachViewHolder(viewHolder);
         }
 
@@ -104,6 +191,9 @@ class RecyclerView extends ViewGroup {
 
         var x:Float = 0.0;
         var y:Float = 0.0;
+
+        computedWidth = 0.0;
+        computedHeight = 0.0;
 
         for (position in 0 ... _adapter.getItemCount()) {
             var viewHolder = attachViewHolder(position);
@@ -127,6 +217,9 @@ class RecyclerView extends ViewGroup {
             viewHolder._view.y = y;
 
             y += viewHolder._view._height;
+
+            computedWidth = Math.max(computedWidth, x + viewHolder._view.width);
+            computedHeight = Math.max(computedHeight, y + viewHolder._view.height);
         }
     }
 
@@ -138,7 +231,20 @@ class RecyclerView extends ViewGroup {
     @:noCompletion
     private function set_adapter(value:RecyclerViewAdapter):RecyclerViewAdapter {
         if (_adapter != value) {
+            var event = new Event(Event.REMOVED_FROM_STAGE);
+
+            for (viewHolder in _attachedList) {
+                _sprite.removeChild(viewHolder._view._sprite);
+
+                if (isAddedToApplicationStage) {
+                    viewHolder._view.dispatchEvent(event);
+                }
+            }
+
+            _attachedList = new List<RecyclerViewHolder>();
+            _detachedMap = new Map<Int, List<RecyclerViewHolder>>();
             _adapter = value;
+
             notifyDataSetChanged();
         }
 

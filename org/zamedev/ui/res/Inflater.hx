@@ -78,7 +78,7 @@ class Inflater {
             var viewGroup = cast(view, ViewGroup);
 
             for (innerNode in node.elements()) {
-                viewGroup.addChild(_inflateNode(resId, viewGroup.createLayoutParams(), innerNode, visitedMap));
+                viewGroup.addChild(_inflateNode(resId, viewGroup.createLayoutParams(), innerNode, visitedMap), false);
             }
         }
 
