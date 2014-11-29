@@ -165,7 +165,7 @@ class View extends EventDispatcher implements Inflatable {
             _sprite.parent.removeChild(_sprite);
         }
 
-        measureAndLayout(MeasureSpec.EXACT(container.width), MeasureSpec.EXACT(container.height));
+        selfLayout(MeasureSpec.EXACT(container.width), MeasureSpec.EXACT(container.height));
         container.addChild(_sprite);
     }
 
@@ -204,6 +204,16 @@ class View extends EventDispatcher implements Inflatable {
             _parent.requestLayout();
         }
 
+        isInLayout = false;
+    }
+
+    public function selfLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
+        if (isInLayout) {
+            return;
+        }
+
+        isInLayout = true;
+        measureAndLayout(widthSpec, heightSpec);
         isInLayout = false;
     }
 

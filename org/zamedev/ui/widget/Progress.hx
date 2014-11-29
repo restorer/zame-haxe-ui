@@ -43,12 +43,12 @@ class Progress extends View {
         return false;
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
 
-        imageView.measureAndLayout(widthSpec, heightSpec);
+        imageView.selfLayout(widthSpec, heightSpec);
 
         _width = imageView.width;
         _height = imageView.height;

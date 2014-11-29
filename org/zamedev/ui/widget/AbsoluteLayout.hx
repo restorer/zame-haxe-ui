@@ -13,7 +13,7 @@ class AbsoluteLayout extends ViewGroup {
         return new AbsoluteLayoutParams();
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }

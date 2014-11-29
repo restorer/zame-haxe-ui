@@ -13,7 +13,7 @@ class TextView extends View {
     private var _textFormat:TextFormat;
     private var textField:TextFieldExt;
 
-    #if (!flash && !webgl)
+    #if (!flash && !webgl && !dom)
         private var cachedBitmap:Bitmap;
     #end
 
@@ -31,7 +31,7 @@ class TextView extends View {
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
 
-        #if (!flash && !webgl)
+        #if (!flash && !webgl && !dom)
             cachedBitmap = new Bitmap();
             _sprite.addChild(cachedBitmap);
         #else
@@ -68,7 +68,7 @@ class TextView extends View {
         return false;
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -94,7 +94,7 @@ class TextView extends View {
                 #if android
                     _width = textField.textWidth * 1.1;
                 #else
-                    _width = textField.textWidth + 4;
+                    _width = textField.textWidth;
                 #end
 
                 switch (widthSpec) {
@@ -108,11 +108,7 @@ class TextView extends View {
                 _width = size;
         }
 
-        #if (flash || webgl)
-            textField.width = _width;
-        #else
-            textField.width = _width + 4;
-        #end
+        textField.width = _width;
 
         switch (heightSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
@@ -129,17 +125,16 @@ class TextView extends View {
                 _height = size;
         }
 
-        #if (flash || webgl)
-            textField.height = _height;
-        #else
-            textField.height = _height;
+        textField.height = _height;
+
+        #if (!flash && !webgl && !dom)
             updateCache();
         #end
 
         return true;
     }
 
-    #if (!flash && !webgl)
+    #if (!flash && !webgl && !dom)
         private function updateCache():Void {
             var cachedBitmapData = new BitmapData(
                 Std.int(Math.max(1, Math.ceil(_width))),
@@ -161,13 +156,15 @@ class TextView extends View {
 
     @:noCompletion
     private function set_textColor(value:Null<UInt>):Null<UInt> {
-        _textFormat.color = value;
-        textField.defaultTextFormat = _textFormat;
-        textField.setTextFormat(_textFormat);
+        if (_textFormat.color != value) {
+            _textFormat.color = value;
+            textField.defaultTextFormat = _textFormat;
+            textField.setTextFormat(_textFormat);
 
-        #if (!flash && !webgl)
-            updateCache();
-        #end
+            #if (!flash && !webgl && !dom)
+                updateCache();
+            #end
+        }
 
         return value;
     }
@@ -179,10 +176,13 @@ class TextView extends View {
 
     @:noCompletion
     private function set_textSize(value:Null<Float>):Null<Float> {
-        _textFormat.size = value;
-        textField.defaultTextFormat = _textFormat;
-        textField.setTextFormat(_textFormat);
-        requestLayout();
+        if (_textFormat.size != value) {
+            _textFormat.size = value;
+            textField.defaultTextFormat = _textFormat;
+            textField.setTextFormat(_textFormat);
+            requestLayout();
+        }
+
         return value;
     }
 
@@ -193,11 +193,14 @@ class TextView extends View {
 
     @:noCompletion
     private function set_font(value:String):String {
-        _textFormat.font = value;
-        textField.embedFonts = true;
-        textField.defaultTextFormat = _textFormat;
-        textField.setTextFormat(_textFormat);
-        requestLayout();
+        if (_textFormat.font != value) {
+            _textFormat.font = value;
+            textField.embedFonts = true;
+            textField.defaultTextFormat = _textFormat;
+            textField.setTextFormat(_textFormat);
+            requestLayout();
+        }
+
         return value;
     }
 
@@ -208,8 +211,11 @@ class TextView extends View {
 
     @:noCompletion
     private function set_text(value:String):String {
-        textField.text = value;
-        requestLayout();
+        if (textField.text != value) {
+            textField.text = value;
+            requestLayout();
+        }
+
         return value;
     }
 }

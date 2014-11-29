@@ -12,7 +12,8 @@ class TextFieldExt extends TextField {
     private static var _divExt:Element = null;
     private static var _isFirefox:Bool = false;
 
-    private var _isTextHeightDirty:Bool;
+    private var _isMeasurementsDirty:Bool;
+    private var _textWidth:Float;
     private var _textHeight:Float;
 
     public function new() {
@@ -29,7 +30,8 @@ class TextFieldExt extends TextField {
             _isFirefox = (Browser.navigator.userAgent.toLowerCase().indexOf("firefox") >= 0);
         }
 
-        _isTextHeightDirty = true;
+        _isMeasurementsDirty = true;
+        _textWidth = 0.0;
         _textHeight = 0.0;
 
         _updateJsFont(__textFormat);
@@ -43,7 +45,7 @@ class TextFieldExt extends TextField {
     @:noCompletion
     override public function set_text(value:String):String {
         if (__isHTML || __text != value) {
-            _isTextHeightDirty = true;
+            _isMeasurementsDirty = true;
         }
 
         return super.set_text(value);
@@ -52,7 +54,7 @@ class TextFieldExt extends TextField {
     @:noCompletion
     override private function set_htmlText(value:String):String {
         if (!__isHTML || __text != value) {
-            _isTextHeightDirty = true;
+            _isMeasurementsDirty = true;
         }
 
         super.set_htmlText(value);
@@ -76,7 +78,7 @@ class TextFieldExt extends TextField {
             || format.leading != __textFormat.leading
         ) {
             _updateJsFont(__textFormat);
-            _isTextHeightDirty = true;
+            _isMeasurementsDirty = true;
         }
     }
 
@@ -100,22 +102,39 @@ class TextFieldExt extends TextField {
 
     @:noCompletion
     override public function set_width(value:Float):Float {
-        _isTextHeightDirty = true;
+        _isMeasurementsDirty = true;
         return super.set_width(value);
     }
 
     @:noCompletion
     override public function set_height(value:Float):Float {
-        _isTextHeightDirty = true;
+        _isMeasurementsDirty = true;
         return super.set_height(value);
     }
 
     @:noCompletion
+    override public function get_textWidth():Float {
+        _reMeasure();
+        return _textWidth;
+    }
+
+    @:noCompletion
     override public function get_textHeight():Float {
-        if (_isTextHeightDirty) {
+        _reMeasure();
+        return _textHeight;
+    }
+
+    private function _reMeasure():Void {
+        if (_isMeasurementsDirty) {
             _divExt.style.setProperty("font", __getFont(__textFormat), null);
-            _divExt.style.width = Std.string(__width) + "px";
             _divExt.innerHTML = __text;
+
+            _divExt.style.width = "auto";
+            _divExt.style.height = "auto";
+
+            _textWidth = _divExt.clientWidth + 1;
+
+            _divExt.style.width = Std.string(__width) + "px";
 
             if (_isFirefox && __textFormat.size >= 22) {
                 _textHeight = _divExt.clientHeight;
@@ -123,10 +142,8 @@ class TextFieldExt extends TextField {
                 _textHeight = _divExt.clientHeight + __textFormat.size * 0.185;
             }
 
-            _isTextHeightDirty = false;
+            _isMeasurementsDirty = false;
         }
-
-        return _textHeight;
     }
 
     private function _updateJsFont(format:TextFormat) {

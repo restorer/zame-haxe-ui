@@ -65,7 +65,7 @@ class ViewGroup extends View {
                     layoutParams._widthSpec = MeasureSpec.EXACT(0.0);
                     layoutParams._heightSpec = MeasureSpec.EXACT(0.0);
 
-                    child.measureAndLayout(layoutParams._widthSpec, layoutParams._heightSpec);
+                    child.selfLayout(layoutParams._widthSpec, layoutParams._heightSpec);
 
                     layoutParams._measured = true;
                     layoutParams._measuredWidth = 0.0;
@@ -109,7 +109,7 @@ class ViewGroup extends View {
                 }
 
                 if (layoutParams._widthSpec != null && layoutParams._heightSpec != null) {
-                    child.measureAndLayout(layoutParams._widthSpec, layoutParams._heightSpec);
+                    child.selfLayout(layoutParams._widthSpec, layoutParams._heightSpec);
 
                     layoutParams._measured = true;
                     layoutParams._measuredWidth = child._width;
@@ -141,7 +141,7 @@ class ViewGroup extends View {
                 layoutParams._heightSpec = MeasureSpec.EXACT(0.0);
             }
 
-            child.measureAndLayout(layoutParams._widthSpec, layoutParams._heightSpec);
+            child.selfLayout(layoutParams._widthSpec, layoutParams._heightSpec);
 
             layoutParams._measured = true;
             layoutParams._measuredWidth = child._width;

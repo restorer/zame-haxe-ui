@@ -11,6 +11,7 @@ import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
+import org.zamedev.ui.view.ViewVisibility;
 
 using StringTools;
 
@@ -38,7 +39,7 @@ class RecyclerView extends ViewGroup {
         addEventListener(Event.REMOVED_FROM_STAGE, onRecyclerViewRemovedFromApplicationStage);
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -65,46 +66,48 @@ class RecyclerView extends ViewGroup {
                 case MeasureSpec.EXACT(size):
                     _height = size;
             }
-        } else {
-            switch (widthSpec) {
-                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                    _width = 0.0;
 
-                case MeasureSpec.EXACT(size):
-                    _width = size;
-            }
+            return true;
+        }
 
-            switch (heightSpec) {
-                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                    _height = 0.0;
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                _width = 0.0;
 
-                case MeasureSpec.EXACT(size):
-                    _height = size;
-            }
+            case MeasureSpec.EXACT(size):
+                _width = size;
+        }
 
-            computedWidth = 0.0;
-            computedHeight = 0.0;
-            _handleDataSetChanged();
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                _height = 0.0;
 
-            switch (widthSpec) {
-                case MeasureSpec.UNSPECIFIED:
-                    _width = computedWidth;
+            case MeasureSpec.EXACT(size):
+                _height = size;
+        }
 
-                case MeasureSpec.AT_MOST(size):
-                    _width = Math.min(size, computedWidth);
+        computedWidth = 0.0;
+        computedHeight = 0.0;
+        _handleDataSetChanged();
 
-                case MeasureSpec.EXACT(_):
-            }
+        switch (widthSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _width = computedWidth;
 
-            switch (heightSpec) {
-                case MeasureSpec.UNSPECIFIED:
-                    _height = computedHeight;
+            case MeasureSpec.AT_MOST(size):
+                _width = Math.min(size, computedWidth);
 
-                case MeasureSpec.AT_MOST(size):
-                    _height = Math.min(size, computedHeight);
+            case MeasureSpec.EXACT(_):
+        }
 
-                case MeasureSpec.EXACT(size):
-            }
+        switch (heightSpec) {
+            case MeasureSpec.UNSPECIFIED:
+                _height = computedHeight;
+
+            case MeasureSpec.AT_MOST(size):
+                _height = Math.min(size, computedHeight);
+
+            case MeasureSpec.EXACT(size):
         }
 
         return true;
@@ -161,6 +164,7 @@ class RecyclerView extends ViewGroup {
             viewHolder = _detachedMap[viewType].pop();
         } else {
             viewHolder = _adapter.onCreateViewHolder(new LayoutParams(), viewType);
+            viewHolder._viewType = viewType;
         }
 
         _attachedList.push(viewHolder);
@@ -174,6 +178,10 @@ class RecyclerView extends ViewGroup {
     }
 
     public function notifyDataSetChanged():Void {
+        if (_visibility == ViewVisibility.GONE) {
+            return;
+        }
+
         isChangingDataset = true;
         _handleDataSetChanged();
         requestLayout();
@@ -197,7 +205,10 @@ class RecyclerView extends ViewGroup {
 
         for (position in 0 ... _adapter.getItemCount()) {
             var viewHolder = attachViewHolder(position);
+
+            viewHolder._view.isInLayout = true;
             _adapter.onBindViewHolder(viewHolder, position);
+            viewHolder._view.isInLayout = false;
 
             var layoutParams = viewHolder._view.layoutParams;
             var widthSpec = computeChildMeasureSpec(layoutParams, layoutParams.width, false);
@@ -211,7 +222,7 @@ class RecyclerView extends ViewGroup {
                 heightSpec = MeasureSpec.EXACT(0.0);
             }
 
-            viewHolder._view.measureAndLayout(widthSpec, heightSpec);
+            viewHolder._view.selfLayout(widthSpec, heightSpec);
 
             viewHolder._view.x = x;
             viewHolder._view.y = y;

@@ -11,7 +11,7 @@ class FrameLayout extends ViewGroup {
         return new FrameLayoutParams();
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }

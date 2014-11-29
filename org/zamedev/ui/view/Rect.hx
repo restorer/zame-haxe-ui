@@ -1,12 +1,12 @@
 package org.zamedev.ui.view;
 
-import openfl.display.Shape;
 import org.zamedev.ui.Context;
+import org.zamedev.ui.internal.ShapeExt;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.res.MeasureSpec;
 
 class Rect extends View {
-    private var shape:Shape;
+    private var shape:ShapeExt;
     private var _fillColor:UInt;
     private var _ellipseWidth:Float;
     private var _ellipseHeight:Float;
@@ -16,10 +16,14 @@ class Rect extends View {
     public var ellipseHeight(get, set):Float;
     public var ellipseSize(never, set):Float;
 
+    #if dom
+        public var buttonMode(get, set):Bool;
+    #end
+
     public function new(context:Context) {
         super(context);
 
-        _sprite.addChild(shape = new Shape());
+        _sprite.addChild(shape = new ShapeExt());
         _fillColor = 0;
         _ellipseWidth = 0.0;
         _ellipseHeight = 0.0;
@@ -51,7 +55,7 @@ class Rect extends View {
         return false;
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -132,4 +136,17 @@ class Rect extends View {
         requestLayout();
         return value;
     }
+
+    #if dom
+        @:noCompletion
+        private function get_buttonMode():Bool {
+            return shape.buttonMode;
+        }
+
+        @:noCompletion
+        private function set_buttonMode(value:Bool):Bool {
+            shape.buttonMode = value;
+            return value;
+        }
+    #end
 }

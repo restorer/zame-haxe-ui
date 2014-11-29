@@ -18,6 +18,7 @@ class Button extends View {
     private var rightIconView:ImageView;
     private var textView:TextView;
     private var hitTestView:Rect;
+
     private var listenersAdded:Bool;
     private var _disabled:Bool;
 
@@ -64,7 +65,12 @@ class Button extends View {
         rightIconMargin = 0.0;
         _disabled = false;
 
-        _sprite.buttonMode = true;
+        #if flash
+            _sprite.buttonMode = true;
+        #elseif dom
+            hitTestView.buttonMode = true;
+        #end
+
         hitTestView.alpha = 0.0;
 
         _sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
@@ -158,15 +164,15 @@ class Button extends View {
         return false;
     }
 
-    override public function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
 
-        backgroundView.measureAndLayout(widthSpec, heightSpec);
-        leftIconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-        rightIconView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-        textView.measureAndLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        backgroundView.selfLayout(widthSpec, heightSpec);
+        leftIconView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        rightIconView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        textView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
         var leftIconWidth = (leftIconView.drawable == null ? 0 : leftIconView.width + leftIconMargin);
         var rightIconWidth = (rightIconView.drawable == null ? 0 : rightIconView.width + rightIconMargin);
@@ -183,7 +189,7 @@ class Button extends View {
         rightIconView.x = textView.ex + rightIconMargin;
         rightIconView.cy = _height / 2;
 
-        hitTestView.measureAndLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
+        hitTestView.selfLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
         return true;
     }
 
