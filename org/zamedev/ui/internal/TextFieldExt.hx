@@ -136,11 +136,15 @@ class TextFieldExt extends TextField {
 
             _divExt.style.width = Std.string(__width) + "px";
 
-            if (_isFirefox && __textFormat.size >= 22) {
+            #if dom
                 _textHeight = _divExt.clientHeight;
-            } else {
-                _textHeight = _divExt.clientHeight + __textFormat.size * 0.185;
-            }
+            #else
+                if (_isFirefox && __textFormat.size >= 22) {
+                    _textHeight = _divExt.clientHeight;
+                } else {
+                    _textHeight = _divExt.clientHeight + __textFormat.size * 0.185;
+                }
+            #end
 
             _isMeasurementsDirty = false;
         }

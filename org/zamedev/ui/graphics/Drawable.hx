@@ -2,6 +2,7 @@ package org.zamedev.ui.graphics;
 
 import openfl.Assets;
 import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 import openfl.display.DisplayObject;
 import openfl.display.PixelSnapping;
 import openfl.errors.Error;
@@ -26,6 +27,14 @@ class Drawable {
     public function resolve():DisplayObject {
         if (type == DrawableType.BITMAP) {
             return bitmapFromAsset(assetId);
+        }
+
+        throw new Error("Unsupported drawable type: " + type);
+    }
+
+    public function resolveBitmapData():BitmapData {
+        if (type == DrawableType.BITMAP) {
+            return Assets.getBitmapData(assetId);
         }
 
         throw new Error("Unsupported drawable type: " + type);

@@ -207,12 +207,18 @@ class View extends EventDispatcher implements Inflatable {
         isInLayout = false;
     }
 
-    public function selfLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
+    public function selfLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec, force:Bool = false):Void {
         if (isInLayout) {
             return;
         }
 
         isInLayout = true;
+
+        if (force) {
+            this.widthSpec = null;
+            this.heightSpec = null;
+        }
+
         measureAndLayout(widthSpec, heightSpec);
         isInLayout = false;
     }

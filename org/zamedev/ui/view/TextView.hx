@@ -93,6 +93,8 @@ class TextView extends View {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
                 #if android
                     _width = textField.textWidth * 1.1;
+                #elseif flash
+                    _width = textField.textWidth + 4;
                 #else
                     _width = textField.textWidth;
                 #end

@@ -222,7 +222,7 @@ class RecyclerView extends ViewGroup {
                 heightSpec = MeasureSpec.EXACT(0.0);
             }
 
-            viewHolder._view.selfLayout(widthSpec, heightSpec);
+            viewHolder._view.selfLayout(widthSpec, heightSpec, true);
 
             viewHolder._view.x = x;
             viewHolder._view.y = y;
