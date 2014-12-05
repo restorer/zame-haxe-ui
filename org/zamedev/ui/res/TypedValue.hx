@@ -55,7 +55,7 @@ class TypedValue {
         if (textValue.substr(0, 1) == "@") {
             return resourceManager.getString(textValue);
         } else {
-            return textValue;
+            return processRawString(textValue);
         }
     }
 
@@ -79,5 +79,9 @@ class TypedValue {
             default:
                 return false;
         }
+    }
+
+    public static function processRawString(s:String):String {
+        return s.replace("\\n", "\n").trim().replace("\\t", "    ");
     }
 }

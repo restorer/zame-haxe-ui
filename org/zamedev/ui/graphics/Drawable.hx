@@ -15,9 +15,13 @@ class Drawable {
     public var type(default, null):DrawableType;
     public var assetId(default, null):String;
 
-    public inline function new(type:DrawableType, assetId:String) {
+    public function new(type:DrawableType, assetId:String) {
         this.type = type;
         this.assetId = assetId;
+    }
+
+    public function toString() {
+        return '[Drawable type=${type} assetId=${assetId}]';
     }
 
     public function computeKey():String {

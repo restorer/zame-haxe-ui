@@ -6,17 +6,23 @@ import org.zamedev.ui.graphics.Color;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.Drawable;
-import org.zamedev.ui.internal.XmlExt;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
 
 using StringTools;
+using org.zamedev.lib.XmlExt;
 
 typedef StyleSpec = {
     name:String,
     includeList:Array<String>,
-    itemMap:Map<String, String>,
+    itemMap:Map<String, TypedValue>,
+};
+
+typedef SelectorSpec = {
+    name:String,
+    includeList:Array<String>,
+    paramMap:Map<String, Array<Selector.SelectorItem>>,
 };
 
 class ResourceManager {
@@ -134,22 +140,6 @@ class ResourceManager {
         return value;
     }
 
-    public function _getSelectorText(id:String):String {
-        var re = ~/^\s*@selector\/([a-zA-Z0-9_]+)\s*$/;
-
-        if (!re.match(id)) {
-            throw new Error("Selector not found: " + id);
-        }
-
-        var assetId = "selector/" + re.matched(1) + ".xml";
-
-        if (!Assets.exists(assetId, AssetType.TEXT)) {
-            throw new Error("Selector not found: " + id);
-        }
-
-        return Assets.getText(assetId);
-    }
-
     public function _getLayoutText(id:String):String {
         var re = ~/^\s*@layout\/([a-zA-Z0-9_]+)\s*$/;
         var assetId = "layout/" + (re.match(id) ? re.matched(1) : id) + ".xml";
@@ -183,26 +173,26 @@ class ResourceManager {
         }
 
         var styleSpecMap = new Map<String, StyleSpec>();
+        var selectorSpecMap = new Map<String, SelectorSpec>();
 
         for (assetId in Assets.list(AssetType.TEXT)) {
             var re = ~/^([a-z]+)(?:\-[a-zA-Z0-9]+)?\/(.+)\.xml$/;
 
-            if (re.match(assetId)) {
-                if (re.matched(1) == "resource") {
-                    parseResourceXml(Assets.getText(assetId), styleSpecMap);
-                } else if (re.matched(1) == "selector") {
-                    var resId = "@selector/" + re.matched(2);
-                    selectors[resId] = Selector.parse(this, resId);
-                }
+            if (re.match(assetId) && re.matched(1) == "resource") {
+                parseResourceXml(Assets.getText(assetId), styleSpecMap, selectorSpecMap);
             }
         }
 
         for (name in styleSpecMap.keys()) {
             styles["@style/" + name] = new Style(resolveStyle(styleSpecMap, styleSpecMap[name]));
         }
+
+        for (name in selectorSpecMap.keys()) {
+            selectors["@selector/" + name] = new Selector(resolveSelector(selectorSpecMap, selectorSpecMap[name]));
+        }
     }
 
-    private function parseResourceXml(xmlString:String, styleSpecMap:Map<String, StyleSpec>):Void {
+    private function parseResourceXml(xmlString:String, styleSpecMap:Map<String, StyleSpec>, selectorSpecMap:Map<String, SelectorSpec>):Void {
         var root = Xml.parse(xmlString).elementsNamed("resources").next();
 
         if (root == null) {
@@ -225,51 +215,91 @@ class ResourceManager {
 
             switch (node.nodeName) {
                 case "color":
-                    colors["@color/" + name] = Color.parse(XmlExt.getNodeValue(resolved));
+                    colors["@color/" + name] = Color.parse(resolved.innerText());
 
                 case "dimen":
-                    dimensions["@dimen/" + name] = DimensionTools.parse(XmlExt.getNodeValue(resolved));
+                    dimensions["@dimen/" + name] = DimensionTools.parse(resolved.innerText());
 
                 case "font":
-                    fonts["@font/" + name] = Assets.getFont("font/" + XmlExt.getNodeValue(resolved).trim()).fontName;
+                    fonts["@font/" + name] = Assets.getFont("font/" + resolved.innerText().trim()).fontName;
 
                 case "string":
-                    strings["@string/" + name] = XmlExt.getNodeValue(resolved);
+                    strings["@string/" + name] = TypedValue.processRawString(resolved.innerText());
 
                 case "style": {
                     var styleSpec = {
                         name: "@style/" + name,
                         includeList: new Array<String>(),
-                        itemMap: new Map<String, String>(),
+                        itemMap: new Map<String, TypedValue>(),
                     };
 
                     for (innerNode in node.elements()) {
                         var innerName = innerNode.get("name");
 
                         if (innerName == null || innerName == "") {
-                            throw new Error("Parse error: @style/" + name);
+                            throw new Error("Parse error: " + styleSpec.name);
                         }
 
                         switch (innerNode.nodeName) {
                             case "include":
                                 styleSpec.includeList.push(innerName);
 
-                            case "item": {
-                                var innerValue = innerNode.get("value");
-
-                                if (innerValue == null) {
-                                    throw new Error("Parse error: @style/" + name);
-                                }
-
-                                styleSpec.itemMap[innerName] = innerValue;
-                            }
+                            case "item":
+                                styleSpec.itemMap[innerName] = new TypedValue(this, innerNode.innerText());
 
                             default:
-                                throw new Error("Parse error: @style/" + name);
+                                throw new Error("Parse error: " + styleSpec.name);
                         }
                     }
 
-                    styleSpecMap["@style/" + name] = styleSpec;
+                    styleSpecMap[styleSpec.name] = styleSpec;
+                }
+
+                case "selector": {
+                    var selectorSpec = {
+                        name: "@selector/" + name,
+                        includeList: new Array<String>(),
+                        paramMap: new Map<String, Array<Selector.SelectorItem>>(),
+                    };
+
+                    for (innerNode in node.elements()) {
+                        var innerName = innerNode.get("name");
+
+                        if (innerName == null || innerName == "") {
+                            throw new Error("Parse error: " + selectorSpec.name);
+                        }
+
+                        switch (innerNode.nodeName) {
+                            case "include":
+                                selectorSpec.includeList.push(innerName);
+
+                            case "param": {
+                                selectorSpec.paramMap[innerName] = new Array<Selector.SelectorItem>();
+
+                                for (stateNode in innerNode.elements()) {
+                                    if (stateNode.nodeName != "state") {
+                                        throw new Error("Parse error: " + selectorSpec.name);
+                                    }
+
+                                    var selectorItem = {
+                                        stateMap: new Map<String, Bool>(),
+                                        value: new TypedValue(this, stateNode.innerText()),
+                                    };
+
+                                    for (att in stateNode.attributes()) {
+                                        selectorItem.stateMap[att] = (stateNode.get(att).trim().toLowerCase() == "true");
+                                    }
+
+                                    selectorSpec.paramMap[innerName].push(selectorItem);
+                                }
+                            }
+
+                            default:
+                                throw new Error("Parse error: " + selectorSpec.name);
+                        }
+                    }
+
+                    selectorSpecMap[selectorSpec.name] = selectorSpec;
                 }
 
                 default:
@@ -281,7 +311,7 @@ class ResourceManager {
     private static function resolveResourceValue(resourceMap:Map<String, Xml>, node:Xml, visitedMap:Map<String, Bool> = null):Xml {
         var re = ~/^\s*@([a-z]+\/[a-zA-Z0-9_]+)\s*$/;
 
-        if (!re.match(XmlExt.getNodeValue(node))) {
+        if (!re.match(node.innerText())) {
             return node;
         }
 
@@ -332,26 +362,48 @@ class ResourceManager {
             }
         }
 
-        var re = ~/^\s*@([a-z]+)\/[a-zA-Z0-9_]+\s*$/;
-
         for (name in styleSpec.itemMap.keys()) {
-            var value = styleSpec.itemMap[name];
-
-            if (re.match(value)) {
-                var resourceType = re.matched(1);
-
-                if (resourceType != "color"
-                    && resourceType != "dimen"
-                    && resourceType != "font"
-                    && resourceType != "string"
-                ) {
-                    throw new Error("Unsupported styled resource type reference in: " + styleSpec.name);
-                }
-            }
-
-            resolvedStyle[name] = new TypedValue(this, value);
+            resolvedStyle[name] = styleSpec.itemMap[name];
         }
 
         return resolvedStyle;
+    }
+
+    private function resolveSelector(
+        selectorSpecMap:Map<String, SelectorSpec>,
+        selectorSpec:SelectorSpec,
+        visitedMap:Map<String, Bool> = null
+    ):Map<String, Array<Selector.SelectorItem>> {
+        var resolvedSelector = new Map<String, Array<Selector.SelectorItem>>();
+
+        if (visitedMap == null) {
+            visitedMap = new Map<String, Bool>();
+        }
+
+        visitedMap[selectorSpec.name] = true;
+
+        for (includeName in selectorSpec.includeList) {
+            if (visitedMap.exists(includeName)) {
+                continue;
+            }
+
+            var includeSpec = selectorSpecMap[includeName];
+
+            if (includeSpec == null) {
+                throw new Error("Included selector not found in: " + selectorSpec.name);
+            }
+
+            var includeMap = resolveSelector(selectorSpecMap, includeSpec, visitedMap);
+
+            for (name in includeMap.keys()) {
+                resolvedSelector[name] = includeMap[name];
+            }
+        }
+
+        for (name in selectorSpec.paramMap.keys()) {
+            resolvedSelector[name] = selectorSpec.paramMap[name];
+        }
+
+        return resolvedSelector;
     }
 }

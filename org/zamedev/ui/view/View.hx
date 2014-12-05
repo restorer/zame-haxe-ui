@@ -241,14 +241,8 @@ class View extends EventDispatcher implements Inflatable {
     }
 
     private function stateUpdated():Void {
-        if (selector == null) {
-            return;
-        }
-
-        var map = selector.match(state);
-
-        for (name in map.keys()) {
-            inflate(name, map[name]);
+        if (selector != null) {
+            selector.apply(this, _state);
         }
     }
 

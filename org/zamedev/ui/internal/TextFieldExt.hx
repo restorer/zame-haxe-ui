@@ -8,6 +8,12 @@ import js.Browser;
 import js.html.Element;
 import openfl.text.TextFormat;
 
+#if !dom
+    import openfl._internal.renderer.RenderSession;
+#end
+
+using StringTools;
+
 class TextFieldExt extends TextField {
     private static var _divExt:Element = null;
     private static var _isFirefox:Bool = false;
@@ -15,6 +21,14 @@ class TextFieldExt extends TextField {
     private var _isMeasurementsDirty:Bool;
     private var _textWidth:Float;
     private var _textHeight:Float;
+    private var _escapedText:String;
+
+    #if dom
+        private var _originalText:String;
+    #else
+        private var _lineHeight:Float;
+        private var _isInRender:Bool;
+    #end
 
     public function new() {
         super();
@@ -33,6 +47,14 @@ class TextFieldExt extends TextField {
         _isMeasurementsDirty = true;
         _textWidth = 0.0;
         _textHeight = 0.0;
+        _escapedText = "";
+
+        #if dom
+            _originalText = "";
+        #else
+            _lineHeight = 0.0;
+            _isInRender = false;
+        #end
 
         _updateJsFont(__textFormat);
     }
@@ -42,20 +64,39 @@ class TextFieldExt extends TextField {
         return cast(format)._jsFont;
     }
 
+    #if dom
+        @:noCompletion
+        override public function get_text():String {
+            return _originalText;
+        }
+    #end
+
     @:noCompletion
     override public function set_text(value:String):String {
         if (__isHTML || __text != value) {
+            _escapedText = value.htmlEscape().replace("\n", "<br />");
             _isMeasurementsDirty = true;
         }
 
-        return super.set_text(value);
+        #if dom
+            _originalText = value;
+            super.set_text(_escapedText);
+            return value;
+        #else
+            return super.set_text(value);
+        #end
     }
 
     @:noCompletion
     override private function set_htmlText(value:String):String {
         if (!__isHTML || __text != value) {
+            _escapedText = value;
             _isMeasurementsDirty = true;
         }
+
+        #if dom
+            _originalText = value;
+        #end
 
         super.set_htmlText(value);
 
@@ -121,19 +162,27 @@ class TextFieldExt extends TextField {
     @:noCompletion
     override public function get_textHeight():Float {
         _reMeasure();
-        return _textHeight;
+
+        #if dom
+            return _textHeight;
+        #else
+            return (_isInRender ? _lineHeight : _textHeight);
+        #end
     }
 
     private function _reMeasure():Void {
         if (_isMeasurementsDirty) {
             _divExt.style.setProperty("font", __getFont(__textFormat), null);
-            _divExt.innerHTML = __text;
-
             _divExt.style.width = "auto";
             _divExt.style.height = "auto";
 
-            _textWidth = _divExt.clientWidth + 1;
+            #if !dom
+                _divExt.innerHTML = "giItT1WQy@!-/#";
+                _lineHeight = _divExt.clientHeight;
+            #end
 
+            _divExt.innerHTML = _escapedText;
+            _textWidth = _divExt.clientWidth + 1;
             _divExt.style.width = Std.string(__width) + "px";
 
             #if dom
@@ -172,6 +221,15 @@ class TextFieldExt extends TextField {
         jsFont += "'";
         cast(format)._jsFont = jsFont;
     }
+
+    #if !dom
+        @:noCompletion
+        override public function __renderCanvas(renderSession:RenderSession):Void {
+            _isInRender = true;
+            super.__renderCanvas(renderSession);
+            _isInRender = false;
+        }
+    #end
 }
 
 #else

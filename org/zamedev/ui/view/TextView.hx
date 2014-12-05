@@ -19,6 +19,7 @@ class TextView extends View {
 
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
+    public var textLeading(get, set):Null<Float>;
     public var font(get, set):String;
     public var text(get, set):String;
 
@@ -30,6 +31,7 @@ class TextView extends View {
 
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
+        textField.setTextFormat(_textFormat);
 
         #if (!flash && !webgl && !dom)
             cachedBitmap = new Bitmap();
@@ -54,6 +56,10 @@ class TextView extends View {
 
             case "textSize":
                 textSize = computeDimension(value.resolveDimension(), true);
+                return true;
+
+            case "textLeading":
+                textLeading = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "font":
@@ -127,7 +133,11 @@ class TextView extends View {
                 _height = size;
         }
 
-        textField.height = _height;
+        #if flash
+            textField.height = _height + 4;
+        #else
+            textField.height = _height;
+        #end
 
         #if (!flash && !webgl && !dom)
             updateCache();
@@ -180,6 +190,23 @@ class TextView extends View {
     private function set_textSize(value:Null<Float>):Null<Float> {
         if (_textFormat.size != value) {
             _textFormat.size = value;
+            textField.defaultTextFormat = _textFormat;
+            textField.setTextFormat(_textFormat);
+            requestLayout();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_textLeading():Null<Float> {
+        return _textFormat.leading;
+    }
+
+    @:noCompletion
+    private function set_textLeading(value:Null<Float>):Null<Float> {
+        if (_textFormat.leading != value) {
+            _textFormat.leading = value;
             textField.defaultTextFormat = _textFormat;
             textField.setTextFormat(_textFormat);
             requestLayout();
