@@ -11,6 +11,7 @@ import org.zamedev.ui.res.MeasureSpec;
 class ViewGroup extends View {
     public var children:Array<View>;
 
+    @:keep
     public function new(context:Context) {
         super(context);
         children = new Array<View>();

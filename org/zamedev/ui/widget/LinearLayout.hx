@@ -23,9 +23,9 @@ class LinearLayout extends ViewGroup {
 
     public var orientation(get, set):LinearLayoutOrientation;
 
+    @:keep
     public function new(context:Context) {
         super(context);
-
         orientation = LinearLayoutOrientation.VERTICAL;
     }
 

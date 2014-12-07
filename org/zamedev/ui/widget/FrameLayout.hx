@@ -7,6 +7,11 @@ import org.zamedev.ui.view.ViewGroup;
 import org.zamedev.ui.view.ViewVisibility;
 
 class FrameLayout extends ViewGroup {
+    @:keep
+    public function new(context:Context) {
+        super(context);
+    }
+
     override public function createLayoutParams():LayoutParams {
         return new FrameLayoutParams();
     }

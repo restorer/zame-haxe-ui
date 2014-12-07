@@ -7,6 +7,7 @@ import org.zamedev.ui.res.TypedValue;
 class Radio extends Button {
     public var selected(get, set):Bool;
 
+    @:keep
     public function new(context:Context) {
         super(context);
         addEventListener(MouseEvent.CLICK, onMouseClick);

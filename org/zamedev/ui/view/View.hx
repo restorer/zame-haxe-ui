@@ -61,6 +61,7 @@ class View extends EventDispatcher implements Inflatable {
     public var visibility(get, set):ViewVisibility;
     public var alpha(get, set):Float;
 
+    @:keep
     public function new(context:Context) {
         super();
 
@@ -326,6 +327,7 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_x():Float {
         return _x;
@@ -338,6 +340,7 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_y():Float {
         return _y;
@@ -350,11 +353,13 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_offsetX():Float {
         return _offsetX;
     }
 
+    @:keep
     @:noCompletion
     private function set_offsetX(value:Float):Float {
         _offsetX = value;
@@ -362,6 +367,7 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_offsetY():Float {
         return _offsetY;
@@ -374,6 +380,7 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_width():Float {
         return _width;
@@ -499,6 +506,7 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_alpha():Float {
         return _sprite.alpha;

@@ -45,6 +45,7 @@ class Button extends View {
     public var rightIconMargin(default, set):Float;
     public var disabled(get, set):Bool;
 
+    @:keep
     public function new(context:Context) {
         super(context);
 

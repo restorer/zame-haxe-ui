@@ -25,6 +25,7 @@ class RecyclerView extends ViewGroup {
 
     public var adapter(get, set):RecyclerViewAdapter;
 
+    @:keep
     public function new(context:Context) {
         super(context);
 

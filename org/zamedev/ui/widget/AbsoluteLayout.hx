@@ -9,6 +9,11 @@ import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
 
 class AbsoluteLayout extends ViewGroup {
+    @:keep
+    public function new(context:Context) {
+        super(context);
+    }
+
     override public function createLayoutParams():LayoutParams {
         return new AbsoluteLayoutParams();
     }

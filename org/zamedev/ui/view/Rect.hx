@@ -20,6 +20,7 @@ class Rect extends View {
         public var buttonMode(get, set):Bool;
     #end
 
+    @:keep
     public function new(context:Context) {
         super(context);
 

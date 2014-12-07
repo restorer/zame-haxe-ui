@@ -6,6 +6,7 @@ import org.zamedev.ui.res.TypedValue;
 import motion.Actuate;
 
 class Toggle extends Button {
+    @:keep
     public function new(context:Context) {
         super(context);
         addEventListener(MouseEvent.CLICK, onMouseClick);

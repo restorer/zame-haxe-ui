@@ -17,6 +17,7 @@ class Progress extends View {
 
     public var drawable(get, set):Drawable;
 
+    @:keep
     public function new(context:Context) {
         super(context);
 

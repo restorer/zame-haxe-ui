@@ -23,6 +23,7 @@ class TextView extends View {
     public var font(get, set):String;
     public var text(get, set):String;
 
+    @:keep
     public function new(context:Context) {
         super(context);
 
@@ -97,7 +98,7 @@ class TextView extends View {
 
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                #if android
+                #if mobile
                     _width = textField.textWidth * 1.1;
                 #elseif flash
                     _width = textField.textWidth + 4;
