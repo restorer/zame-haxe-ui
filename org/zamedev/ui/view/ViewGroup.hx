@@ -8,6 +8,8 @@ import org.zamedev.ui.graphics.DimensionType;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.res.MeasureSpec;
 
+using Lambda;
+
 class ViewGroup extends View {
     public var children:Array<View>;
 
@@ -246,7 +248,7 @@ class ViewGroup extends View {
         var result = new Array<View>();
 
         for (child in children) {
-            if (child.tag == tag) {
+            if (child.tags.has(tag)) {
                 result.push(child);
             }
 

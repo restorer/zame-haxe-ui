@@ -44,6 +44,8 @@ class Button extends View {
     public var leftIconMargin(default, set):Float;
     public var rightIconMargin(default, set):Float;
     public var disabled(get, set):Bool;
+    public var leftIconAlpha(get, set):Float;
+    public var rightIconAlpha(get, set):Float;
 
     @:keep
     public function new(context:Context) {
@@ -159,6 +161,14 @@ class Button extends View {
 
             case "disabled":
                 disabled = value.resolveBool();
+                return true;
+
+            case "leftIconAlpha":
+                leftIconAlpha = value.resolveFloat();
+                return true;
+
+            case "rightIconAlpha":
+                rightIconAlpha = value.resolveFloat();
                 return true;
         }
 
@@ -500,6 +510,28 @@ class Button extends View {
     private function set_disabled(value:Bool):Bool {
         _disabled = value;
         updateState("disabled", value);
+        return value;
+    }
+
+    @:noCompletion
+    private function get_leftIconAlpha():Float {
+        return leftIconView.alpha;
+    }
+
+    @:noCompletion
+    private function set_leftIconAlpha(value:Float):Float {
+        leftIconView.alpha = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_rightIconAlpha():Float {
+        return rightIconView.alpha;
+    }
+
+    @:noCompletion
+    private function set_rightIconAlpha(value:Float):Float {
+        rightIconView.alpha = value;
         return value;
     }
 }

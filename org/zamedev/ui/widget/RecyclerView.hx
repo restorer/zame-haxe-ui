@@ -1,43 +1,94 @@
 package org.zamedev.ui.widget;
 
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+import openfl.display.PixelSnapping;
+import openfl.display.Shape;
 import openfl.errors.Error;
-import openfl.errors.ArgumentError;
 import openfl.events.Event;
 import org.zamedev.ui.Context;
-import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.graphics.GravityType;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
 import org.zamedev.ui.view.ViewVisibility;
+import openfl.geom.ColorTransform;
+import openfl.geom.Rectangle;
+import motion.Actuate;
 
 using StringTools;
 
 class RecyclerView extends ViewGroup {
     private var _adapter:RecyclerViewAdapter;
-    private var _attachedList:List<RecyclerViewHolder>;
+    private var _attachedList:Array<RecyclerViewHolder>;
     private var _detachedMap:Map<Int, List<RecyclerViewHolder>>;
     private var computedWidth:Float;
     private var computedHeight:Float;
     private var isChangingDataset:Bool;
+    private var renderedBitmap:Bitmap;
+    private var bitmapData:BitmapData;
+    private var renderToBitmap:Bool;
+    private var _firstVisiblePosition:Int;
+    private var _scrollOffsetX:Float;
+    private var _scrollOffsetY:Float;
+    private var _cycle:Bool;
+    private var _verticalFadeSize:Int;
+    private var layoutManager:RecyclerViewLayoutManager;
+    private var _isScrolling:Bool;
+
+    private var _diffOffsetX:Float;
+    private var _diffOffsetY:Float;
+    private var _targetScrollOffsetX:Float;
+    private var _targetScrollOffsetY:Float;
 
     public var adapter(get, set):RecyclerViewAdapter;
+    public var scrollOffsetX(get, set):Float;
+    public var scrollOffsetY(get, set):Float;
+    public var cycle(get, set):Bool;
+    public var verticalFadeSize(get, set):Int;
 
     @:keep
     public function new(context:Context) {
         super(context);
 
         _adapter = null;
-        _attachedList = new List<RecyclerViewHolder>();
+        _attachedList = new Array<RecyclerViewHolder>();
         _detachedMap = new Map<Int, List<RecyclerViewHolder>>();
         computedWidth = 0.0;
         computedHeight = 0.0;
         isChangingDataset = false;
+        renderedBitmap = new Bitmap();
+        bitmapData = null;
+        renderToBitmap = false;
+        _firstVisiblePosition = 0;
+        _scrollOffsetX = 0.0;
+        _scrollOffsetY = 0.0;
+        _cycle = false;
+        _verticalFadeSize = 0;
+        layoutManager = new RecyclerViewLayoutManager();
+        _isScrolling = false;
 
         addEventListener(Event.ADDED_TO_STAGE, onRecyclerViewAddedToApplicationStage);
         addEventListener(Event.REMOVED_FROM_STAGE, onRecyclerViewRemovedFromApplicationStage);
+    }
+
+    override public function inflate(name:String, value:TypedValue):Bool {
+        if (super.inflate(name, value)) {
+            return true;
+        }
+
+        switch (name) {
+            case "cycle":
+                cycle = value.resolveBool();
+                return true;
+
+            case "verticalFadeSize":
+                verticalFadeSize = Std.int(computeDimension(value.resolveDimension(), true));
+                return true;
+        }
+
+        return false;
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
@@ -87,9 +138,7 @@ class RecyclerView extends ViewGroup {
                 _height = size;
         }
 
-        computedWidth = 0.0;
-        computedHeight = 0.0;
-        _handleDataSetChanged();
+        handleDataSetChanged();
 
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED:
@@ -108,7 +157,7 @@ class RecyclerView extends ViewGroup {
             case MeasureSpec.AT_MOST(size):
                 _height = Math.min(size, computedHeight);
 
-            case MeasureSpec.EXACT(size):
+            case MeasureSpec.EXACT(_):
         }
 
         return true;
@@ -143,7 +192,10 @@ class RecyclerView extends ViewGroup {
     }
 
     private function detachViewHolder(viewHolder:RecyclerViewHolder):Void {
-        _sprite.removeChild(viewHolder._view._sprite);
+        if (viewHolder._view._sprite.parent == _sprite) {
+            _sprite.removeChild(viewHolder._view._sprite);
+        }
+
         _attachedList.remove(viewHolder);
 
         if (!_detachedMap.exists(viewHolder._viewType)) {
@@ -157,7 +209,7 @@ class RecyclerView extends ViewGroup {
         }
     }
 
-    private function attachViewHolder(position:Int):RecyclerViewHolder {
+    private function attachViewHolder(position:Int, attachToSprite:Bool, addToBegin:Bool):RecyclerViewHolder {
         var viewHolder:RecyclerViewHolder;
         var viewType = _adapter.getItemViewType(position);
 
@@ -168,8 +220,15 @@ class RecyclerView extends ViewGroup {
             viewHolder._viewType = viewType;
         }
 
-        _attachedList.push(viewHolder);
-        _sprite.addChild(viewHolder._view._sprite);
+        if (addToBegin) {
+            _attachedList.unshift(viewHolder);
+        } else {
+            _attachedList.push(viewHolder);
+        }
+
+        if (attachToSprite) {
+            _sprite.addChild(viewHolder._view._sprite);
+        }
 
         if (isAddedToApplicationStage) {
             viewHolder._view.dispatchEvent(new Event(Event.ADDED_TO_STAGE));
@@ -178,60 +237,361 @@ class RecyclerView extends ViewGroup {
         return viewHolder;
     }
 
+    private function bindViewHolder(viewHolder:RecyclerViewHolder, position:Int):Void {
+        viewHolder._view.isInLayout = true;
+        _adapter.onBindViewHolder(viewHolder, position);
+        viewHolder._view.isInLayout = false;
+
+        var layoutParams = viewHolder._view.layoutParams;
+        var widthSpec = computeChildMeasureSpec(layoutParams, layoutParams.width, false);
+        var heightSpec = computeChildMeasureSpec(layoutParams, layoutParams.height, true);
+
+        if (widthSpec == null) {
+            widthSpec = MeasureSpec.EXACT(0.0);
+        }
+
+        if (heightSpec == null) {
+            heightSpec = MeasureSpec.EXACT(0.0);
+        }
+
+        viewHolder._view.selfLayout(widthSpec, heightSpec, true);
+    }
+
     public function notifyDataSetChanged():Void {
         if (_visibility == ViewVisibility.GONE) {
             return;
         }
 
         isChangingDataset = true;
-        _handleDataSetChanged();
+        handleDataSetChanged();
         requestLayout();
         isChangingDataset = false;
     }
 
-    private function _handleDataSetChanged():Void {
-        for (viewHolder in _attachedList) {
+    private function handleDataSetChanged():Void {
+        computedWidth = 0.0;
+        computedHeight = 0.0;
+
+        for (viewHolder in _attachedList.copy()) {
             detachViewHolder(viewHolder);
         }
 
         if (_adapter == null) {
+            if (renderedBitmap.parent == _sprite) {
+                _sprite.removeChild(renderedBitmap);
+            }
+
             return;
         }
 
-        var x:Float = 0.0;
-        var y:Float = 0.0;
+        renderToBitmap = true;
 
-        computedWidth = 0.0;
-        computedHeight = 0.0;
+        switch (widthSpec) {
+            case EXACT(_):
+            default: renderToBitmap = false;
+        }
 
-        for (position in 0 ... _adapter.getItemCount()) {
-            var viewHolder = attachViewHolder(position);
+        switch (heightSpec) {
+            case EXACT(_):
+            default: renderToBitmap = false;
+        }
 
-            viewHolder._view.isInLayout = true;
-            _adapter.onBindViewHolder(viewHolder, position);
-            viewHolder._view.isInLayout = false;
+        if (renderToBitmap) {
+            var bitmapWidth:Int = Std.int(Math.max(1, Math.ceil(_width)));
+            var bitmapHeight:Int = Std.int(Math.max(1, Math.ceil(_height)));
 
-            var layoutParams = viewHolder._view.layoutParams;
-            var widthSpec = computeChildMeasureSpec(layoutParams, layoutParams.width, false);
-            var heightSpec = computeChildMeasureSpec(layoutParams, layoutParams.height, true);
-
-            if (widthSpec == null) {
-                widthSpec = MeasureSpec.EXACT(0.0);
+            if (bitmapData == null || bitmapData.width != bitmapWidth || bitmapData.height != bitmapHeight) {
+                bitmapData = new BitmapData(bitmapWidth, bitmapHeight, true, 0);
             }
 
-            if (heightSpec == null) {
-                heightSpec = MeasureSpec.EXACT(0.0);
+            if (renderedBitmap.parent == null) {
+                _sprite.addChild(renderedBitmap);
             }
 
-            viewHolder._view.selfLayout(widthSpec, heightSpec, true);
+            computedWidth = _width;
+            computedHeight = _height;
 
-            viewHolder._view.x = x;
-            viewHolder._view.y = y;
+            updateBitmapData();
+        } else {
+            if (renderedBitmap.parent == _sprite) {
+                _sprite.removeChild(renderedBitmap);
+            }
 
-            y += viewHolder._view._height;
+            computedWidth = 0.0;
+            computedHeight = 0.0;
+            layoutManager.init(0.0, 0.0, _width, _height);
 
-            computedWidth = Math.max(computedWidth, x + viewHolder._view.width);
-            computedHeight = Math.max(computedHeight, y + viewHolder._view.height);
+            for (position in 0 ... _adapter.getItemCount()) {
+                var viewHolder = attachViewHolder(position, true, false);
+                bindViewHolder(viewHolder, position);
+
+                var view:View = viewHolder._view;
+                layoutManager.layout(view);
+
+                computedWidth = Math.max(computedWidth, view.x + view.width);
+                computedHeight = Math.max(computedHeight, view.y + view.height);
+            }
+        }
+    }
+
+    private function prependViewHolder(maxPosition:Int):View {
+        if (_firstVisiblePosition == 0) {
+            if (_cycle) {
+                _firstVisiblePosition = maxPosition - 1;
+            } else {
+                return null;
+            }
+        } else {
+            _firstVisiblePosition--;
+        }
+
+        var viewHolder = attachViewHolder(_firstVisiblePosition, false, true);
+        bindViewHolder(viewHolder, _firstVisiblePosition);
+
+        var view:View = viewHolder._view;
+        layoutManager.prepend(view);
+
+        return view;
+    }
+
+    private function updateBitmapData():Void {
+        if (!renderToBitmap || adapter == null) {
+            return;
+        }
+
+        bitmapData.fillRect(bitmapData.rect, 0);
+
+        var isAfterEnd = false;
+        var position = _firstVisiblePosition;
+        var maxPosition = adapter.getItemCount();
+        var attachedListCopy = _attachedList.copy();
+
+        layoutManager.init(_scrollOffsetX, _scrollOffsetY, _width, _height);
+
+        if (maxPosition > 0) {
+            while (layoutManager.canPrepend()) {
+                var view = prependViewHolder(maxPosition);
+
+                if (view == null) {
+                    break;
+                }
+
+                _scrollOffsetX = layoutManager.px;
+                _scrollOffsetY = layoutManager.py;
+
+                bitmapData.draw(view._sprite, view._sprite.transform.matrix);
+            }
+        }
+
+        for (viewHolder in attachedListCopy) {
+            if (isAfterEnd) {
+                detachViewHolder(viewHolder);
+                continue;
+            }
+
+            var view:View = viewHolder._view;
+            layoutManager.layout(view);
+
+            if (layoutManager.isBeforeStart(view)) {
+                detachViewHolder(viewHolder);
+                _scrollOffsetX = layoutManager.x;
+                _scrollOffsetY = layoutManager.y;
+                _firstVisiblePosition++;
+
+                if (_firstVisiblePosition >= maxPosition) {
+                    if (_cycle) {
+                        _firstVisiblePosition = 0;
+                    } else {
+                        isAfterEnd = true;
+                        continue;
+                    }
+                }
+            }
+
+            bitmapData.draw(view._sprite, view._sprite.transform.matrix);
+            isAfterEnd = layoutManager.isAtEnd(view);
+
+            if (isAfterEnd) {
+                continue;
+            }
+
+            position++;
+
+            if (position >= maxPosition) {
+                if (_cycle) {
+                    position = 0;
+                } else {
+                    isAfterEnd = true;
+                }
+            }
+        }
+
+        if (!isAfterEnd && maxPosition > 0) {
+            while (true) {
+                var viewHolder = attachViewHolder(position, false, false);
+                bindViewHolder(viewHolder, position);
+
+                var view:View = viewHolder._view;
+                layoutManager.layout(view);
+                bitmapData.draw(view._sprite, view._sprite.transform.matrix);
+
+                if (layoutManager.isAtEnd(view)) {
+                    break;
+                }
+
+                position++;
+
+                if (position >= maxPosition) {
+                    if (_cycle) {
+                        position = 0;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (_verticalFadeSize > 0) {
+            var colorTransform = new ColorTransform();
+            var rect = new Rectangle(0.0, 0.0, bitmapData.rect.width, 1.0);
+
+            for (i in 0 ... _verticalFadeSize) {
+                colorTransform.alphaMultiplier = i / _verticalFadeSize;
+
+                rect.y = i;
+                bitmapData.colorTransform(rect, colorTransform);
+
+                rect.y = bitmapData.rect.height - i - 1.0;
+                bitmapData.colorTransform(rect, colorTransform);
+            }
+        }
+
+        renderedBitmap.bitmapData = bitmapData;
+        renderedBitmap.smoothing = true;
+    }
+
+    public function scrollBy(offsetX:Float, offsetY:Float, duration:Float = 0.0):Void {
+        scrollTo(_scrollOffsetX + offsetX, _scrollOffsetY + offsetY, duration);
+    }
+
+    public function scrollTo(offsetX:Float, offsetY:Float, duration:Float = 0.0):Void {
+        if ((offsetX == _scrollOffsetX && offsetY == _scrollOffsetY) || !renderToBitmap) {
+            return;
+        }
+
+        ensureScrollingStopped();
+
+        if (duration < 0.0001 || _visibility == ViewVisibility.GONE) {
+            _scrollOffsetX = offsetX;
+            _scrollOffsetY = offsetY;
+            updateBitmapData();
+            return;
+        }
+
+        _isScrolling = true;
+        _diffOffsetX = 0.0;
+        _diffOffsetY = 0.0;
+        _targetScrollOffsetX = offsetX;
+        _targetScrollOffsetY = offsetY;
+
+        Actuate.update(
+            _handleScrollUpdate,
+            duration,
+            [_scrollOffsetX, _scrollOffsetY],
+            [_targetScrollOffsetX, _targetScrollOffsetY]
+        ).onComplete(_handleScrollComplete);
+    }
+
+    private function ensureScrollingStopped() {
+        if (_isScrolling) {
+            Actuate.stop(_handleScrollUpdate);
+            _scrollOffsetX = _targetScrollOffsetX + _diffOffsetX;
+            _scrollOffsetY = _targetScrollOffsetY + _diffOffsetY;
+            _isScrolling = false;
+            updateBitmapData();
+        }
+    }
+
+    private function _handleScrollUpdate(currentOffsetX:Float, currentOffsetY:Float):Void {
+        _scrollOffsetX = currentOffsetX + _diffOffsetX;
+        _scrollOffsetY = currentOffsetY + _diffOffsetY;
+
+        var prevScrollOffsetX = _scrollOffsetX;
+        var prevScrollOffsetY = _scrollOffsetY;
+
+        updateBitmapData();
+
+        _diffOffsetX += (_scrollOffsetX - prevScrollOffsetX);
+        _diffOffsetY += (_scrollOffsetY - prevScrollOffsetY);
+    }
+
+    private function _handleScrollComplete():Void {
+        _isScrolling = false;
+    }
+
+    public function updateFirstVisiblePosition(position:Int):Void {
+        if (_firstVisiblePosition == position || adapter == null) {
+            return;
+        }
+
+        var maxPosition = adapter.getItemCount();
+
+        if (maxPosition <= 0) {
+            return;
+        }
+
+        if (position < 0 || position >= maxPosition) {
+            if (cycle) {
+                position = ((position % maxPosition) + maxPosition) % maxPosition;
+            } else {
+                position = Std.int(Math.min(maxPosition - 1, Math.max(0, position)));
+            }
+        }
+
+        ensureScrollingStopped();
+
+        _firstVisiblePosition = position;
+        _scrollOffsetX = 0.0;
+        _scrollOffsetY = 0.0;
+
+        for (viewHolder in _attachedList.copy()) {
+            detachViewHolder(viewHolder);
+        }
+
+        updateBitmapData();
+    }
+
+    public function scrollByDir(dir:Int, duration:Float = 0.0):Void {
+        if (dir == 0 || !renderToBitmap || adapter == null || _attachedList.length == 0) {
+            return;
+        }
+
+        if (dir < -1) {
+            dir = -1;
+        } else if (dir > 1) {
+            dir = 1;
+        }
+
+        ensureScrollingStopped();
+
+        if (duration < 0.0001 || _visibility == ViewVisibility.GONE) {
+            updateFirstVisiblePosition(_firstVisiblePosition + dir);
+            return;
+        }
+
+        if (dir > 0) {
+            var pos = layoutManager.computeNextScrollPosition(_attachedList[0]._view);
+            scrollTo(-pos.x, -pos.y, duration);
+        } else {
+            layoutManager.init(_scrollOffsetX, _scrollOffsetY, _width, _height);
+            var view = prependViewHolder(adapter.getItemCount());
+
+            if (view != null) {
+                var pos = layoutManager.computePrevScrollPosition(view);
+                _scrollOffsetX = pos.x;
+                _scrollOffsetY = pos.y;
+                scrollTo(0.0, 0.0, duration);
+            }
         }
     }
 
@@ -246,18 +606,101 @@ class RecyclerView extends ViewGroup {
             var event = new Event(Event.REMOVED_FROM_STAGE);
 
             for (viewHolder in _attachedList) {
-                _sprite.removeChild(viewHolder._view._sprite);
+                if (viewHolder._view._sprite.parent == _sprite) {
+                    _sprite.removeChild(viewHolder._view._sprite);
+                }
 
                 if (isAddedToApplicationStage) {
                     viewHolder._view.dispatchEvent(event);
                 }
             }
 
-            _attachedList = new List<RecyclerViewHolder>();
+            _attachedList = new Array<RecyclerViewHolder>();
             _detachedMap = new Map<Int, List<RecyclerViewHolder>>();
             _adapter = value;
 
             notifyDataSetChanged();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_firstVisiblePosition():Int {
+        return _firstVisiblePosition;
+    }
+
+    @:noCompletion
+    private function set_firstVisiblePosition(value:Int):Int {
+        if (_firstVisiblePosition != value) {
+            _firstVisiblePosition = value;
+            updateBitmapData();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_scrollOffsetX():Float {
+        return _scrollOffsetX;
+    }
+
+    @:noCompletion
+    private function set_scrollOffsetX(value:Float):Float {
+        if (_scrollOffsetX != value) {
+            _scrollOffsetX = value;
+            updateBitmapData();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_scrollOffsetY():Float {
+        return _scrollOffsetY;
+    }
+
+    @:noCompletion
+    private function set_scrollOffsetY(value:Float):Float {
+        if (_scrollOffsetY != value) {
+            _scrollOffsetY = value;
+            updateBitmapData();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_cycle():Bool {
+        return _cycle;
+    }
+
+    @:noCompletion
+    private function set_cycle(value:Bool):Bool {
+        if (_cycle != value) {
+            _cycle = value;
+
+            if (!isInLayout) {
+                updateBitmapData();
+            }
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_verticalFadeSize():Int {
+        return _verticalFadeSize;
+    }
+
+    @:noCompletion
+    private function set_verticalFadeSize(value:Int):Int {
+        if (_verticalFadeSize != value) {
+            _verticalFadeSize = value;
+
+            if (!isInLayout) {
+                updateBitmapData();
+            }
         }
 
         return value;

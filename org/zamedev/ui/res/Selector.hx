@@ -53,7 +53,10 @@ class Selector {
                 }
 
                 if (matched) {
-                    view.inflate(key, item.value);
+                    if (!view.inflate(key, item.value)) {
+                        throw new Error("Apply error: class " + Type.getClassName(Type.getClass(view)) + ", unsupported attribute " + key);
+                    }
+
                     break;
                 }
             }

@@ -15,6 +15,7 @@ import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Selector;
 import org.zamedev.ui.res.TypedValue;
 
+using Lambda;
 using StringTools;
 
 class View extends EventDispatcher implements Inflatable {
@@ -38,7 +39,7 @@ class View extends EventDispatcher implements Inflatable {
     private var isAddedToApplicationStage:Bool;
 
     public var id:String;
-    public var tag:String;
+    public var tags:Array<String>;
     public var layoutParams:LayoutParams;
     public var state(get, set):Map<String, Bool>;
     public var selector(get, set):Selector;
@@ -78,7 +79,7 @@ class View extends EventDispatcher implements Inflatable {
         isAddedToApplicationStage = false;
 
         id = null;
-        tag = null;
+        tags = new Array<String>();
         layoutParams = null;
         _x = 0.0;
         _y = 0.0;
@@ -108,8 +109,13 @@ class View extends EventDispatcher implements Inflatable {
                 id = value.resolveString();
                 return true;
 
-            case "tag":
-                tag = value.resolveString();
+            case "tags":
+                tags = value.resolveString().split("|").map(function (v) {
+                    return v.trim();
+                }).filter(function (v) {
+                    return (v.length > 0);
+                });
+
                 return true;
 
             case "selector":
@@ -143,6 +149,14 @@ class View extends EventDispatcher implements Inflatable {
 
             case "alpha":
                 alpha = value.resolveFloat();
+                return true;
+
+            case "offsetX":
+                offsetX = computeDimension(value.resolveDimension(), false);
+                return true;
+
+            case "offsetY":
+                offsetY = computeDimension(value.resolveDimension(), true);
                 return true;
         }
 

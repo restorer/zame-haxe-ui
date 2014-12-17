@@ -6,10 +6,14 @@ import org.zamedev.ui.res.TypedValue;
 
 class Radio extends Button {
     public var selected(get, set):Bool;
+    public var groupTag:String;
 
     @:keep
     public function new(context:Context) {
         super(context);
+
+        groupTag = null;
+
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
@@ -21,6 +25,10 @@ class Radio extends Button {
         switch (name) {
             case "selected":
                 selected = value.resolveBool();
+                return true;
+
+            case "groupTag":
+                groupTag = value.resolveString();
                 return true;
         }
 
@@ -40,8 +48,8 @@ class Radio extends Button {
     private function set_selected(value:Bool):Bool {
         updateState("selected", value);
 
-        if (!isInLayout && _parent != null && tag != null) {
-            for (child in _parent.findViewsByTag(tag, false)) {
+        if (!isInLayout && _parent != null && groupTag != null) {
+            for (child in _parent.findViewsByTag(groupTag, false)) {
                 if (child != this) {
                     child.updateState("selected", false);
                 }

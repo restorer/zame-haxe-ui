@@ -13,6 +13,10 @@ class TextView extends View {
     private var _textFormat:TextFormat;
     private var textField:TextFieldExt;
 
+    #if flash
+        private var _textLeading:Null<Float>;
+    #end
+
     #if (!flash && !webgl && !dom)
         private var cachedBitmap:Bitmap;
     #end
@@ -29,6 +33,10 @@ class TextView extends View {
 
         _textFormat = new TextFormat();
         textField = new TextFieldExt();
+
+        #if flash
+            _textLeading = _textFormat.leading;
+        #end
 
         textField.selectable = false;
         textField.defaultTextFormat = _textFormat;
@@ -201,13 +209,28 @@ class TextView extends View {
 
     @:noCompletion
     private function get_textLeading():Null<Float> {
-        return _textFormat.leading;
+        #if flash
+            return _textLeading;
+        #else
+            return _textFormat.leading;
+        #end
     }
 
     @:noCompletion
     private function set_textLeading(value:Null<Float>):Null<Float> {
-        if (_textFormat.leading != value) {
-            _textFormat.leading = value;
+        if (#if flash _textLeading #else _textFormat.leading #end != value) {
+            #if flash
+                if (value == null) {
+                    _textFormat.leading = null;
+                } else {
+                    _textFormat.leading = value - 5.0;
+                }
+
+                _textLeading = value;
+            #else
+                _textFormat.leading = value;
+            #end
+
             textField.defaultTextFormat = _textFormat;
             textField.setTextFormat(_textFormat);
             requestLayout();
