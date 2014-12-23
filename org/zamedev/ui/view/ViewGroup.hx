@@ -210,6 +210,16 @@ class ViewGroup extends View {
         }
     }
 
+    public function removeAllChildren(reLayout:Bool = true):Void {
+        for (child in children.copy()) {
+            removeChild(child, false);
+        }
+
+        if (reLayout) {
+            requestLayout();
+        }
+    }
+
     private function onViewGroupAddedToApplicationStage(e:Event):Void {
         for (child in children) {
             child.dispatchEvent(e);

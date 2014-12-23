@@ -36,6 +36,7 @@ class RecyclerView extends ViewGroup {
     private var _verticalFadeSize:Int;
     private var layoutManager:RecyclerViewLayoutManager;
     private var _isScrolling:Bool;
+    private var _scrollable:Bool;
 
     private var _diffOffsetX:Float;
     private var _diffOffsetY:Float;
@@ -47,6 +48,7 @@ class RecyclerView extends ViewGroup {
     public var scrollOffsetY(get, set):Float;
     public var cycle(get, set):Bool;
     public var verticalFadeSize(get, set):Int;
+    public var scrollable(get, set):Bool;
 
     @:keep
     public function new(context:Context) {
@@ -68,6 +70,7 @@ class RecyclerView extends ViewGroup {
         _verticalFadeSize = 0;
         layoutManager = new RecyclerViewLayoutManager();
         _isScrolling = false;
+        _scrollable = true;
 
         addEventListener(Event.ADDED_TO_STAGE, onRecyclerViewAddedToApplicationStage);
         addEventListener(Event.REMOVED_FROM_STAGE, onRecyclerViewRemovedFromApplicationStage);
@@ -85,6 +88,10 @@ class RecyclerView extends ViewGroup {
 
             case "verticalFadeSize":
                 verticalFadeSize = Std.int(computeDimension(value.resolveDimension(), true));
+                return true;
+
+            case "scrollable":
+                scrollable = value.resolveBool();
                 return true;
         }
 
@@ -284,16 +291,20 @@ class RecyclerView extends ViewGroup {
             return;
         }
 
-        renderToBitmap = true;
+        if (_scrollable) {
+            renderToBitmap = true;
 
-        switch (widthSpec) {
-            case EXACT(_):
-            default: renderToBitmap = false;
-        }
+            switch (widthSpec) {
+                case EXACT(_):
+                default: renderToBitmap = false;
+            }
 
-        switch (heightSpec) {
-            case EXACT(_):
-            default: renderToBitmap = false;
+            switch (heightSpec) {
+                case EXACT(_):
+                default: renderToBitmap = false;
+            }
+        } else {
+            renderToBitmap = false;
         }
 
         if (renderToBitmap) {
@@ -701,6 +712,21 @@ class RecyclerView extends ViewGroup {
             if (!isInLayout) {
                 updateBitmapData();
             }
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_scrollable():Bool {
+        return _scrollable;
+    }
+
+    @:noCompletion
+    private function set_scrollable(value:Bool):Bool {
+        if (_scrollable != value) {
+            _scrollable = value;
+            notifyDataSetChanged();
         }
 
         return value;
