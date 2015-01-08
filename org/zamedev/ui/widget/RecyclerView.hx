@@ -11,7 +11,7 @@ import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
-import org.zamedev.ui.view.ViewGroup;
+import org.zamedev.ui.view.BaseViewContainer;
 import org.zamedev.ui.view.ViewVisibility;
 import openfl.geom.ColorTransform;
 import openfl.geom.Rectangle;
@@ -19,7 +19,7 @@ import motion.Actuate;
 
 using StringTools;
 
-class RecyclerView extends ViewGroup {
+class RecyclerView extends BaseViewContainer {
     private var _adapter:RecyclerViewAdapter;
     private var _attachedList:Array<RecyclerViewHolder>;
     private var _detachedMap:Map<Int, List<RecyclerViewHolder>>;
@@ -168,22 +168,6 @@ class RecyclerView extends ViewGroup {
         }
 
         return true;
-    }
-
-    override public function findViewById(id:String, deep:Bool = true):View {
-        return null;
-    }
-
-    override public function findViewsByTag(tag:String, deep:Bool = true):Array<View> {
-        return new Array<View>();
-    }
-
-    override public function addChild(view:View, reLayout:Bool = true):Void {
-        throw new Error("Not supported by RecyclerView");
-    }
-
-    override public function removeChild(view:View, reLayout:Bool = true):Void {
-        throw new Error("Not supported by RecyclerView");
     }
 
     private function onRecyclerViewAddedToApplicationStage(e:Event):Void {
@@ -625,6 +609,11 @@ class RecyclerView extends ViewGroup {
                     viewHolder._view.dispatchEvent(event);
                 }
             }
+
+            _firstVisiblePosition = 0;
+            _scrollOffsetX = 0.0;
+            _scrollOffsetY = 0.0;
+            _isScrolling = false;
 
             _attachedList = new Array<RecyclerViewHolder>();
             _detachedMap = new Map<Int, List<RecyclerViewHolder>>();

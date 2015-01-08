@@ -23,7 +23,7 @@ class View extends EventDispatcher implements Inflatable {
     private var _sprite:Sprite;
     private var _width:Float;
     private var _height:Float;
-    private var _parent:ViewGroup;
+    private var _parent:ViewContainer;
     private var widthSpec:MeasureSpec;
     private var heightSpec:MeasureSpec;
     private var _state:Map<String, Bool>;
@@ -39,7 +39,7 @@ class View extends EventDispatcher implements Inflatable {
     private var isAddedToApplicationStage:Bool;
 
     public var id:String;
-    public var tags:Array<String>;
+    public var tags:Map<String, Dynamic>;
     public var layoutParams:LayoutParams;
     public var state(get, set):Map<String, Bool>;
     public var selector(get, set):Selector;
@@ -79,7 +79,7 @@ class View extends EventDispatcher implements Inflatable {
         isAddedToApplicationStage = false;
 
         id = null;
-        tags = new Array<String>();
+        tags = new Map<String, Dynamic>();
         layoutParams = null;
         _x = 0.0;
         _y = 0.0;
@@ -110,11 +110,13 @@ class View extends EventDispatcher implements Inflatable {
                 return true;
 
             case "tags":
-                tags = value.resolveString().split("|").map(function (v) {
+                for (tag in value.resolveString().split("|").map(function (v) {
                     return v.trim();
                 }).filter(function (v) {
                     return (v.length > 0);
-                });
+                })) {
+                    tags[tag] = true;
+                }
 
                 return true;
 
@@ -314,7 +316,7 @@ class View extends EventDispatcher implements Inflatable {
 
     @:noCompletion
     private function get_parent():ViewGroup {
-        return _parent;
+        return (Std.is(_parent, ViewGroup) ? cast _parent : null);
     }
 
     @:noCompletion

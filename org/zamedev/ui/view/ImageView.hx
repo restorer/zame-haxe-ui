@@ -12,8 +12,13 @@ class ImageView extends View {
     private var displayObjectCache:Map<String, DisplayObject>;
     private var imageWidth:Float;
     private var imageHeight:Float;
+    private var _scaleX:Float;
+    private var _scaleY:Float;
 
     public var drawable(get, set):Drawable;
+    public var scaleX(get, set):Float;
+    public var scaleY(get, set):Float;
+    public var scale(never, set):Float;
 
     @:keep
     public function new(context:Context) {
@@ -24,6 +29,8 @@ class ImageView extends View {
         displayObjectCache = new Map<String, DisplayObject>();
         imageWidth = 0.0;
         imageHeight = 0.0;
+        _scaleX = 1.0;
+        _scaleY = 1.0;
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {
@@ -34,6 +41,18 @@ class ImageView extends View {
         switch (name) {
             case "drawable":
                 drawable = value.resolveDrawable();
+                return true;
+
+            case "scaleX":
+                scaleX = value.resolveFloat();
+                return true;
+
+            case "scaleY":
+                scaleY = value.resolveFloat();
+                return true;
+
+            case "scale":
+                scale = value.resolveFloat();
                 return true;
         }
 
@@ -101,6 +120,10 @@ class ImageView extends View {
             }
 
             _sprite.addChild(displayObject);
+
+            displayObject.scaleX = _scaleX;
+            displayObject.scaleY = _scaleY;
+
             imageWidth = displayObject.width;
             imageHeight = displayObject.height;
         } else {
@@ -109,6 +132,66 @@ class ImageView extends View {
         }
 
         requestLayout();
+        return value;
+    }
+
+    @:noCompletion
+    private function get_scaleX():Float {
+        return _scaleX;
+    }
+
+    @:noCompletion
+    private function set_scaleX(value:Float):Float {
+        if (_scaleX != value) {
+            _scaleX = value;
+
+            if (displayObject != null) {
+                displayObject.scaleX = value;
+                imageWidth = displayObject.width;
+                requestLayout();
+            }
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_scaleY():Float {
+        return _scaleY;
+    }
+
+    @:noCompletion
+    private function set_scaleY(value:Float):Float {
+        if (_scaleY != value) {
+            _scaleY = value;
+
+            if (displayObject != null) {
+                displayObject.scaleY = value;
+                imageHeight = displayObject.height;
+                requestLayout();
+            }
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function set_scale(value:Float):Float {
+        if (value != _scaleX || value != _scaleY) {
+            _scaleX = value;
+            _scaleY = value;
+
+            if (displayObject != null) {
+                displayObject.scaleX = value;
+                displayObject.scaleY = value;
+
+                imageWidth = displayObject.width;
+                imageHeight = displayObject.height;
+
+                requestLayout();
+            }
+        }
+
         return value;
     }
 }

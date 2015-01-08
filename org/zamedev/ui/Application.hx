@@ -11,7 +11,7 @@ import org.zamedev.ui.res.ResourceManager;
 // http://www.yiiframework.com/doc-2.0/guide-tutorial-i18n.html
 
 class Application extends Sprite implements Context {
-    #if debug
+    #if (debug || fps)
         private var fps:FPS;
     #end
 
@@ -43,7 +43,7 @@ class Application extends Sprite implements Context {
     private function create():Void {
         addChild(_applicationStage);
 
-        #if debug
+        #if (debug || fps)
             addChild(fps = new FPS(16, 16, 0xff0000));
         #end
     }

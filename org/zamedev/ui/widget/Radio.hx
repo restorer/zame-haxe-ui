@@ -48,8 +48,8 @@ class Radio extends Button {
     private function set_selected(value:Bool):Bool {
         updateState("selected", value);
 
-        if (!isInLayout && _parent != null && groupTag != null) {
-            for (child in _parent.findViewsByTag(groupTag, false)) {
+        if (!isInLayout && parent != null && groupTag != null) {
+            for (child in parent.findViewsByTag(groupTag, false)) {
                 if (child != this) {
                     child.updateState("selected", false);
                 }

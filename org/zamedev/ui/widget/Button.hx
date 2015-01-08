@@ -11,8 +11,9 @@ import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.Rect;
 import org.zamedev.ui.view.TextView;
 import org.zamedev.ui.view.View;
+import org.zamedev.ui.view.ViewContainer;
 
-class Button extends View {
+class Button extends ViewContainer {
     private var backgroundView:ImageView;
     private var leftIconView:ImageView;
     private var rightIconView:ImageView;
@@ -51,17 +52,11 @@ class Button extends View {
     public function new(context:Context) {
         super(context);
 
-        backgroundView = new ImageView(context);
-        leftIconView = new ImageView(context);
-        rightIconView = new ImageView(context);
-        textView = new TextView(context);
-        hitTestView = new Rect(context);
-
-        _sprite.addChild(backgroundView._sprite);
-        _sprite.addChild(leftIconView._sprite);
-        _sprite.addChild(rightIconView._sprite);
-        _sprite.addChild(textView._sprite);
-        _sprite.addChild(hitTestView._sprite);
+        _addChild(backgroundView = new ImageView(context));
+        _addChild(leftIconView = new ImageView(context));
+        _addChild(rightIconView = new ImageView(context));
+        _addChild(textView = new TextView(context));
+        _addChild(hitTestView = new Rect(context));
 
         listenersAdded = false;
         leftIconMargin = 0.0;
