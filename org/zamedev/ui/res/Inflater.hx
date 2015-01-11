@@ -17,16 +17,35 @@ class Inflater {
     }
 
     public function inflate(resId:String, layoutParams:LayoutParams = null):View {
-        return _inflateResource(resId, layoutParams, new Map<String, Bool>(), new Map<String, String>());
+        return _inflateResource(
+            resId,
+            layoutParams,
+            new Map<String, Bool>(),
+            new Map<String, String>(),
+            new Map<String, String>()
+        );
     }
 
     public function inflateInto(resId:String, viewGroup:ViewGroup, reLayout:Bool = true):View {
-        var view = _inflateResource(resId, viewGroup.createLayoutParams(), new Map<String, Bool>(), new Map<String, String>());
+        var view = _inflateResource(
+            resId,
+            viewGroup.createLayoutParams(),
+            new Map<String, Bool>(),
+            new Map<String, String>(),
+            new Map<String, String>()
+        );
+
         viewGroup.addChild(view, reLayout);
         return view;
     }
 
-    private function _inflateResource(resId:String, layoutParams:LayoutParams, visitedMap:Map<String, Bool>, vars:Map<String, String>):View {
+    private function _inflateResource(
+        resId:String,
+        layoutParams:LayoutParams,
+        visitedMap:Map<String, Bool>,
+        vars:Map<String, String>,
+        overrides:Map<String, String>
+    ):View {
         var xmlString = context.resourceManager._getLayoutText(resId);
         var root = Xml.parse(xmlString).firstElement();
 
@@ -34,10 +53,17 @@ class Inflater {
             throw new Error("Parse error: " + resId);
         }
 
-        return _inflateNode(resId, layoutParams, root, visitedMap, vars);
+        return _inflateNode(resId, layoutParams, root, visitedMap, vars, overrides);
     }
 
-    private function _inflateNode(resId:String, layoutParams:LayoutParams, node:Xml, visitedMap:Map<String, Bool>, vars:Map<String, String>):View {
+    private function _inflateNode(
+        resId:String,
+        layoutParams:LayoutParams,
+        node:Xml,
+        visitedMap:Map<String, Bool>,
+        vars:Map<String, String>,
+        overrides:Map<String, String>
+    ):View {
         visitedMap[resId] = true;
         var className = node.nodeName;
 
@@ -51,12 +77,11 @@ class Inflater {
             }
 
             var newVars = new Map<String, String>();
+            var newOverrides = new Map<String, String>();
 
             for (att in node.attributes()) {
                 if (att == "layout") {
                     continue;
-                } else if (att.substr(0, 4) != "var_") {
-                    throw new Error("Parse error: " + resId + ", unsupported attribute " + att + " in include tag");
                 }
 
                 var value = node.get(att);
@@ -69,7 +94,11 @@ class Inflater {
                     }
                 }
 
-                newVars[att.substr(4)] = value;
+                if (att.substr(0, 4) == "var_") {
+                    newVars[att.substr(4)] = value;
+                } else {
+                    newOverrides[att] = value;
+                }
             }
 
             var newVisitedMap = new Map<String, Bool>();
@@ -78,7 +107,7 @@ class Inflater {
                 newVisitedMap[key] = visitedMap[key];
             }
 
-            return _inflateResource(includeResId, layoutParams, newVisitedMap, newVars);
+            return _inflateResource(includeResId, layoutParams, newVisitedMap, newVars, newOverrides);
         }
 
         if (ClassMapping.classMap.exists(className)) {
@@ -101,14 +130,14 @@ class Inflater {
         view.onInflateStarted();
         view.layoutParams = (layoutParams == null ? new LayoutParams() : layoutParams);
 
-        var styleResId = node.get("style");
+        var styleResId = (overrides.exists("style") ? overrides["style"] : node.get("style"));
 
         if (styleResId != null) {
             context.resourceManager.getStyle(styleResId).apply(view);
         }
 
         for (att in node.attributes()) {
-            if (att == "style") {
+            if (att == "style" || overrides.exists(att)) {
                 continue;
             }
 
@@ -127,11 +156,20 @@ class Inflater {
             }
         }
 
+        for (att in overrides.keys()) {
+            if (att != "style" && !view.inflate(att, new TypedValue(context.resourceManager, overrides[att]))) {
+                throw new Error("Parse error: " + resId + ", class " + className + ", unsupported attribute " + att);
+            }
+        }
+
         if (Std.is(view, ViewGroup)) {
             var viewGroup = cast(view, ViewGroup);
 
             for (innerNode in node.elements()) {
-                viewGroup.addChild(_inflateNode(resId, viewGroup.createLayoutParams(), innerNode, visitedMap, vars), false);
+                viewGroup.addChild(
+                    _inflateNode(resId, viewGroup.createLayoutParams(), innerNode, visitedMap, vars, new Map<String, String>()),
+                    false
+                );
             }
         }
 

@@ -17,6 +17,8 @@ class Button extends ViewContainer {
     private var backgroundView:ImageView;
     private var leftIconView:ImageView;
     private var rightIconView:ImageView;
+    private var upIconView:ImageView;
+    private var downIconView:ImageView;
     private var textView:TextView;
     private var hitTestView:Rect;
 
@@ -26,6 +28,8 @@ class Button extends ViewContainer {
     public var background(get, set):Drawable;
     public var leftIcon(get, set):Drawable;
     public var rightIcon(get, set):Drawable;
+    public var upIcon(get, set):Drawable;
+    public var downIcon(get, set):Drawable;
     public var backgroundOffset(get, set):Point;
     public var backgroundOffsetX(get, set):Float;
     public var backgroundOffsetY(get, set):Float;
@@ -35,6 +39,12 @@ class Button extends ViewContainer {
     public var rightIconOffset(get, set):Point;
     public var rightIconOffsetX(get, set):Float;
     public var rightIconOffsetY(get, set):Float;
+    public var upIconOffset(get, set):Point;
+    public var upIconOffsetX(get, set):Float;
+    public var upIconOffsetY(get, set):Float;
+    public var downIconOffset(get, set):Point;
+    public var downIconOffsetX(get, set):Float;
+    public var downIconOffsetY(get, set):Float;
     public var textOffset(get, set):Point;
     public var textOffsetX(get, set):Float;
     public var textOffsetY(get, set):Float;
@@ -44,9 +54,13 @@ class Button extends ViewContainer {
     public var text(get, set):String;
     public var leftIconMargin(default, set):Float;
     public var rightIconMargin(default, set):Float;
+    public var upIconMargin(default, set):Float;
+    public var downIconMargin(default, set):Float;
     public var disabled(get, set):Bool;
     public var leftIconAlpha(get, set):Float;
     public var rightIconAlpha(get, set):Float;
+    public var upIconAlpha(get, set):Float;
+    public var downIconAlpha(get, set):Float;
 
     @:keep
     public function new(context:Context) {
@@ -55,12 +69,16 @@ class Button extends ViewContainer {
         _addChild(backgroundView = new ImageView(context));
         _addChild(leftIconView = new ImageView(context));
         _addChild(rightIconView = new ImageView(context));
+        _addChild(upIconView = new ImageView(context));
+        _addChild(downIconView = new ImageView(context));
         _addChild(textView = new TextView(context));
         _addChild(hitTestView = new Rect(context));
 
         listenersAdded = false;
         leftIconMargin = 0.0;
         rightIconMargin = 0.0;
+        upIconMargin = 0.0;
+        downIconMargin = 0.0;
         _disabled = false;
 
         #if flash
@@ -75,9 +93,6 @@ class Button extends ViewContainer {
         _sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
         _sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
         _sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
-
-        addEventListener(Event.ADDED_TO_STAGE, onAddedToApplicationStage);
-        addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromApplicationStage);
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {
@@ -96,6 +111,14 @@ class Button extends ViewContainer {
 
             case "rightIcon":
                 rightIcon = value.resolveDrawable();
+                return true;
+
+            case "upIcon":
+                upIcon = value.resolveDrawable();
+                return true;
+
+            case "downIcon":
+                downIcon = value.resolveDrawable();
                 return true;
 
             case "backgroundOffsetX":
@@ -120,6 +143,22 @@ class Button extends ViewContainer {
 
             case "rightIconOffsetY":
                 rightIconOffsetY = computeDimension(value.resolveDimension(), true);
+                return true;
+
+            case "upIconOffsetX":
+                upIconOffsetX = computeDimension(value.resolveDimension(), false);
+                return true;
+
+            case "upIconOffsetY":
+                upIconOffsetY = computeDimension(value.resolveDimension(), true);
+                return true;
+
+            case "downIconOffsetX":
+                downIconOffsetX = computeDimension(value.resolveDimension(), false);
+                return true;
+
+            case "downIconOffsetY":
+                downIconOffsetY = computeDimension(value.resolveDimension(), true);
                 return true;
 
             case "textOffsetX":
@@ -154,6 +193,14 @@ class Button extends ViewContainer {
                 rightIconMargin = computeDimension(value.resolveDimension(), false);
                 return true;
 
+            case "upIconMargin":
+                upIconMargin = computeDimension(value.resolveDimension(), true);
+                return true;
+
+            case "downIconMargin":
+                downIconMargin = computeDimension(value.resolveDimension(), true);
+                return true;
+
             case "disabled":
                 disabled = value.resolveBool();
                 return true;
@@ -164,6 +211,14 @@ class Button extends ViewContainer {
 
             case "rightIconAlpha":
                 rightIconAlpha = value.resolveFloat();
+                return true;
+
+            case "upIconAlpha":
+                upIconAlpha = value.resolveFloat();
+                return true;
+
+            case "downIconAlpha":
+                downIconAlpha = value.resolveFloat();
                 return true;
         }
 
@@ -178,41 +233,51 @@ class Button extends ViewContainer {
         backgroundView.selfLayout(widthSpec, heightSpec);
         leftIconView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
         rightIconView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        upIconView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        downIconView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
         textView.selfLayout(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
         var leftIconWidth = (leftIconView.drawable == null ? 0 : leftIconView.width + leftIconMargin);
         var rightIconWidth = (rightIconView.drawable == null ? 0 : rightIconView.width + rightIconMargin);
+        var upIconHeight = (upIconView.drawable == null ? 0 : upIconView.height + upIconMargin);
+        var downIconHeight = (downIconView.drawable == null ? 0 : downIconView.height + downIconMargin);
 
-        _width = Math.max(backgroundView.width, leftIconWidth + textView.width + rightIconWidth);
-        _height = Math.max(Math.max(Math.max(backgroundView.height, leftIconView.height), rightIconView.height), textView.height);
+        _width = Math.max(
+            Math.max(
+                Math.max(backgroundView.width, leftIconWidth + textView.width + rightIconWidth),
+                upIconView.width
+            ),
+            downIconView.width
+        );
 
-        textView.cx = (_width + leftIconWidth - rightIconWidth) / 2;
-        textView.cy = _height / 2;
+        _height = Math.max(
+            Math.max(
+                Math.max(backgroundView.height, leftIconView.height),
+                rightIconView.height
+            ),
+            upIconHeight + textView.height + downIconHeight
+        );
+
+        var textCx = (_width + leftIconWidth - rightIconWidth) / 2;
+        var textCy = (_height + upIconHeight - downIconHeight) / 2;
+
+        textView.cx = textCx;
+        textView.cy = textCy;
 
         leftIconView.ex = textView.x - leftIconMargin;
-        leftIconView.cy = _height / 2;
+        leftIconView.cy = textCy;
 
         rightIconView.x = textView.ex + rightIconMargin;
-        rightIconView.cy = _height / 2;
+        rightIconView.cy = textCy;
+
+        upIconView.cx = textCx;
+        upIconView.ey = textView.y - upIconMargin;
+
+        downIconView.cx = textCx;
+        downIconView.y = textView.ey + downIconMargin;
 
         hitTestView.selfLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
         return true;
-    }
-
-    private function onAddedToApplicationStage(e:Event):Void {
-        backgroundView.dispatchEvent(e);
-        leftIconView.dispatchEvent(e);
-        rightIconView.dispatchEvent(e);
-        textView.dispatchEvent(e);
-        hitTestView.dispatchEvent(e);
-    }
-
-    private function onRemovedFromApplicationStage(e:Event):Void {
-        backgroundView.dispatchEvent(e);
-        leftIconView.dispatchEvent(e);
-        rightIconView.dispatchEvent(e);
-        textView.dispatchEvent(e);
-        hitTestView.dispatchEvent(e);
     }
 
     @:noCompletion
@@ -303,6 +368,28 @@ class Button extends ViewContainer {
     @:noCompletion
     private function set_rightIcon(value:Drawable):Drawable {
         rightIconView.drawable = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_upIcon():Drawable {
+        return upIconView.drawable;
+    }
+
+    @:noCompletion
+    private function set_upIcon(value:Drawable):Drawable {
+        upIconView.drawable = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_downIcon():Drawable {
+        return downIconView.drawable;
+    }
+
+    @:noCompletion
+    private function set_downIcon(value:Drawable):Drawable {
+        downIconView.drawable = value;
         return value;
     }
 
@@ -406,6 +493,72 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
+    private function get_upIconOffset():Point {
+        return upIconView.offset;
+    }
+
+    @:noCompletion
+    private function set_upIconOffset(value:Point):Point {
+        upIconView.offset = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_upIconOffsetX():Float {
+        return upIconView.offsetX;
+    }
+
+    @:noCompletion
+    private function set_upIconOffsetX(value:Float):Float {
+        upIconView.offsetX = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_upIconOffsetY():Float {
+        return upIconView.offsetY;
+    }
+
+    @:noCompletion
+    private function set_upIconOffsetY(value:Float):Float {
+        upIconView.offsetY = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_downIconOffset():Point {
+        return downIconView.offset;
+    }
+
+    @:noCompletion
+    private function set_downIconOffset(value:Point):Point {
+        downIconView.offset = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_downIconOffsetX():Float {
+        return downIconView.offsetX;
+    }
+
+    @:noCompletion
+    private function set_downIconOffsetX(value:Float):Float {
+        downIconView.offsetX = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_downIconOffsetY():Float {
+        return downIconView.offsetY;
+    }
+
+    @:noCompletion
+    private function set_downIconOffsetY(value:Float):Float {
+        downIconView.offsetY = value;
+        return value;
+    }
+
+    @:noCompletion
     private function get_textOffset():Point {
         return textView.offset;
     }
@@ -497,6 +650,20 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
+    private function set_upIconMargin(value:Float):Float {
+        upIconMargin = value;
+        requestLayout();
+        return value;
+    }
+
+    @:noCompletion
+    private function set_downIconMargin(value:Float):Float {
+        downIconMargin = value;
+        requestLayout();
+        return value;
+    }
+
+    @:noCompletion
     private function get_disabled():Bool {
         return _disabled;
     }
@@ -527,6 +694,28 @@ class Button extends ViewContainer {
     @:noCompletion
     private function set_rightIconAlpha(value:Float):Float {
         rightIconView.alpha = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_upIconAlpha():Float {
+        return upIconView.alpha;
+    }
+
+    @:noCompletion
+    private function set_upIconAlpha(value:Float):Float {
+        upIconView.alpha = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_downIconAlpha():Float {
+        return downIconView.alpha;
+    }
+
+    @:noCompletion
+    private function set_downIconAlpha(value:Float):Float {
+        downIconView.alpha = value;
         return value;
     }
 }

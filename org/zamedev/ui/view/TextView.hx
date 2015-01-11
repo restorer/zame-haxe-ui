@@ -1,13 +1,23 @@
 package org.zamedev.ui.view;
 
+import openfl.errors.ArgumentError;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
 import openfl.text.TextFormat;
+import openfl.text.TextFormatAlign;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
+
+using StringTools;
+
+#if (!flash && !html5 && !openfl_next)
+    typedef TextFormatAlignExt = String;
+#else
+    typedef TextFormatAlignExt = TextFormatAlign;
+#end
 
 class TextView extends View {
     private var _textFormat:TextFormat;
@@ -24,6 +34,7 @@ class TextView extends View {
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
     public var textLeading(get, set):Null<Float>;
+    public var textAlign(get, set):TextFormatAlignExt;
     public var font(get, set):String;
     public var text(get, set):String;
 
@@ -71,6 +82,26 @@ class TextView extends View {
                 textLeading = computeDimension(value.resolveDimension(), true);
                 return true;
 
+            case "textAlign":
+                textAlign = switch(value.resolveString().trim().toLowerCase()) {
+                    case "center":
+                        TextFormatAlign.CENTER;
+
+                    case "justify":
+                        TextFormatAlign.JUSTIFY;
+
+                    case "right":
+                        TextFormatAlign.RIGHT;
+
+                    case "left":
+                        TextFormatAlign.LEFT;
+
+                    default:
+                        throw new ArgumentError("Unsupported text align: " + value.resolveString());
+                }
+
+                return true;
+
             case "font":
                 font = value.resolveFont();
                 return true;
@@ -106,7 +137,7 @@ class TextView extends View {
 
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                #if mobile
+                #if (native || mobile)
                     _width = textField.textWidth * 1.1;
                 #elseif flash
                     _width = textField.textWidth + 4;
@@ -234,6 +265,26 @@ class TextView extends View {
             textField.defaultTextFormat = _textFormat;
             textField.setTextFormat(_textFormat);
             requestLayout();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_textAlign():TextFormatAlignExt {
+        return _textFormat.align;
+    }
+
+    @:noCompletion
+    private function set_textAlign(value:TextFormatAlignExt):TextFormatAlignExt {
+        if (_textFormat.align != value) {
+            _textFormat.align = value;
+            textField.defaultTextFormat = _textFormat;
+            textField.setTextFormat(_textFormat);
+
+            #if (!flash && !webgl && !dom)
+                updateCache();
+            #end
         }
 
         return value;
