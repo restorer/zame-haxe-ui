@@ -14,9 +14,9 @@ class LayoutParams {
     public var _measuredWidth:Float;
     public var _measuredHeight:Float;
 
-    public function new() {
-        width = Dimension.WRAP_CONTENT;
-        height = Dimension.WRAP_CONTENT;
+    public function new(width:Dimension = null, height:Dimension = null) {
+        this.width = (width == null ? Dimension.WRAP_CONTENT : width);
+        this.height = (height == null ? Dimension.WRAP_CONTENT : height);
     }
 
     public function inflate(name:String, value:TypedValue):Bool {

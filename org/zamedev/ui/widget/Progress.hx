@@ -68,7 +68,8 @@ class Progress extends View {
 
     private function onProgressAddedToApplicationStage(e:Event):Void {
         imageView.dispatchEvent(e);
-        Actuate.tween(_pivotSprite, 2, { rotation: 359 }).ease(Linear.easeNone).repeat();
+        Actuate.tween(_pivotSprite, 1.5, { rotation: 359 }).ease(Linear.easeNone).repeat();
+        // Actuate.tween(_pivotSprite, 1.5, { rotation: 359 }).ease(motion.easing.Sine.easeInOut).repeat();
     }
 
     private function onProgressRemovedFromApplicationStage(e:Event):Void {

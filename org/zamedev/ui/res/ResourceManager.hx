@@ -66,6 +66,26 @@ class ResourceManager {
         return value;
     }
 
+    public function getFloat(id:String):Float {
+        var value = dimensions[id];
+
+        if (value == null) {
+            value = dimensions["@dimen/" + id];
+
+            if (value == null) {
+                throw new Error("Dimension not found: " + id);
+            }
+        }
+
+        switch (value) {
+            case EXACT(size):
+                return size;
+
+            default:
+                throw new Error("Only exact dimensions coul'd be resolved as float: " + id);
+        }
+    }
+
     public function getDrawable(id:String):Drawable {
         if (id == "null" || id == "@drawable/null") {
             return null;

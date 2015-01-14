@@ -12,15 +12,24 @@ class AbsoluteLayoutParams extends LayoutParams {
     public var ex:Dimension;
     public var ey:Dimension;
 
-    public function new() {
-        super();
+    public function new(
+        width:Dimension = null,
+        height:Dimension = null,
+        x:Dimension = null,
+        y:Dimension = null,
+        cx:Dimension = null,
+        cy:Dimension = null,
+        ex:Dimension = null,
+        ey:Dimension = null
+    ) {
+        super(width, height);
 
-        x = null;
-        y = null;
-        cx = null;
-        cy = null;
-        ex = null;
-        ey = null;
+        this.x = x;
+        this.y = y;
+        this.cx = cx;
+        this.cy = cy;
+        this.ex = ex;
+        this.ey = ey;
     }
 
     override public function inflate(name:String, value:TypedValue):Bool {

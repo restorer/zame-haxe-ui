@@ -8,6 +8,7 @@ class ClassMapping {
 
         classMap["ImageView"] = Type.getClassName(org.zamedev.ui.view.ImageView);
         classMap["Rect"] = Type.getClassName(org.zamedev.ui.view.Rect);
+        classMap["SpaceView"] = Type.getClassName(org.zamedev.ui.view.SpaceView);
         classMap["TextView"] = Type.getClassName(org.zamedev.ui.view.TextView);
         classMap["View"] = Type.getClassName(org.zamedev.ui.view.View);
         classMap["AbsoluteLayout"] = Type.getClassName(org.zamedev.ui.widget.AbsoluteLayout);
