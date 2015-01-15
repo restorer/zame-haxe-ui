@@ -528,6 +528,7 @@ class View extends EventDispatcher implements Inflatable {
         return _sprite.alpha;
     }
 
+    @:keep
     @:noCompletion
     private function set_alpha(value:Float):Float {
         _sprite.alpha = value;

@@ -3,6 +3,11 @@ package org.zamedev.ui.view;
 import org.zamedev.ui.res.MeasureSpec;
 
 class SpaceView extends View {
+    @:keep
+    public function new(context:Context) {
+        super(context);
+    }
+
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;

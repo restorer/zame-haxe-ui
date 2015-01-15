@@ -135,11 +135,13 @@ class ImageView extends View {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_scaleX():Float {
         return _scaleX;
     }
 
+    @:keep
     @:noCompletion
     private function set_scaleX(value:Float):Float {
         if (_scaleX != value) {
@@ -155,11 +157,13 @@ class ImageView extends View {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_scaleY():Float {
         return _scaleY;
     }
 
+    @:keep
     @:noCompletion
     private function set_scaleY(value:Float):Float {
         if (_scaleY != value) {

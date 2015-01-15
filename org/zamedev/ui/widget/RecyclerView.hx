@@ -40,8 +40,8 @@ class RecyclerView extends BaseViewContainer {
 
     private var _diffOffsetX:Float;
     private var _diffOffsetY:Float;
-    private var _targetScrollOffsetX:Float;
-    private var _targetScrollOffsetY:Float;
+    private var _scrollingCurrentOffsetX:Float;
+    private var _scrollingCurrentOffsetY:Float;
 
     public var adapter(get, set):RecyclerViewAdapter;
     public var scrollOffsetX(get, set):Float;
@@ -486,30 +486,24 @@ class RecyclerView extends BaseViewContainer {
         _isScrolling = true;
         _diffOffsetX = 0.0;
         _diffOffsetY = 0.0;
-        _targetScrollOffsetX = offsetX;
-        _targetScrollOffsetY = offsetY;
+        _scrollingCurrentOffsetX = _scrollOffsetX;
+        _scrollingCurrentOffsetY = _scrollOffsetY;
 
-        Actuate.update(
-            _handleScrollUpdate,
-            duration,
-            [_scrollOffsetX, _scrollOffsetY],
-            [_targetScrollOffsetX, _targetScrollOffsetY]
-        ).onComplete(_handleScrollComplete);
+        Actuate.tween(this, duration, {
+            _scrollingCurrentOffsetX: offsetX,
+            _scrollingCurrentOffsetY: offsetY,
+        }).onUpdate(_handleScrollUpdate).onComplete(_handleScrollComplete);
     }
 
     private function ensureScrollingStopped() {
         if (_isScrolling) {
-            Actuate.stop(_handleScrollUpdate);
-            _scrollOffsetX = _targetScrollOffsetX + _diffOffsetX;
-            _scrollOffsetY = _targetScrollOffsetY + _diffOffsetY;
-            _isScrolling = false;
-            updateBitmapData();
+            Actuate.stop(this, null, true, true);
         }
     }
 
-    private function _handleScrollUpdate(currentOffsetX:Float, currentOffsetY:Float):Void {
-        _scrollOffsetX = currentOffsetX + _diffOffsetX;
-        _scrollOffsetY = currentOffsetY + _diffOffsetY;
+    private function _handleScrollUpdate():Void {
+        _scrollOffsetX = _scrollingCurrentOffsetX + _diffOffsetX;
+        _scrollOffsetY = _scrollingCurrentOffsetY + _diffOffsetY;
 
         var prevScrollOffsetX = _scrollOffsetX;
         var prevScrollOffsetY = _scrollOffsetY;
