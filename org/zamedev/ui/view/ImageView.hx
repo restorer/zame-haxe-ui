@@ -1,6 +1,7 @@
 package org.zamedev.ui.view;
 
 import openfl.display.DisplayObject;
+import openfl.events.MouseEvent;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.MeasureSpec;
@@ -92,6 +93,28 @@ class ImageView extends View {
         }
 
         return true;
+    }
+
+    override public function addEventListener(
+        type:String,
+        listener:Dynamic->Void,
+        useCapture:Bool = false,
+        priority:Int = 0,
+        useWeakReference:Bool = false
+    ):Void {
+        if (type == MouseEvent.CLICK) {
+            sprite.addEventListener(type, listener, useCapture, priority, useWeakReference);
+        } else {
+            super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+        }
+    }
+
+    override public function removeEventListener(type:String, listener:Dynamic->Void, capture:Bool = false):Void {
+        if (type == MouseEvent.CLICK) {
+            sprite.removeEventListener(type, listener, capture);
+        } else {
+            super.removeEventListener(type, listener, capture);
+        }
     }
 
     @:noCompletion
