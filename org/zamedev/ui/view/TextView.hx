@@ -21,6 +21,7 @@ using StringTools;
 
 class TextView extends View {
     private var _textFormat:TextFormat;
+    private var _htmlText:String;
     private var textField:TextFieldExt;
 
     #if flash
@@ -37,12 +38,14 @@ class TextView extends View {
     public var textAlign(get, set):TextFormatAlignExt;
     public var font(get, set):String;
     public var text(get, set):String;
+    public var htmlText(never, set):String;
 
     @:keep
     public function new(context:Context) {
         super(context);
 
         _textFormat = new TextFormat();
+        _htmlText = null;
         textField = new TextFieldExt();
 
         #if flash
@@ -108,6 +111,10 @@ class TextView extends View {
 
             case "text":
                 text = value.resolveString();
+                return true;
+
+            case "htmlText":
+                htmlText = value.resolveString();
                 return true;
         }
 
@@ -254,7 +261,7 @@ class TextView extends View {
                 if (value == null) {
                     _textFormat.leading = null;
                 } else {
-                    _textFormat.leading = value - 5.0;
+                    _textFormat.leading = value - 4.0;
                 }
 
                 _textLeading = value;
@@ -315,8 +322,25 @@ class TextView extends View {
 
     @:noCompletion
     private function set_text(value:String):String {
-        if (textField.text != value) {
+        if (_htmlText != null || textField.text != value) {
+            _htmlText = null;
             textField.text = value;
+            requestLayout();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function set_htmlText(value:String):String {
+        if (_htmlText == null || _htmlText != value) {
+            _htmlText = value;
+
+            var html = ~/"(@font\/[^"]+)"/g.map(value, function(re:EReg):String {
+                return "\"" + _context.resourceManager.getFont(re.matched(1)) + "\"";
+            });
+
+            textField.htmlText = html;
             requestLayout();
         }
 

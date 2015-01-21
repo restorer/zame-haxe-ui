@@ -32,7 +32,14 @@ class Application extends Sprite implements Context {
         super();
 
         _applicationStage = new ApplicationStage();
-        _locale = Capabilities.language;
+
+        #if ios
+            // work-around for bug in lime legacy
+            _locale = "en-US";
+        #else
+            _locale = Capabilities.language;
+        #end
+
         _resourceManager = new ResourceManager(this);
         _inflater = new Inflater(this);
         _currentScene = null;
