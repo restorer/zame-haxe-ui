@@ -54,8 +54,8 @@ class Progress extends View {
         _width = imageView.width;
         _height = imageView.height;
 
-        var midX = Std.int(_width / 2);
-        var midY = Std.int(_height / 2);
+        var midX = _width / 2;
+        var midY = _height / 2;
 
         _pivotSprite.x = midX;
         _pivotSprite.y = midY;

@@ -221,6 +221,8 @@ class RecyclerView extends BaseViewContainer {
             _sprite.addChild(viewHolder._view._sprite);
         }
 
+        viewHolder._visiblePosition = position - _firstVisiblePosition;
+
         if (isAddedToApplicationStage) {
             viewHolder._view.dispatchEvent(new Event(Event.ADDED_TO_STAGE));
         }

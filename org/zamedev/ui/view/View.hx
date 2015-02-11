@@ -153,6 +153,10 @@ class View extends EventDispatcher implements Inflatable {
                 alpha = value.resolveFloat();
                 return true;
 
+            case "rotation":
+                rotation = value.resolveFloat();
+                return true;
+
             case "offsetX":
                 offsetX = computeDimension(value.resolveDimension(), false);
                 return true;

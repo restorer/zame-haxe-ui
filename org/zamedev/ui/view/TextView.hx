@@ -309,6 +309,15 @@ class TextView extends View {
             textField.embedFonts = true;
             textField.defaultTextFormat = _textFormat;
             textField.setTextFormat(_textFormat);
+
+            #if native
+                if (_htmlText != null) {
+                    textField.htmlText = textField.htmlText;
+                } else {
+                    textField.text = textField.text;
+                }
+            #end
+
             requestLayout();
         }
 
