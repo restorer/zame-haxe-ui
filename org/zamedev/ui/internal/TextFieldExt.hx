@@ -74,7 +74,7 @@ class TextFieldExt extends TextField {
     @:noCompletion
     override public function set_text(value:String):String {
         if (__isHTML || __text != value) {
-            _escapedText = value.htmlEscape().replace("\n", "<br />");
+            _escapedText = value.htmlEscape().replace(" ", "&nbsp;").replace("\n", "<br />");
             _isMeasurementsDirty = true;
         }
 

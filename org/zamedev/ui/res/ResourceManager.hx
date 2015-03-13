@@ -6,9 +6,7 @@ import org.zamedev.ui.graphics.Color;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.Drawable;
-import org.zamedev.ui.view.LayoutParams;
-import org.zamedev.ui.view.View;
-import org.zamedev.ui.view.ViewGroup;
+import org.zamedev.ui.graphics.FontExt;
 
 using StringTools;
 using org.zamedev.lib.XmlExt;
@@ -28,7 +26,7 @@ typedef SelectorSpec = {
 class ResourceManager {
     private var context:Context;
     private var colors:Map<String, UInt>;
-    private var fonts:Map<String, String>;
+    private var fonts:Map<String, FontExt>;
     private var dimensions:Map<String, Dimension>;
     private var drawables:Map<String, Drawable>;
     private var strings:Map<String, String>;
@@ -104,7 +102,7 @@ class ResourceManager {
         return value;
     }
 
-    public function getFont(id:String):String {
+    public function getFont(id:String):FontExt {
         var value = fonts[id];
 
         if (value == null) {
@@ -175,7 +173,7 @@ class ResourceManager {
         colors = new Map<String, UInt>();
         dimensions = new Map<String, Dimension>();
         drawables = new Map<String, Drawable>();
-        fonts = new Map<String, String>();
+        fonts = new Map<String, FontExt>();
         strings = new Map<String, String>();
         styles = new Map<String, Style>();
         selectors = new Map<String, Selector>();
@@ -241,7 +239,7 @@ class ResourceManager {
                     dimensions["@dimen/" + name] = DimensionTools.parse(resolved.innerText());
 
                 case "font":
-                    fonts["@font/" + name] = Assets.getFont("font/" + resolved.innerText().trim()).fontName;
+                    fonts["@font/" + name] = FontExt.parse(resolved.innerText().trim());
 
                 case "string":
                     strings["@string/" + name] = TypedValue.processRawString(resolved.innerText());

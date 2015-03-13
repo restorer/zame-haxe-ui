@@ -499,7 +499,7 @@ class RecyclerView extends BaseViewContainer {
 
     private function ensureScrollingStopped() {
         if (_isScrolling) {
-            Actuate.stop(this, null, true, true);
+            Actuate.stop(this, null, true);
         }
     }
 

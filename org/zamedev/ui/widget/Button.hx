@@ -5,12 +5,12 @@ import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
+import org.zamedev.ui.graphics.FontExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.Rect;
 import org.zamedev.ui.view.TextView;
-import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewContainer;
 
 class Button extends ViewContainer {
@@ -50,7 +50,7 @@ class Button extends ViewContainer {
     public var textOffsetY(get, set):Float;
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
-    public var font(get, set):String;
+    public var font(get, set):FontExt;
     public var text(get, set):String;
     public var leftIconMargin(default, set):Float;
     public var rightIconMargin(default, set):Float;
@@ -614,12 +614,12 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
-    private function get_font():String {
+    private function get_font():FontExt {
         return textView.font;
     }
 
     @:noCompletion
-    private function set_font(value:String):String {
+    private function set_font(value:FontExt):FontExt {
         textView.font = value;
         return value;
     }

@@ -5,6 +5,7 @@ import org.zamedev.ui.graphics.Color;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.Drawable;
+import org.zamedev.ui.graphics.FontExt;
 
 using StringTools;
 
@@ -59,11 +60,11 @@ class TypedValue {
         }
     }
 
-    public function resolveFont():String {
+    public function resolveFont():FontExt {
         if (textValue.substr(0, 1) == "@") {
             return resourceManager.getFont(textValue);
         } else {
-            return textValue;
+            return FontExt.parse(textValue);
         }
     }
 

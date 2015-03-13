@@ -406,49 +406,58 @@ class View extends EventDispatcher implements Inflatable {
         return _width;
     }
 
+    @:keep
     @:noCompletion
     private function get_height():Float {
         return _height;
     }
 
+    @:keep
     @:noCompletion
     private function get_cx():Float {
         return x + width / 2;
     }
 
+    @:keep
     @:noCompletion
     private function set_cx(value:Float):Float {
         x = value - width / 2;
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_cy():Float {
         return y + height / 2;
     }
 
+    @:keep
     @:noCompletion
     private function set_cy(value:Float):Float {
         y = value - height / 2;
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_ex():Float {
         return x + width;
     }
 
+    @:keep
     @:noCompletion
     private function set_ex(value:Float):Float {
         x = value - width;
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_ey():Float {
         return y + height;
     }
 
+    @:keep
     @:noCompletion
     private function set_ey(value:Float):Float {
         y = value - height;
@@ -491,11 +500,13 @@ class View extends EventDispatcher implements Inflatable {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_rotation():Float {
         return _sprite.rotation;
     }
 
+    @:keep
     @:noCompletion
     private function set_rotation(value:Float):Float {
         _sprite.rotation = value;
