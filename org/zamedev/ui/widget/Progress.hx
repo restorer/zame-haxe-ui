@@ -1,15 +1,15 @@
 package org.zamedev.ui.widget;
 
+import motion.Actuate;
+import motion.easing.Linear;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.View;
-import motion.Actuate;
-import motion.easing.Linear;
 
 class Progress extends View {
     private var imageView:ImageView;
@@ -30,18 +30,19 @@ class Progress extends View {
         addEventListener(Event.REMOVED_FROM_STAGE, onProgressRemovedFromApplicationStage);
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "drawable":
-                drawable = value.resolveDrawable();
+        switch (attId) {
+            case Styleable.drawable:
+                drawable = cast value;
                 return true;
-        }
 
-        return false;
+            default:
+                return false;
+        }
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {

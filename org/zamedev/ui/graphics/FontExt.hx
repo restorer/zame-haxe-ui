@@ -14,12 +14,12 @@ class FontExt {
         public var bitmapFont:BitmapFont;
     #end
 
-    public function new():Void {
-        ttfFontName = null;
+    public function new(ttfFontName:String = null #if bitmapFont , bitmapFontName:String = null, bitmapFont:BitmapFont = null #end):Void {
+        this.ttfFontName = ttfFontName;
 
         #if bitmapFont
-            bitmapFontName = null;
-            bitmapFont = null;
+            this.bitmapFontName = bitmapFontName;
+            this.bitmapFont = bitmapFont;
         #end
     }
 
@@ -39,23 +39,16 @@ class FontExt {
         #end
     }
 
-    public static function parse(value:String):FontExt {
-        var result = new FontExt();
-
-        #if bitmapFont
-            if (~/\.fnt$/i.match(value)) {
-                result.bitmapFontName = value;
-
-                result.bitmapFont = BitmapFont.fromAngelCode(
-                    Assets.getBitmapData("font/" + ~/\.fnt$/i.replace(value, ".png")),
-                    Xml.parse(Assets.getText("font/" + value))
-                );
-
-                return result;
-            }
-        #end
-
-        result.ttfFontName = Assets.getFont("font/" + value).fontName;
-        return result;
+    public static function createTtf(assetId:String) {
+        return new FontExt(Assets.getFont(assetId).fontName);
     }
+
+    #if bitmapFont
+        public static function createBitmap(name:String, imageAssetId:String, xmlAssetId:String) {
+            return new FontExt(null, name, BitmapFont.fromAngelCode(
+                Assets.getBitmapData(imageAssetId),
+                Xml.parse(Assets.getText(xmlAssetId))
+            ));
+        }
+    #end
 }

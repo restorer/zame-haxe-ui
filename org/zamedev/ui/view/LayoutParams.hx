@@ -1,8 +1,8 @@
 package org.zamedev.ui.view;
 
 import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.res.MeasureSpec;
+import org.zamedev.ui.res.Styleable;
 
 class LayoutParams {
     public var width:Dimension;
@@ -19,23 +19,18 @@ class LayoutParams {
         this.height = (height == null ? Dimension.WRAP_CONTENT : height);
     }
 
-    public function inflate(name:String, value:TypedValue):Bool {
-        switch (name) {
-            case "width":
-                width = value.resolveDimension();
+    private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        switch (attId) {
+            case Styleable.layout_width:
+                width = cast value;
                 return true;
 
-            case "height":
-                height = value.resolveDimension();
+            case Styleable.layout_height:
+                height = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
-    }
-
-    public function onInflateStarted():Void {
-    }
-
-    public function onInflateFinished():Void {
     }
 }

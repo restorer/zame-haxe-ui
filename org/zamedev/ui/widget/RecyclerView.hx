@@ -1,21 +1,18 @@
 package org.zamedev.ui.widget;
 
+import motion.Actuate;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
-import openfl.display.PixelSnapping;
-import openfl.display.Shape;
-import openfl.errors.Error;
 import openfl.events.Event;
-import org.zamedev.ui.Context;
-import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
-import org.zamedev.ui.view.LayoutParams;
-import org.zamedev.ui.view.View;
-import org.zamedev.ui.view.BaseViewContainer;
-import org.zamedev.ui.view.ViewVisibility;
 import openfl.geom.ColorTransform;
 import openfl.geom.Rectangle;
-import motion.Actuate;
+import org.zamedev.ui.Context;
+import org.zamedev.ui.res.MeasureSpec;
+import org.zamedev.ui.res.Styleable;
+import org.zamedev.ui.view.BaseViewContainer;
+import org.zamedev.ui.view.LayoutParams;
+import org.zamedev.ui.view.View;
+import org.zamedev.ui.view.ViewVisibility;
 
 using StringTools;
 
@@ -76,26 +73,27 @@ class RecyclerView extends BaseViewContainer {
         addEventListener(Event.REMOVED_FROM_STAGE, onRecyclerViewRemovedFromApplicationStage);
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "cycle":
-                cycle = value.resolveBool();
+        switch (attId) {
+            case Styleable.cycle:
+                cycle = cast value;
                 return true;
 
-            case "verticalFadeSize":
-                verticalFadeSize = Std.int(computeDimension(value.resolveDimension(), true));
+            case Styleable.verticalFadeSize:
+                verticalFadeSize = Std.int(computeDimension(cast value, true));
                 return true;
 
-            case "scrollable":
-                scrollable = value.resolveBool();
+            case Styleable.scrollable:
+                scrollable = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {

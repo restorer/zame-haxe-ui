@@ -1,8 +1,8 @@
 package org.zamedev.ui.view;
 
-import openfl.errors.Error;
 import openfl.events.Event;
 import org.zamedev.ui.Context;
+import org.zamedev.ui.errors.UiError;
 
 class ViewContainer extends BaseViewContainer {
     public var children:Array<View>;
@@ -18,7 +18,7 @@ class ViewContainer extends BaseViewContainer {
 
     private function _addChild(view:View, reLayout:Bool = false):Void {
         if (view._parent != null) {
-            throw new Error("View already added to another ViewContainer");
+            throw new UiError("View already added to another ViewContainer");
         }
 
         view._parent = this;
@@ -36,7 +36,7 @@ class ViewContainer extends BaseViewContainer {
 
     private function _removeChild(view:View, reLayout:Bool = false):Void {
         if (!children.remove(view)) {
-            throw new Error("View is not added to this ViewContainer");
+            throw new UiError("View is not added to this ViewContainer");
         }
 
         _sprite.removeChild(view._sprite);

@@ -5,7 +5,7 @@ import openfl.text.TextField;
 #if js
 
 import js.Browser;
-import js.html.Element;
+import js.html.DOMElement;
 import openfl.text.TextFormat;
 
 #if !dom
@@ -15,7 +15,7 @@ import openfl.text.TextFormat;
 using StringTools;
 
 class TextFieldExt extends TextField {
-    private static var _divExt:Element = null;
+    private static var _divExt:DOMElement = null;
     private static var _isFirefox:Bool = false;
 
     private var _isMeasurementsDirty:Bool;
@@ -61,7 +61,7 @@ class TextFieldExt extends TextField {
 
     @:noCompletion
     override private function __getFont(format:TextFormat):String {
-        return cast(format)._jsFont;
+        return untyped format._jsFont;
     }
 
     #if dom
@@ -219,7 +219,7 @@ class TextFieldExt extends TextField {
         }
 
         jsFont += "'";
-        cast(format)._jsFont = jsFont;
+        untyped format._jsFont = jsFont;
     }
 
     #if !dom

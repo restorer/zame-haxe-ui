@@ -1,0 +1,6 @@
+-lib zame-miscutils
+-lib lime
+-lib openfl
+-lib polygonal-printf
+-main org.zamedev.ui.tools.UiBuilder
+-neko run.n

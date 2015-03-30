@@ -2,8 +2,8 @@ package org.zamedev.ui.view;
 
 import org.zamedev.ui.Context;
 import org.zamedev.ui.internal.ShapeExt;
-import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.res.MeasureSpec;
+import org.zamedev.ui.res.Styleable;
 
 class Rect extends View {
     private var shape:ShapeExt;
@@ -30,30 +30,31 @@ class Rect extends View {
         _ellipseHeight = 0.0;
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "fillColor":
-                fillColor = value.resolveColor();
+        switch (attId) {
+            case Styleable.fillColor:
+                fillColor = cast value;
                 return true;
 
-            case "ellipseWidth":
-                ellipseWidth = computeDimension(value.resolveDimension(), false);
+            case Styleable.ellipseWidth:
+                ellipseWidth = computeDimension(cast value, false);
                 return true;
 
-            case "ellipseHeight":
-                ellipseHeight = computeDimension(value.resolveDimension(), true);
+            case Styleable.ellipseHeight:
+                ellipseHeight = computeDimension(cast value, true);
                 return true;
 
-            case "ellipseSize":
-                ellipseSize = computeDimension(value.resolveDimension(), false);
+            case Styleable.ellipseSize:
+                ellipseSize = computeDimension(cast value, false);
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
@@ -142,6 +143,7 @@ class Rect extends View {
         @:noCompletion
         private function get_buttonMode():Bool {
             return shape.buttonMode;
+            return false;
         }
 
         @:noCompletion

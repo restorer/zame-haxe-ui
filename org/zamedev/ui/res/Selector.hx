@@ -1,23 +1,17 @@
 package org.zamedev.ui.res;
 
-import openfl.errors.Error;
 import org.zamedev.ui.view.View;
 
 using StringTools;
 
-typedef SelectorItem = {
-    stateMap:Map<String, Bool>,
-    value:TypedValue,
-};
-
 class Selector {
-    private var paramMap:Map<String, Array<SelectorItem>>;
+    private var paramMap:Map<Int, Array<SelectorItem>>;
 
-    public function new(paramMap:Map<String, Array<SelectorItem>> = null) {
+    public function new(paramMap:Map<Int, Array<SelectorItem>> = null) {
         if (paramMap != null) {
             this.paramMap = paramMap;
         } else {
-            this.paramMap = new Map<String, Array<SelectorItem>>();
+            this.paramMap = new Map<Int, Array<SelectorItem>>();
         }
     }
 
@@ -30,7 +24,7 @@ class Selector {
             sb.add(" => [");
 
             sb.add(paramMap[key].map(function(v:SelectorItem):String {
-                return "{stateMap => " + v.stateMap.toString() + ", value => " + v.value.toString() + "}";
+                return "{stateMap => " + v.stateMap.toString() + ", value => " + Std.string(v.value) + "}";
             }).join(", "));
 
             sb.add("]");
@@ -53,10 +47,7 @@ class Selector {
                 }
 
                 if (matched) {
-                    if (!view.inflate(key, item.value)) {
-                        throw new Error("Apply error: class " + Type.getClassName(Type.getClass(view)) + ", unsupported attribute " + key);
-                    }
-
+                    view.inflate(cast key, item.value);
                     break;
                 }
             }

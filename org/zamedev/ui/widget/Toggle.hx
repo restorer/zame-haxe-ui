@@ -1,9 +1,9 @@
 package org.zamedev.ui.widget;
 
+import motion.Actuate;
 import openfl.events.MouseEvent;
 import org.zamedev.ui.Context;
-import org.zamedev.ui.res.TypedValue;
-import motion.Actuate;
+import org.zamedev.ui.res.Styleable;
 
 class Toggle extends Button {
     @:keep
@@ -12,18 +12,19 @@ class Toggle extends Button {
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "selected":
-                updateState("selected", value.resolveBool());
+        switch (attId) {
+            case Styleable.selected:
+                updateState("selected", cast value);
                 return true;
-        }
 
-        return false;
+            default:
+                return false;
+        }
     }
 
     @:noCompletion

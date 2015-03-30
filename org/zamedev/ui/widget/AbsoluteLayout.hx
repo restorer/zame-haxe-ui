@@ -1,9 +1,7 @@
 package org.zamedev.ui.widget;
 
 import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
 import org.zamedev.ui.view.LayoutParams;
 import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;

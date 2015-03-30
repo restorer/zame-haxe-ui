@@ -1,6 +1,6 @@
 package org.zamedev.ui.graphics;
 
-import openfl.errors.ArgumentError;
+import org.zamedev.ui.errors.UiParseError;
 
 using StringTools;
 
@@ -47,7 +47,7 @@ class GravityTools {
                     result.verticalType = GravityType.END;
 
                 default:
-                    throw new ArgumentError("Parse error: " + s);
+                    throw new UiParseError(s);
             }
         }
 

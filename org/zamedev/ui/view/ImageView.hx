@@ -5,7 +5,7 @@ import openfl.events.MouseEvent;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 
 class ImageView extends View {
     private var _drawable:Drawable;
@@ -34,30 +34,31 @@ class ImageView extends View {
         _scaleY = 1.0;
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "drawable":
-                drawable = value.resolveDrawable();
+        switch (attId) {
+            case Styleable.drawable:
+                drawable = cast value;
                 return true;
 
-            case "scaleX":
-                scaleX = value.resolveFloat();
+            case Styleable.scaleX:
+                scaleX = cast value;
                 return true;
 
-            case "scaleY":
-                scaleY = value.resolveFloat();
+            case Styleable.scaleY:
+                scaleY = cast value;
                 return true;
 
-            case "scale":
-                scale = value.resolveFloat();
+            case Styleable.scale:
+                scale = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {

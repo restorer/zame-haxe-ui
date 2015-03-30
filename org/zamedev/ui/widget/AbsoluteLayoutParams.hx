@@ -1,7 +1,7 @@
 package org.zamedev.ui.widget;
 
 import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.LayoutParams;
 
 class AbsoluteLayoutParams extends LayoutParams {
@@ -32,37 +32,38 @@ class AbsoluteLayoutParams extends LayoutParams {
         this.ey = ey;
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "x":
-                x = value.resolveDimension();
+        switch (attId) {
+            case Styleable.layout_x:
+                x = cast value;
                 return true;
 
-            case "y":
-                y = value.resolveDimension();
+            case Styleable.layout_y:
+                y = cast value;
                 return true;
 
-            case "cx":
-                cx = value.resolveDimension();
+            case Styleable.layout_cx:
+                cx = cast value;
                 return true;
 
-            case "cy":
-                cy = value.resolveDimension();
+            case Styleable.layout_cy:
+                cy = cast value;
                 return true;
 
-            case "ex":
-                ex = value.resolveDimension();
+            case Styleable.layout_ex:
+                ex = cast value;
                 return true;
 
-            case "ey":
-                ey = value.resolveDimension();
+            case Styleable.layout_ey:
+                ey = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 }

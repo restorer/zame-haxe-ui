@@ -7,7 +7,7 @@ import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.graphics.FontExt;
 import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.Rect;
 import org.zamedev.ui.view.TextView;
@@ -95,134 +95,135 @@ class Button extends ViewContainer {
         _sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "background":
-                background = value.resolveDrawable();
+        switch (attId) {
+            case Styleable.background:
+                background = cast value;
                 return true;
 
-            case "leftIcon":
-                leftIcon = value.resolveDrawable();
+            case Styleable.leftIcon:
+                leftIcon = cast value;
                 return true;
 
-            case "rightIcon":
-                rightIcon = value.resolveDrawable();
+            case Styleable.rightIcon:
+                rightIcon = cast value;
                 return true;
 
-            case "upIcon":
-                upIcon = value.resolveDrawable();
+            case Styleable.upIcon:
+                upIcon = cast value;
                 return true;
 
-            case "downIcon":
-                downIcon = value.resolveDrawable();
+            case Styleable.downIcon:
+                downIcon = cast value;
                 return true;
 
-            case "backgroundOffsetX":
-                backgroundOffsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.backgroundOffsetX:
+                backgroundOffsetX = computeDimension(cast value, false);
                 return true;
 
-            case "backgroundOffsetY":
-                backgroundOffsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.backgroundOffsetY:
+                backgroundOffsetY = computeDimension(cast value, true);
                 return true;
 
-            case "leftIconOffsetX":
-                leftIconOffsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.leftIconOffsetX:
+                leftIconOffsetX = computeDimension(cast value, false);
                 return true;
 
-            case "leftIconOffsetY":
-                leftIconOffsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.leftIconOffsetY:
+                leftIconOffsetY = computeDimension(cast value, true);
                 return true;
 
-            case "rightIconOffsetX":
-                rightIconOffsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.rightIconOffsetX:
+                rightIconOffsetX = computeDimension(cast value, false);
                 return true;
 
-            case "rightIconOffsetY":
-                rightIconOffsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.rightIconOffsetY:
+                rightIconOffsetY = computeDimension(cast value, true);
                 return true;
 
-            case "upIconOffsetX":
-                upIconOffsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.upIconOffsetX:
+                upIconOffsetX = computeDimension(cast value, false);
                 return true;
 
-            case "upIconOffsetY":
-                upIconOffsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.upIconOffsetY:
+                upIconOffsetY = computeDimension(cast value, true);
                 return true;
 
-            case "downIconOffsetX":
-                downIconOffsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.downIconOffsetX:
+                downIconOffsetX = computeDimension(cast value, false);
                 return true;
 
-            case "downIconOffsetY":
-                downIconOffsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.downIconOffsetY:
+                downIconOffsetY = computeDimension(cast value, true);
                 return true;
 
-            case "textOffsetX":
-                textOffsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.textOffsetX:
+                textOffsetX = computeDimension(cast value, false);
                 return true;
 
-            case "textOffsetY":
-                textOffsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.textOffsetY:
+                textOffsetY = computeDimension(cast value, true);
                 return true;
 
-            case "textColor":
-                textColor = value.resolveColor();
+            case Styleable.textColor:
+                textColor = cast value;
                 return true;
 
-            case "textSize":
-                textSize = computeDimension(value.resolveDimension(), true);
+            case Styleable.textSize:
+                textSize = computeDimension(cast value, true);
                 return true;
 
-            case "font":
-                font = value.resolveFont();
+            case Styleable.font:
+                font = cast value;
                 return true;
 
-            case "text":
-                text = value.resolveString();
+            case Styleable.text:
+                text = cast value;
                 return true;
 
-            case "leftIconMargin":
-                leftIconMargin = computeDimension(value.resolveDimension(), false);
+            case Styleable.leftIconMargin:
+                leftIconMargin = computeDimension(cast value, false);
                 return true;
 
-            case "rightIconMargin":
-                rightIconMargin = computeDimension(value.resolveDimension(), false);
+            case Styleable.rightIconMargin:
+                rightIconMargin = computeDimension(cast value, false);
                 return true;
 
-            case "upIconMargin":
-                upIconMargin = computeDimension(value.resolveDimension(), true);
+            case Styleable.upIconMargin:
+                upIconMargin = computeDimension(cast value, true);
                 return true;
 
-            case "downIconMargin":
-                downIconMargin = computeDimension(value.resolveDimension(), true);
+            case Styleable.downIconMargin:
+                downIconMargin = computeDimension(cast value, true);
                 return true;
 
-            case "disabled":
-                disabled = value.resolveBool();
+            case Styleable.disabled:
+                disabled = cast value;
                 return true;
 
-            case "leftIconAlpha":
-                leftIconAlpha = value.resolveFloat();
+            case Styleable.leftIconAlpha:
+                leftIconAlpha = cast value;
                 return true;
 
-            case "rightIconAlpha":
-                rightIconAlpha = value.resolveFloat();
+            case Styleable.rightIconAlpha:
+                rightIconAlpha = cast value;
                 return true;
 
-            case "upIconAlpha":
-                upIconAlpha = value.resolveFloat();
+            case Styleable.upIconAlpha:
+                upIconAlpha = cast value;
                 return true;
 
-            case "downIconAlpha":
-                downIconAlpha = value.resolveFloat();
+            case Styleable.downIconAlpha:
+                downIconAlpha = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {

@@ -1,22 +1,14 @@
 package org.zamedev.ui.widget;
 
-import openfl.errors.ArgumentError;
 import org.zamedev.ui.Context;
-import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.GravityType;
 import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.LayoutParams;
-import org.zamedev.ui.view.View;
 import org.zamedev.ui.view.ViewGroup;
 import org.zamedev.ui.view.ViewVisibility;
 
 using StringTools;
-
-enum LinearLayoutOrientation {
-    VERTICAL;
-    HORIZONTAL;
-}
 
 class LinearLayout extends ViewGroup {
     private var _orientation:LinearLayoutOrientation;
@@ -33,28 +25,19 @@ class LinearLayout extends ViewGroup {
         return new LinearLayoutParams();
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "orientation":
-                switch (value.resolveString().trim().toLowerCase()) {
-                    case "vertical":
-                        orientation = LinearLayoutOrientation.VERTICAL;
-
-                    case "horizontal":
-                        orientation = LinearLayoutOrientation.HORIZONTAL;
-
-                    default:
-                        throw new ArgumentError("Unknown orientation value: " + value.resolveString());
-                }
-
+        switch (attId) {
+            case Styleable.orientation:
+                orientation = cast value;
                 return true;
-        }
 
-        return false;
+            default:
+                return false;
+        }
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {

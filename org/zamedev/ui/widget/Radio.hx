@@ -2,7 +2,7 @@ package org.zamedev.ui.widget;
 
 import openfl.events.MouseEvent;
 import org.zamedev.ui.Context;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 
 class Radio extends Button {
     public var selected(get, set):Bool;
@@ -17,22 +17,23 @@ class Radio extends Button {
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "selected":
-                selected = value.resolveBool();
+        switch (attId) {
+            case Styleable.selected:
+                selected = cast value;
                 return true;
 
-            case "groupTag":
-                groupTag = value.resolveString();
+            case Styleable.groupTag:
+                groupTag = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     @:noCompletion

@@ -2,7 +2,6 @@ package org.zamedev.ui.view;
 
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
-import openfl.errors.ArgumentError;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 import org.zamedev.ui.Context;
@@ -10,7 +9,7 @@ import org.zamedev.ui.graphics.FontExt;
 import org.zamedev.ui.graphics.TextAlignExt;
 import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 
 using StringTools;
 
@@ -180,8 +179,15 @@ class TextView extends View {
             return null;
         }
 
-        return ~/"(@font\/[^"]+)"/g.map(_htmlText, function(re:EReg):String {
-            return "\"" + _context.resourceManager.getFont(re.matched(1)) + "\"";
+        return ~/"@(font\/[^"]+)"/g.map(_htmlText, function(re:EReg):String {
+            var resId = _context.resourceManager.findIdByName(re.matched(1));
+            var font =_context.resourceManager.getFont(resId == null ? 0 : resId);
+
+            #if bitmapFont
+                return re.matched(0);
+            #end
+
+            return "\"" + font.ttfFontName + "\"";
         });
     }
 
@@ -213,58 +219,43 @@ class TextView extends View {
         }
     #end
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "textColor":
-                textColor = value.resolveColor();
+        switch (attId) {
+            case Styleable.textColor:
+                textColor = cast value;
                 return true;
 
-            case "textSize":
-                textSize = computeDimension(value.resolveDimension(), true);
+            case Styleable.textSize:
+                textSize = computeDimension(cast value, true);
                 return true;
 
-            case "textLeading":
-                textLeading = computeDimension(value.resolveDimension(), true);
+            case Styleable.textLeading:
+                textLeading = computeDimension(cast value, true);
                 return true;
 
-            case "textAlign":
-                textAlign = switch(value.resolveString().trim().toLowerCase()) {
-                    case "center":
-                        TextAlignExt.CENTER;
-
-                    case "justify":
-                        TextAlignExt.JUSTIFY;
-
-                    case "right":
-                        TextAlignExt.RIGHT;
-
-                    case "left":
-                        TextAlignExt.LEFT;
-
-                    default:
-                        throw new ArgumentError("Unsupported text align: " + value.resolveString());
-                }
-
+            case Styleable.textAlign:
+                textAlign = cast value;
                 return true;
 
-            case "font":
-                font = value.resolveFont();
+            case Styleable.font:
+                font = cast value;
                 return true;
 
-            case "text":
-                text = value.resolveString();
+            case Styleable.text:
+                text = cast value;
                 return true;
 
-            case "htmlText":
-                htmlText = value.resolveString();
+            case Styleable.htmlText:
+                htmlText = cast value;
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {

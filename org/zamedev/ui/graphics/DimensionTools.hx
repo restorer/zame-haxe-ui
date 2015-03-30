@@ -1,6 +1,6 @@
 package org.zamedev.ui.graphics;
 
-import openfl.errors.ArgumentError;
+import org.zamedev.ui.errors.UiParseError;
 
 using StringTools;
 
@@ -48,7 +48,7 @@ class DimensionTools {
             var value = Std.parseFloat(re.matched(1));
 
             if (Math.isNaN(value)) {
-                throw new ArgumentError("Parse error: " + s);
+                throw new UiParseError(s);
             }
 
             if (re.matched(2) == null && re.matched(3) == null && re.matched(4) == null) {
@@ -85,6 +85,6 @@ class DimensionTools {
             }
         }
 
-        throw new ArgumentError("Parse error: " + s);
+        throw new UiParseError(s);
     }
 }

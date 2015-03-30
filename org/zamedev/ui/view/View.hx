@@ -2,22 +2,22 @@ package org.zamedev.ui.view;
 
 import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
-import openfl.errors.ArgumentError;
-import openfl.errors.Error;
 import openfl.events.Event;
 import openfl.events.EventDispatcher;
 import openfl.geom.Point;
 import org.zamedev.ui.Context;
+import org.zamedev.ui.errors.UiError;
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.res.Inflatable;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Selector;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 
 using Lambda;
 using StringTools;
 
+@:access(org.zamedev.ui.view.LayoutParams)
 class View extends EventDispatcher implements Inflatable {
     private var _context:Context;
     private var _sprite:Sprite;
@@ -93,80 +93,70 @@ class View extends EventDispatcher implements Inflatable {
         addEventListener(Event.REMOVED_FROM_STAGE, onViewRemovedFromApplicationStage);
     }
 
-    public function inflate(name:String, value:TypedValue):Bool {
-        if (name.substr(0, 7) == "layout_") {
-            var layoutName = name.substr(7);
+    public function inflate(attId:Styleable, value:Dynamic):Void {
+        if (!_inflate(attId, value)) {
+            throw new UiError('can\'t inflate styleable "${attId}" in "${Type.getClassName(Type.getClass(this))}"');
+        }
+    }
 
+    private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if ((cast attId:Int) >= (cast Styleable._layout:Int)) {
             if (layoutParams != null) {
-                return layoutParams.inflate(layoutName, value);
+                return layoutParams._inflate(attId, value);
             }
 
             return false;
         }
 
-        switch (name) {
-            case "id":
-                id = value.resolveString();
+        switch (attId) {
+            case Styleable.id:
+                id = cast value;
                 return true;
 
-            case "tags":
-                for (tag in value.resolveString().split("|").map(function (v) {
-                    return v.trim();
-                }).filter(function (v) {
-                    return (v.length > 0);
-                })) {
+            case Styleable.tags:
+                tags = new Map<String, Dynamic>();
+
+                for (tag in (cast value:Array<String>)) {
                     tags[tag] = true;
                 }
 
                 return true;
 
-            case "selector":
-                selector = value.resolveSelector();
+            case Styleable.selector:
+                selector = cast value;
                 return true;
 
-            case "widthWeightSum":
-                widthWeightSum = Math.max(1.0, computeDimension(value.resolveDimension(), false));
+            case Styleable.widthWeightSum:
+                widthWeightSum = Math.max(1.0, computeDimension(cast value, false));
                 return true;
 
-            case "heightWeightSum":
-                heightWeightSum = Math.max(1.0, computeDimension(value.resolveDimension(), true));
+            case Styleable.heightWeightSum:
+                heightWeightSum = Math.max(1.0, computeDimension(cast value, true));
                 return true;
 
-            case "visibility":
-                switch (value.resolveString().trim().toLowerCase()) {
-                    case "visible":
-                        visibility = ViewVisibility.VISIBLE;
-
-                    case "invisible":
-                        visibility = ViewVisibility.INVISIBLE;
-
-                    case "gone":
-                        visibility = ViewVisibility.GONE;
-
-                    default:
-                        throw new ArgumentError("Unknown visibility value: " + value.resolveString());
-                }
-
+            case Styleable.visibility:
+                visibility = cast value;
                 return true;
 
-            case "alpha":
-                alpha = value.resolveFloat();
+            case Styleable.alpha:
+                alpha = cast value;
                 return true;
 
-            case "rotation":
-                rotation = value.resolveFloat();
+            case Styleable.rotation:
+                rotation = cast value;
                 return true;
 
-            case "offsetX":
-                offsetX = computeDimension(value.resolveDimension(), false);
+            case Styleable.offsetX:
+                offsetX = computeDimension(cast value, false);
                 return true;
 
-            case "offsetY":
-                offsetY = computeDimension(value.resolveDimension(), true);
+            case Styleable.offsetY:
+                offsetY = computeDimension(cast value, true);
                 return true;
+
+            default:
+                return false;
         }
-
-        return false;
     }
 
     public function onInflateStarted():Void {
@@ -293,13 +283,13 @@ class View extends EventDispatcher implements Inflatable {
     private function computeDimension(dimension:Dimension, vertical:Bool):Float {
         switch (dimension) {
             case Dimension.WRAP_CONTENT | Dimension.MATCH_PARENT:
-                throw new Error("Dimension must be exact or relative to stage");
+                throw new UiError("dimension must be exact or relative to stage");
 
             case Dimension.EXACT(size):
                 return size;
 
             case Dimension.WEIGHT_PARENT(_, _, _):
-                throw new Error("Dimension must be exact or relative to stage");
+                throw new UiError("dimension must be exact or relative to stage");
 
             case Dimension.WEIGHT_STAGE(weight, type, useWeightSum): {
                 var appStage = _context.applicationStage;

@@ -1,7 +1,7 @@
 package org.zamedev.ui.res;
 
 interface Inflatable {
-    public function inflate(name:String, value:TypedValue):Bool;
+    public function inflate(attId:Styleable, value:Dynamic):Void;
     public function onInflateStarted():Void;
     public function onInflateFinished():Void;
 }

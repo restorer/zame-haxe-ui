@@ -1,16 +1,16 @@
 package org.zamedev.ui.graphics;
 
-import openfl.errors.ArgumentError;
+import org.zamedev.ui.errors.UiParseError;
 
 class Color {
-    public static function parse(s:String):UInt {
+    public static function parse(s:String):Int {
         var re = ~/^\s*#([0-9A-Fa-f]{6})\s*$/;
 
         if (re.match(s)) {
             var val = Std.parseInt("0x" + re.matched(1));
 
             if (val == null) {
-                throw new ArgumentError("Parse error: " + s);
+                throw new UiParseError(s);
             }
 
             return val;
@@ -22,7 +22,7 @@ class Color {
             var val = Std.parseInt("0x" + re.matched(1));
 
             if (val == null) {
-                throw new ArgumentError("Parse error: " + s);
+                throw new UiParseError(s);
             }
 
             var r = (val & 0xf00) >> 8;
@@ -40,12 +40,12 @@ class Color {
             var b = Std.parseInt(re.matched(3));
 
             if (r == null || r > 255 || g == null || g > 255 || b == null || b > 255) {
-                throw new ArgumentError("Parse error: " + s);
+                throw new UiParseError(s);
             }
 
             return (r << 16) | (g << 8) | b;
         }
 
-        throw new ArgumentError("Parse error: " + s);
+        throw new UiParseError(s);
     }
 }

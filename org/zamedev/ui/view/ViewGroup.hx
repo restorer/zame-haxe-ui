@@ -1,11 +1,6 @@
 package org.zamedev.ui.view;
 
-import openfl.errors.Error;
-import openfl.events.Event;
 import org.zamedev.ui.Context;
-import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.graphics.DimensionType;
-import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.res.MeasureSpec;
 
 using Lambda;

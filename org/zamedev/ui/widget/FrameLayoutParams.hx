@@ -2,9 +2,8 @@ package org.zamedev.ui.widget;
 
 import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.Gravity;
-import org.zamedev.ui.graphics.GravityTools;
 import org.zamedev.ui.graphics.GravityType;
-import org.zamedev.ui.res.TypedValue;
+import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.LayoutParams;
 
 class FrameLayoutParams extends LayoutParams {
@@ -42,50 +41,51 @@ class FrameLayoutParams extends LayoutParams {
         _marginBottomComputed = 0.0;
     }
 
-    override public function inflate(name:String, value:TypedValue):Bool {
-        if (super.inflate(name, value)) {
+    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+        if (super._inflate(attId, value)) {
             return true;
         }
 
-        switch (name) {
-            case "marginLeft":
-                marginLeft = value.resolveDimension();
+        switch (attId) {
+            case Styleable.layout_marginLeft:
+                marginLeft = cast value;
                 return true;
 
-            case "marginRight":
-                marginRight = value.resolveDimension();
+            case Styleable.layout_marginRight:
+                marginRight = cast value;
                 return true;
 
-            case "marginTop":
-                marginTop = value.resolveDimension();
+            case Styleable.layout_marginTop:
+                marginTop = cast value;
                 return true;
 
-            case "marginBottom":
-                marginBottom = value.resolveDimension();
+            case Styleable.layout_marginBottom:
+                marginBottom = cast value;
                 return true;
 
-            case "marginHorizontal":
-                marginLeft = value.resolveDimension();
+            case Styleable.layout_marginHorizontal:
+                marginLeft = cast value;
                 marginRight = marginLeft;
                 return true;
 
-            case "marginVertical":
-                marginTop = value.resolveDimension();
+            case Styleable.layout_marginVertical:
+                marginTop = cast value;
                 marginBottom = marginTop;
                 return true;
 
-            case "margin":
-                marginLeft = value.resolveDimension();
+            case Styleable.layout_margin:
+                marginLeft = cast value;
                 marginRight = marginLeft;
                 marginTop = marginLeft;
                 marginBottom = marginLeft;
                 return true;
 
-            case "gravity":
-                gravity = GravityTools.parse(value.resolveString());
+            case Styleable.layout_gravity:
+                gravity = cast value;
                 return true;
-        }
 
-        return false;
+            default:
+                return false;
+        }
     }
 }

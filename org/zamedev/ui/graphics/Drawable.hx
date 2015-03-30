@@ -5,35 +5,41 @@ import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.DisplayObject;
 import openfl.display.PixelSnapping;
-import openfl.errors.Error;
-
-enum DrawableType {
-    BITMAP;
-}
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
+import org.zamedev.ui.errors.UiError;
 
 class Drawable {
     public var type(default, null):DrawableType;
     public var assetId(default, null):String;
+    public var packedX(default, null):Int;
+    public var packedY(default, null):Int;
+    public var packedW(default, null):Int;
+    public var packedH(default, null):Int;
 
-    public function new(type:DrawableType, assetId:String) {
+    private var packedBitmapData:BitmapData;
+
+    public function new(type:DrawableType, assetId:String, packedX:Int = 0, packedY:Int = 0, packedW:Int = 0, packedH:Int = 0) {
         this.type = type;
         this.assetId = assetId;
+        this.packedX = packedX;
+        this.packedY = packedY;
+        this.packedW = packedW;
+        this.packedH = packedH;
+
+        this.packedBitmapData = null;
     }
 
     public function toString() {
-        return '[Drawable type=${type} assetId=${assetId}]';
+        return '[Drawable type=${type} assetId=${assetId} packedX=${packedX} packedY=${packedY} packedW=${packedW} packedH=${packedH}]';
     }
 
     public function computeKey():String {
-        return Std.string(type) + ":" + assetId;
+        return '${Std.string(type)}:${assetId}:${packedX}:${packedY}:${packedW}:${packedH}';
     }
 
     public function resolve():DisplayObject {
-        if (type == DrawableType.BITMAP) {
-            return bitmapFromAsset(assetId);
-        }
-
-        throw new Error("Unsupported drawable type: " + type);
+        return new Bitmap(resolveBitmapData(), PixelSnapping.AUTO, true);
     }
 
     public function resolveBitmapData():BitmapData {
@@ -41,11 +47,45 @@ class Drawable {
             return Assets.getBitmapData(assetId);
         }
 
-        throw new Error("Unsupported drawable type: " + type);
+        if (type == DrawableType.PACKED) {
+            if (packedBitmapData == null) {
+                packedBitmapData = new BitmapData(packedW, packedH, true, 0);
+
+                packedBitmapData.copyPixels(
+                    Assets.getBitmapData(assetId),
+                    new Rectangle(packedX, packedY, packedW, packedH),
+                    new Point(0, 0),
+                    null,
+                    null,
+                    true
+                );
+            }
+
+            return packedBitmapData;
+        }
+
+        throw new UiError("Unsupported drawable type: " + type);
     }
 
     public static function eq(a:Drawable, b:Drawable):Bool {
-        return ((a == null && b == null) || (a != null && b != null && a.type == b.type && a.assetId == b.assetId));
+        if (a == null && b == null) {
+            return true;
+        }
+
+        if (a == null || b == null || a.type != b.type || a.assetId != b.assetId) {
+            return false;
+        }
+
+        if (a.type == DrawableType.PACKED && (
+            a.packedX != b.packedX
+            || a.packedY != b.packedY
+            || a.packedW != b.packedW
+            || a.packedH != b.packedH
+        )) {
+            return false;
+        }
+
+        return true;
     }
 
     public static function bitmapFromAsset(assetId:String, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {
