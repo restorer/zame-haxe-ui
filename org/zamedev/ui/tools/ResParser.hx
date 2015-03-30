@@ -73,6 +73,9 @@ class ResParser {
                 case "layout":
                     resGenerator.putLayout(name, parseLayout(name, node));
 
+                case "layoutpart":
+                    resGenerator.putLayoutPart(name, parseLayout(name, node));
+
                 default:
                     throw new UiParseError('unknown resource type: ${node.nodeName}');
             }

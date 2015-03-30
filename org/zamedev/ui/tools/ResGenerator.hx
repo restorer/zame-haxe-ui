@@ -36,6 +36,7 @@ class ResGenerator {
     private var styleMap:LinkedMap<String, GenItem<GenStyle>> = new LinkedMap<String, GenItem<GenStyle>>();
     private var selectorMap:LinkedMap<String, GenItem<GenSelector>> = new LinkedMap<String, GenItem<GenSelector>>();
     private var layoutMap:LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
+    private var layoutPartMap:LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
     private var genLayoutViewId:Int;
     private var includeMap:Map<String, Bool>;
 
@@ -87,7 +88,19 @@ class ResGenerator {
     }
 
     public function putLayout(name:String, value:Xml):Void {
+        if (layoutPartMap.exists(name)) {
+            throw new UiParseError('duplicate resource "${name}" of type "layout" (in "layoutPart")');
+        }
+
         putIfNotExists("layout", layoutMap, name, value);
+    }
+
+    public function putLayoutPart(name:String, value:Xml):Void {
+        if (layoutMap.exists(name)) {
+            throw new UiParseError('duplicate resource "${name}" of type "layoutPart" (in "layout")');
+        }
+
+        putIfNotExists("layoutPart", layoutPartMap, name, value);
     }
 
     public function getDrawable(name:String):Drawable {
@@ -103,6 +116,7 @@ class ResGenerator {
             "org.zamedev.ui.graphics.DrawableType" => true,
             "org.zamedev.ui.graphics.FontExt" => true,
             "org.zamedev.ui.graphics.GravityType" => true,
+            "org.zamedev.ui.graphics.TextAlignExt" => true,
             "org.zamedev.ui.res.ResourceManager" => true,
             "org.zamedev.ui.res.Selector" => true,
             "org.zamedev.ui.res.Style" => true,
@@ -161,7 +175,7 @@ class ResGenerator {
     }
 
     private function validateResourceName(name:String):String {
-        if (!~/^[A-Za-z_][0-9A-Za-z_]*$/.match(name)) {
+        if (!~/^[A-Za-z_][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name))) {
             throw new UiParseError('"${name}" is invalid resource identifier');
         }
 
@@ -169,7 +183,7 @@ class ResGenerator {
     }
 
     private function validateClassName(name:String):String {
-        if (!~/^[A-Z][0-9A-Za-z_]*$/.match(name)) {
+        if (!~/^[A-Z][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name))) {
             throw new UiParseError('"${name}" is invalid class name');
         }
 
@@ -177,7 +191,7 @@ class ResGenerator {
     }
 
     private function validateAttributeName(name:String):String {
-        if (!~/^[A-Za-z][0-9A-Za-z_]*$/.match(name)) {
+        if (!~/^[A-Za-z][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name))) {
             throw new UiParseError('"${name}" is invalid attribute name');
         }
 
@@ -373,7 +387,13 @@ class ResGenerator {
                 throw new UiParseError('@layout/${layoutName} - circular dependency on ${includeResId}');
             }
 
-            if (!layoutMap.exists(refInfo.name)) {
+            var incLayoutItem = layoutMap[refInfo.name];
+
+            if (incLayoutItem == null) {
+                incLayoutItem = layoutPartMap[refInfo.name];
+            }
+
+            if (incLayoutItem == null) {
                 throw new UiParseError('@layout/${layoutName} - included layout not found (${includeResId})');
             }
 
@@ -415,7 +435,7 @@ class ResGenerator {
             generateInflateLayoutNode(
                 sb,
                 refInfo.name,
-                layoutMap[refInfo.name].value,
+                incLayoutItem.value,
                 layoutParamsHaxeCode,
                 newVisitedMap,
                 newVars,

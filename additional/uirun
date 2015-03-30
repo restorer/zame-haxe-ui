@@ -2,4 +2,4 @@
 
 haxelib run zame-ui && \
 echo "Running lime ..." && \
-haxelib run lime "$@" \
+haxelib run lime "$@"

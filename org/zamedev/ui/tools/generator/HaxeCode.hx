@@ -21,6 +21,28 @@ import org.zamedev.ui.widget.LinearLayoutOrientation;
 using StringTools;
 
 class HaxeCode {
+    public static function validateIdentifier(name:String):String {
+        switch (name) {
+            case "package"
+            | "import"
+            | "using"
+            | "class"
+            | "interface"
+            | "enum"
+            | "abstract"
+            | "private"
+            | "public"
+            | "var"
+            | "function"
+            | "default":
+                throw new UiParseError('"${name}" is reserved haxe identifier');
+
+            default:
+                return name;
+        }
+    }
+
+
     public static function genString(s:String):String {
         s = s.replace("\"", "\\\"")
             .replace("\n", "\\n")
@@ -171,6 +193,8 @@ class HaxeCode {
             if (refInfo.type != typeRef) {
                 throw new UiParseError('${textValue} is not a ${typeRef}');
             }
+
+            refInfo.name = validateIdentifier(refInfo.name);
 
             switch (type) {
                 case COLOR:
