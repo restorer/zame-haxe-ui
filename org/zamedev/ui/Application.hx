@@ -19,7 +19,7 @@ class Application extends Sprite implements Context {
     private var _locale:String;
     private var _resourceManager:ResourceManager;
     private var _inflater:Inflater;
-    private var _currentScene:Scene;
+    private var _sceneStack:List<Scene>;
 
     public var context(get, null):Context;
     public var application(get, null):Application;
@@ -42,7 +42,7 @@ class Application extends Sprite implements Context {
 
         _resourceManager = new ResourceManager(this);
         _inflater = new Inflater(this);
-        _currentScene = null;
+        _sceneStack = new List<Scene>();
 
         create();
     }
@@ -55,19 +55,56 @@ class Application extends Sprite implements Context {
         #end
     }
 
-    public function changeScene(scene:Scene):Void {
-        if (_currentScene == scene) {
+    public function changeScene(scene:Scene, searchForScene:Scene = null):Void {
+        if (searchForScene != null) {
+            while (_sceneStack.length != 0 && _sceneStack.first() != searchForScene) {
+                _sceneStack.pop().removeFromApplicationStage();
+            }
+        }
+
+        var topScene = _sceneStack.first();
+
+        if (topScene == scene) {
             return;
         }
 
-        if (_currentScene != null) {
-            _currentScene.removeFromApplicationStage();
+        if (topScene != null) {
+            topScene.removeFromApplicationStage();
+            _sceneStack.pop();
         }
 
-        _currentScene = scene;
+        if (scene != null) {
+            _sceneStack.push(scene);
+            scene.addToApplicationStage();
+        }
+    }
 
-        if (_currentScene != null) {
-            _currentScene.addToApplicationStage();
+    public function pushScene(scene:Scene):Void {
+        if (scene == null) {
+            return;
+        }
+
+        var topScene = _sceneStack.first();
+
+        if (topScene != null) {
+            topScene.onCovered();
+        }
+
+        _sceneStack.push(scene);
+        scene.addToApplicationStage();
+    }
+
+    public function popScene():Void {
+        var scene = _sceneStack.pop();
+
+        if (scene != null) {
+            scene.removeFromApplicationStage();
+        }
+
+        var topScene = _sceneStack.first();
+
+        if (topScene != null) {
+            topScene.onUncovered();
         }
     }
 

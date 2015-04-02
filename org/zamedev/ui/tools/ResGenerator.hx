@@ -199,9 +199,7 @@ class ResGenerator {
     }
 
     private function putIfNotExists<T>(resType:String, map:LinkedMap<String, GenItem<T>>, name:String, value:T):Void {
-        var item = map[validateResourceName(name)];
-
-        if (item != null) {
+        if (map.exists(validateResourceName(name))) {
             throw new UiParseError('duplicate resource "${name}" of type "${resType}"');
         }
 

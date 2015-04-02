@@ -181,17 +181,21 @@ class RecyclerView extends BaseViewContainer {
     }
 
     private function detachViewHolder(viewHolder:RecyclerViewHolder):Void {
+        _attachedList.remove(viewHolder);
+        viewHolder.onDetach();
+    }
+
+    public function _detachViewHolderFinishedInternal(viewHolder:RecyclerViewHolder):Void {
         if (viewHolder._view._sprite.parent == _sprite) {
             _sprite.removeChild(viewHolder._view._sprite);
         }
-
-        _attachedList.remove(viewHolder);
 
         if (!_detachedMap.exists(viewHolder._viewType)) {
             _detachedMap[viewHolder._viewType] = new List<RecyclerViewHolder>();
         }
 
         _detachedMap[viewHolder._viewType].push(viewHolder);
+        viewHolder._recyclerView = null;
 
         if (isAddedToApplicationStage) {
             viewHolder._view.dispatchEvent(new Event(Event.REMOVED_FROM_STAGE));
@@ -209,6 +213,8 @@ class RecyclerView extends BaseViewContainer {
             viewHolder._viewType = viewType;
         }
 
+        viewHolder._recyclerView = this;
+
         if (addToBegin) {
             _attachedList.unshift(viewHolder);
         } else {
@@ -220,6 +226,7 @@ class RecyclerView extends BaseViewContainer {
         }
 
         viewHolder._visiblePosition = position - _firstVisiblePosition;
+        viewHolder.onAttach();
 
         if (isAddedToApplicationStage) {
             viewHolder._view.dispatchEvent(new Event(Event.ADDED_TO_STAGE));

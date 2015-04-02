@@ -33,7 +33,13 @@ class ResParser {
             var name = node.get("name");
 
             if (name != null) {
-                resourceMap[node.nodeName + "/" + name] = node;
+                var resPath = node.nodeName + "/" + name;
+
+                if (resourceMap.exists(resPath)) {
+                    throw new UiParseError('duplicate resource "${name}" of type "${node.nodeName}"');
+                } else {
+                    resourceMap[resPath] = node;
+                }
             }
         }
 
