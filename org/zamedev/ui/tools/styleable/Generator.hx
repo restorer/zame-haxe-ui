@@ -30,7 +30,7 @@ class Generator {
 
         sb.add("package org.zamedev.ui.res;\n\n");
         sb.add("@:enum\n");
-        sb.add("abstract Styleable(Int) {\n");
+        sb.add("abstract Styleable(Int) from Int to Int {\n");
         sb.add(sbRegular.toString());
         sb.add("\n    var _custom = 500000000;\n");
         sb.add("    var _layout = 1000000000;\n\n");

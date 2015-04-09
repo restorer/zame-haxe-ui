@@ -154,7 +154,7 @@ class TextView extends View {
         }
     }
 
-    private function getAlignForTextField():TextFormatAlign {
+    private function getAlignForTextField(): #if legacy String #else TextFormatAlign #end {
         if (_textAlign == null) {
             return null;
         }
@@ -188,7 +188,7 @@ class TextView extends View {
             #end
 
             return "\"" + font.ttfFontName + "\"";
-        });
+        }).replace("\n", " ");
     }
 
     #if bitmapFont

@@ -6,6 +6,7 @@ import openfl.geom.Point;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.graphics.FontExt;
+import org.zamedev.ui.graphics.TextAlignExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.ImageView;
@@ -50,6 +51,7 @@ class Button extends ViewContainer {
     public var textOffsetY(get, set):Float;
     public var textColor(get, set):Null<UInt>;
     public var textSize(get, set):Null<Float>;
+    public var textAlign(get, set):TextAlignExt;
     public var font(get, set):FontExt;
     public var text(get, set):String;
     public var leftIconMargin(default, set):Float;
@@ -175,6 +177,10 @@ class Button extends ViewContainer {
 
             case Styleable.textSize:
                 textSize = computeDimension(cast value, true);
+                return true;
+
+            case Styleable.textAlign:
+                textAlign = cast value;
                 return true;
 
             case Styleable.font:
@@ -611,6 +617,17 @@ class Button extends ViewContainer {
     @:noCompletion
     private function set_textSize(value:Null<Float>):Null<Float> {
         textView.textSize = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_textAlign():TextAlignExt {
+        return textView.textAlign;
+    }
+
+    @:noCompletion
+    private function set_textAlign(value:TextAlignExt):TextAlignExt {
+        textView.textAlign = value;
         return value;
     }
 

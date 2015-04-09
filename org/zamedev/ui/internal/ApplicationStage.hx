@@ -1,10 +1,12 @@
 package org.zamedev.ui.internal;
 
+import org.zamedev.ui.graphics.ScaleMode;
 import openfl.display.Shape;
 import openfl.display.Sprite;
 import openfl.events.Event;
 
 class ApplicationStage extends Sprite {
+    private var scaleMode:ScaleMode;
     private var appStageWidth:Float;
     private var appStageHeight:Float;
     private var maskShape:Shape;
@@ -17,6 +19,7 @@ class ApplicationStage extends Sprite {
     public function new() {
         super();
 
+        scaleMode = ScaleMode.CENTER_INSIDE;
         appStageWidth = 0.0;
         appStageHeight = 0.0;
         maskShape = new Shape();
@@ -33,10 +36,15 @@ class ApplicationStage extends Sprite {
         }
     }
 
-    public function setStageSize(width:Float, height:Float):Void {
-        if (appStageWidth != width || appStageHeight != height) {
+    public function setStageSize(width:Float, height:Float, scaleMode:ScaleMode = null):Void {
+        if (scaleMode == null) {
+            scaleMode = ScaleMode.CENTER_INSIDE;
+        }
+
+        if (appStageWidth != width || appStageHeight != height || this.scaleMode != scaleMode) {
             appStageWidth = width;
             appStageHeight = height;
+            this.scaleMode = scaleMode;
 
             if (stage != null) {
                 onStageResize(null);
@@ -172,22 +180,35 @@ class ApplicationStage extends Sprite {
             scaleX = 1.0;
             scaleY = 1.0;
         } else {
-            var desiredRatio = appStageWidth / appStageHeight;
-            var stageRatio = stage.stageWidth / stage.stageHeight;
-            var scale:Float;
+            switch (scaleMode) {
+                case CENTER_INSIDE | CENTER_CROP: {
+                    var desiredRatio = appStageWidth / appStageHeight;
+                    var stageRatio = stage.stageWidth / stage.stageHeight;
+                    var scale:Float;
 
-            if (stageRatio < desiredRatio) {
-                scale = stage.stageWidth / appStageWidth;
-                y = Math.round((stage.stageHeight - appStageHeight * scale) / 2);
-                x = 0;
-            } else {
-                scale = stage.stageHeight / appStageHeight;
-                x = Math.round((stage.stageWidth - appStageWidth * scale) / 2);
-                y = 0;
+                    if ((scaleMode == CENTER_INSIDE && stageRatio < desiredRatio)
+                        || (scaleMode == CENTER_CROP && stageRatio > desiredRatio)
+                    ) {
+                        scale = stage.stageWidth / appStageWidth;
+                        y = Math.round((stage.stageHeight - appStageHeight * scale) / 2);
+                        x = 0;
+                    } else {
+                        scale = stage.stageHeight / appStageHeight;
+                        x = Math.round((stage.stageWidth - appStageWidth * scale) / 2);
+                        y = 0;
+                    }
+
+                    scaleX = scale;
+                    scaleY = scale;
+                }
+
+                case FIT_XY: {
+                    x = 0;
+                    y = 0;
+                    scaleX = stage.stageWidth / appStageWidth;
+                    scaleY = stage.stageHeight / appStageHeight;
+                }
             }
-
-            scaleX = scale;
-            scaleY = scale;
         }
 
         updateMask();

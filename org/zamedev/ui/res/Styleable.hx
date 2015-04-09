@@ -1,7 +1,7 @@
 package org.zamedev.ui.res;
 
 @:enum
-abstract Styleable(Int) {
+abstract Styleable(Int) from Int to Int {
     var id = 1; // STRING
     var tags = 2; // STRING_ARRAY
     var selector = 3; // SELECTOR

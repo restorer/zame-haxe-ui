@@ -61,7 +61,7 @@ class HaxeCode {
     }
 
     public static function genStyleable(name:String):String {
-        return '(cast Styleable.${name})';
+        return 'Styleable.${name}';
     }
 
     public static function genFont(f:GenFont):String {

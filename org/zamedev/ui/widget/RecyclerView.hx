@@ -689,11 +689,13 @@ class RecyclerView extends BaseViewContainer {
         return value;
     }
 
+    @:keep
     @:noCompletion
     private function get_verticalFadeSize():Int {
         return _verticalFadeSize;
     }
 
+    @:keep
     @:noCompletion
     private function set_verticalFadeSize(value:Int):Int {
         if (_verticalFadeSize != value) {
