@@ -121,6 +121,9 @@ class TextView extends View {
                 _textField.embedFonts = true;
                 _textField.selectable = false;
 
+                // _textField.multiline = true;
+                // _textField.wordWrap = true;
+
                 // _textField.backgroundColor = 0x800000;
                 // _textField.background = true;
 
@@ -314,7 +317,7 @@ class TextView extends View {
                     #if (native || mobile)
                         _width = _textField.textWidth * 1.1;
                     #elseif flash
-                        _width = _textField.textWidth + 4;
+                        _width = _textField.textWidth + 5;
                     #else
                         _width = _textField.textWidth;
                     #end

@@ -16,7 +16,10 @@ class RecyclerViewLayoutManager {
     private var maxWidth:Float;
     private var maxHeight:Float;
 
+    public var orientation:LinearLayoutOrientation;
+
     public function new() {
+        this.orientation = LinearLayoutOrientation.VERTICAL;
     }
 
     public function init(x:Float, y:Float, maxWidth:Float, maxHeight:Float) {
@@ -29,7 +32,12 @@ class RecyclerViewLayoutManager {
     }
 
     public function prepend(view:View):Void {
-        py -= view.height;
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            py -= view.height;
+        } else {
+            px -= view.width;
+        }
+
         view.x = px;
         view.y = py;
     }
@@ -37,32 +45,63 @@ class RecyclerViewLayoutManager {
     public function layout(view:View):Void {
         view.x = x;
         view.y = y;
-        y += view.height;
+
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            y += view.height;
+        } else {
+            x += view.width;
+        }
     }
 
     public function canPrepend():Bool {
-        return (py > 0);
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            return (py > 0);
+        } else {
+            return (px > 0);
+        }
     }
 
     public function isBeforeStart(view:View):Bool {
-        return ((view.y + view.height) <= 0);
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            return ((view.y + view.height) <= 0);
+        } else {
+            return ((view.x + view.width) <= 0);
+        }
     }
 
     public function isAtEnd(view:View):Bool {
-        return ((view.y + view.height) >= maxHeight);
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            return ((view.y + view.height) >= maxHeight);
+        } else {
+            return ((view.x + view.width) >= maxWidth);
+        }
     }
 
     public function computePrevScrollPosition(view:View):ScrollPosition {
-        return {
-            x: 0.0,
-            y: view.y + 1.0,
-        };
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            return {
+                x: 0.0,
+                y: view.y + 1.0,
+            };
+        } else {
+            return {
+                x: view.x + 1.0,
+                y: 0.0,
+            };
+        }
     }
 
     public function computeNextScrollPosition(view:View):ScrollPosition {
-        return {
-            x: 0.0,
-            y: view.y + view.height,
-        };
+        if (orientation == LinearLayoutOrientation.VERTICAL) {
+            return {
+                x: 0.0,
+                y: view.y + view.height,
+            };
+        } else {
+            return {
+                x: view.x + view.width,
+                y: 0.0,
+            };
+        }
     }
 }

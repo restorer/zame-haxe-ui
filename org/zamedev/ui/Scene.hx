@@ -16,10 +16,13 @@ class Scene extends ContextWrapper {
     private var _contentView:View;
     private var sceneSprite:SceneSprite;
     private var maskShape:Shape;
+    private var coverMaskColor:Int = 0x000000;
+    private var coverMaskAlpha:Float = 0.75;
     private var addedToApplicationStage:Bool;
     private var isCovered:Bool;
 
     public var contentView(get, set):View;
+    public var sceneParams:Dynamic = null;
 
     public function new(context:Context) {
         super(context);
@@ -117,11 +120,10 @@ class Scene extends ContextWrapper {
         isCovered = true;
         sceneSprite.dispatchEvents = false;
         dispatchEvent(new Event(COVERED));
-
         onRootResize(null);
 
         Actuate.apply(maskShape, { alpha: 0.0 });
-        Actuate.tween(maskShape, TRANSITION_DURATION, { alpha: 0.75 });
+        Actuate.tween(maskShape, TRANSITION_DURATION, { alpha: coverMaskAlpha });
     }
 
     public function onUncovered():Void {
@@ -145,7 +147,7 @@ class Scene extends ContextWrapper {
         var appStage = context.applicationStage;
 
         maskShape.graphics.clear();
-        maskShape.graphics.beginFill(0x000000);
+        maskShape.graphics.beginFill(coverMaskColor);
 
         maskShape.graphics.drawRect(
             - appStage.x / appStage.scaleX,

@@ -6,18 +6,18 @@ import openfl.text.TextField;
 
 import js.Browser;
 import js.html.DOMElement;
+import openfl._internal.renderer.RenderSession;
+import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
+import openfl.text.TextFormatAlign;
 
-#if !dom
-    import openfl._internal.renderer.RenderSession;
+#if dom
+    import openfl._internal.renderer.dom.DOMRenderer;
 #end
 
 using StringTools;
 
 class TextFieldExt extends TextField {
-    private static var _divExt:DOMElement = null;
-    private static var _isFirefox:Bool = false;
-
     private var _isMeasurementsDirty:Bool;
     private var _textWidth:Float;
     private var _textHeight:Float;
@@ -33,17 +33,6 @@ class TextFieldExt extends TextField {
     public function new() {
         super();
 
-        if (_divExt == null) {
-            _divExt = Browser.document.createElement("div");
-            _divExt.style.position = "absolute";
-            _divExt.style.top = "0";
-            _divExt.style.left = "0";
-            _divExt.style.visibility = "hidden";
-            Browser.document.body.appendChild(_divExt);
-
-            _isFirefox = (Browser.navigator.userAgent.toLowerCase().indexOf("firefox") >= 0);
-        }
-
         _isMeasurementsDirty = true;
         _textWidth = 0.0;
         _textHeight = 0.0;
@@ -56,12 +45,7 @@ class TextFieldExt extends TextField {
             _isInRender = false;
         #end
 
-        _updateJsFont(__textFormat);
-    }
-
-    @:noCompletion
-    override private function __getFont(format:TextFormat):String {
-        return untyped format._jsFont;
+        DOMTextFieldExt.updateJsFont(__textFormat);
     }
 
     #if dom
@@ -102,7 +86,7 @@ class TextFieldExt extends TextField {
 
         if (__ranges != null) {
             for (range in __ranges) {
-                _updateJsFont(range.format);
+                DOMTextFieldExt.updateJsFont(range.format);
             }
         }
 
@@ -118,7 +102,7 @@ class TextFieldExt extends TextField {
             || format.italic != __textFormat.italic
             || format.leading != __textFormat.leading
         ) {
-            _updateJsFont(__textFormat);
+            DOMTextFieldExt.updateJsFont(__textFormat);
             _isMeasurementsDirty = true;
         }
     }
@@ -135,7 +119,7 @@ class TextFieldExt extends TextField {
         super.set_defaultTextFormat(value);
 
         if (update) {
-            _updateJsFont(__textFormat);
+            DOMTextFieldExt.updateJsFont(__textFormat);
         }
 
         return value;
@@ -155,13 +139,13 @@ class TextFieldExt extends TextField {
 
     @:noCompletion
     override public function get_textWidth():Float {
-        _reMeasure();
+        DOMTextFieldExt.measureText(this);
         return _textWidth;
     }
 
     @:noCompletion
     override public function get_textHeight():Float {
-        _reMeasure();
+        DOMTextFieldExt.measureText(this);
 
         #if dom
             return _textHeight;
@@ -170,36 +154,46 @@ class TextFieldExt extends TextField {
         #end
     }
 
-    private function _reMeasure():Void {
-        if (_isMeasurementsDirty) {
-            _divExt.style.setProperty("font", __getFont(__textFormat), null);
-            _divExt.style.width = "auto";
-            _divExt.style.height = "auto";
-
-            #if !dom
-                _divExt.innerHTML = "giItT1WQy@!-/#";
-                _lineHeight = _divExt.clientHeight;
-            #end
-
-            _divExt.innerHTML = _escapedText;
-            _textWidth = _divExt.clientWidth + 1;
-            _divExt.style.width = Std.string(__width) + "px";
-
-            #if dom
-                _textHeight = _divExt.clientHeight;
-            #else
-                if (_isFirefox && __textFormat.size >= 22) {
-                    _textHeight = _divExt.clientHeight;
-                } else {
-                    _textHeight = _divExt.clientHeight + __textFormat.size * 0.185;
-                }
-            #end
-
-            _isMeasurementsDirty = false;
+    #if dom
+        @:noCompletion
+        public override function __renderDOM(renderSession:RenderSession):Void {
+            DOMTextFieldExt.render(this, renderSession);
         }
+    #else
+        @:noCompletion
+        override public function __renderCanvas(renderSession:RenderSession):Void {
+            _isInRender = true;
+            super.__renderCanvas(renderSession);
+            _isInRender = false;
+        }
+    #end
+}
+
+@:access(openfl.text.TextField)
+class DOMTextFieldExt {
+    private static var _divExt:DOMElement = null;
+    private static var _isFirefox:Bool = false;
+
+    private static function initialize():Void {
+        _divExt = Browser.document.createElement("div");
+        _divExt.style.position = "absolute";
+        _divExt.style.top = "0";
+        _divExt.style.left = "0";
+        _divExt.style.visibility = "hidden";
+        Browser.document.body.appendChild(_divExt);
+
+        _isFirefox = (Browser.navigator.userAgent.toLowerCase().indexOf("firefox") >= 0);
     }
 
-    private function _updateJsFont(format:TextFormat) {
+    public static function getFont(format:TextFormat):String {
+        return untyped format._jsFont;
+    }
+
+    public static function updateJsFont(format:TextFormat) {
+        if (_divExt == null) {
+            initialize();
+        }
+
         var jsFont = format.italic ? "italic " : "normal ";
         jsFont += "normal ";
         jsFont += format.bold ? "bold " : "normal ";
@@ -222,12 +216,104 @@ class TextFieldExt extends TextField {
         untyped format._jsFont = jsFont;
     }
 
-    #if !dom
-        @:noCompletion
-        override public function __renderCanvas(renderSession:RenderSession):Void {
-            _isInRender = true;
-            super.__renderCanvas(renderSession);
-            _isInRender = false;
+    public static function measureText(textField:TextFieldExt):Void {
+        if (!textField._isMeasurementsDirty) {
+            return;
+        }
+
+        if (_divExt == null) {
+            initialize();
+        }
+
+        _divExt.style.setProperty("font", getFont(textField.__textFormat), null);
+        _divExt.style.width = "auto";
+        _divExt.style.height = "auto";
+
+        #if !dom
+            _divExt.innerHTML = "giItT1WQy@!-/#";
+            textField._lineHeight = _divExt.clientHeight;
+        #end
+
+        _divExt.innerHTML = textField._escapedText;
+        textField._textWidth = _divExt.clientWidth + 1;
+        _divExt.style.width = Std.string(textField.__width) + "px";
+
+        #if dom
+            textField._textHeight = _divExt.clientHeight;
+        #else
+            if (_isFirefox && textField.__textFormat.size >= 22) {
+                textField._textHeight = _divExt.clientHeight;
+            } else {
+                textField._textHeight = _divExt.clientHeight + textField.__textFormat.size * 0.185;
+            }
+        #end
+
+        textField._isMeasurementsDirty = false;
+    }
+
+    #if dom
+        public static inline function render(textField:TextFieldExt, renderSession:RenderSession):Void {
+            if (textField.stage != null && textField.__worldVisible && textField.__renderable) {
+                if (textField.__dirty || textField.__div == null) {
+                    if (textField.__text != "" || textField.background || textField.border) {
+                        if (textField.__div == null) {
+                            textField.__div = cast Browser.document.createElement("div");
+                            DOMRenderer.initializeElement(textField, textField.__div, renderSession);
+                            textField.__style.setProperty("cursor", "inherit", null);
+                        }
+
+                        var style = textField.__style;
+                        textField.__div.innerHTML = textField.__text;
+
+                        if (textField.background) {
+                            style.setProperty("background-color", "#" + StringTools.hex(textField.backgroundColor, 6), null);
+                        } else {
+                            style.removeProperty("background-color");
+                        }
+
+                        if (textField.border) {
+                            style.setProperty("border", "solid 1px #" + StringTools.hex(textField.borderColor, 6), null);
+                        } else {
+                            style.removeProperty("border");
+                        }
+
+                        style.setProperty("font", getFont(textField.__textFormat), null);
+                        style.setProperty("color", "#" + StringTools.hex(textField.__textFormat.color, 6), null);
+
+                        if (textField.autoSize != TextFieldAutoSize.NONE) {
+                            style.setProperty("width", "auto", null);
+                        } else {
+                            style.setProperty("width", textField.__width + "px", null);
+                        }
+
+                        style.setProperty("height", textField.__height + "px", null);
+
+                        switch (textField.__textFormat.align) {
+                            case TextFormatAlign.CENTER:
+                                style.setProperty("text-align", "center", null);
+
+                            case TextFormatAlign.RIGHT:
+                                style.setProperty("text-align", "right", null);
+
+                            default:
+                                style.setProperty("text-align", "left", null);
+                        }
+
+                        textField.__dirty = false;
+                    } else if (textField.__div != null) {
+                        renderSession.element.removeChild(textField.__div);
+                        textField.__div = null;
+                    }
+                }
+
+                if (textField.__div != null) {
+                    DOMRenderer.applyStyle(textField, renderSession, true, true, false);
+                }
+            } else if (textField.__div != null) {
+                renderSession.element.removeChild(textField.__div);
+                textField.__div = null;
+                textField.__style = null;
+            }
         }
     #end
 }

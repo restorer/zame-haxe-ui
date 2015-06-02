@@ -25,7 +25,6 @@ class AbsoluteLayout extends ViewGroup {
 
         for (child in children) {
             var layoutParams = cast(child.layoutParams, AbsoluteLayoutParams);
-
             child.x = computeChildPosition(child, layoutParams.x, layoutParams.cx, layoutParams.ex, false);
             child.y = computeChildPosition(child, layoutParams.y, layoutParams.cy, layoutParams.ey, true);
         }

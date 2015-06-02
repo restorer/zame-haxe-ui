@@ -69,6 +69,7 @@ class StyleableMap {
         m["groupTag"] = StyleableType.STRING;
         m["cycle"] = StyleableType.BOOL;
         m["verticalFadeSize"] = StyleableType.DIMENSION;
+        m["horizontalFadeSize"] = StyleableType.DIMENSION;
         m["scrollable"] = StyleableType.BOOL;
 
         m["layout_width"] = StyleableType.DIMENSION;

@@ -31,7 +31,7 @@ class RecyclerView extends BaseViewContainer {
     private var _scrollOffsetY:Float;
     private var _cycle:Bool;
     private var _verticalFadeSize:Int;
-    private var layoutManager:RecyclerViewLayoutManager;
+    private var _horizontalFadeSize:Int;
     private var _isScrolling:Bool;
     private var _scrollable:Bool;
 
@@ -40,11 +40,13 @@ class RecyclerView extends BaseViewContainer {
     private var _scrollingCurrentOffsetX:Float;
     private var _scrollingCurrentOffsetY:Float;
 
+    public var layoutManager(default, null):RecyclerViewLayoutManager;
     public var adapter(get, set):RecyclerViewAdapter;
     public var scrollOffsetX(get, set):Float;
     public var scrollOffsetY(get, set):Float;
     public var cycle(get, set):Bool;
     public var verticalFadeSize(get, set):Int;
+    public var horizontalFadeSize(get, set):Int;
     public var scrollable(get, set):Bool;
 
     @:keep
@@ -65,6 +67,7 @@ class RecyclerView extends BaseViewContainer {
         _scrollOffsetY = 0.0;
         _cycle = false;
         _verticalFadeSize = 0;
+        _horizontalFadeSize = 0;
         layoutManager = new RecyclerViewLayoutManager();
         _isScrolling = false;
         _scrollable = true;
@@ -85,6 +88,10 @@ class RecyclerView extends BaseViewContainer {
 
             case Styleable.verticalFadeSize:
                 verticalFadeSize = Std.int(computeDimension(cast value, true));
+                return true;
+
+            case Styleable.horizontalFadeSize:
+                horizontalFadeSize = Std.int(computeDimension(cast value, true));
                 return true;
 
             case Styleable.scrollable:
@@ -468,6 +475,21 @@ class RecyclerView extends BaseViewContainer {
             }
         }
 
+        if (_horizontalFadeSize > 0) {
+            var colorTransform = new ColorTransform();
+            var rect = new Rectangle(0.0, 0.0, 1.0, bitmapData.rect.height);
+
+            for (i in 0 ... _horizontalFadeSize) {
+                colorTransform.alphaMultiplier = i / _horizontalFadeSize;
+
+                rect.x = i;
+                bitmapData.colorTransform(rect, colorTransform);
+
+                rect.x = bitmapData.rect.width - i - 1.0;
+                bitmapData.colorTransform(rect, colorTransform);
+            }
+        }
+
         renderedBitmap.bitmapData = bitmapData;
         renderedBitmap.smoothing = true;
     }
@@ -700,6 +722,26 @@ class RecyclerView extends BaseViewContainer {
     private function set_verticalFadeSize(value:Int):Int {
         if (_verticalFadeSize != value) {
             _verticalFadeSize = value;
+
+            if (!isInLayout) {
+                updateBitmapData();
+            }
+        }
+
+        return value;
+    }
+
+    @:keep
+    @:noCompletion
+    private function get_horizontalFadeSize():Int {
+        return _horizontalFadeSize;
+    }
+
+    @:keep
+    @:noCompletion
+    private function set_horizontalFadeSize(value:Int):Int {
+        if (_horizontalFadeSize != value) {
+            _horizontalFadeSize = value;
 
             if (!isInLayout) {
                 updateBitmapData();

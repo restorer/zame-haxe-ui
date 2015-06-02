@@ -58,7 +58,8 @@ abstract Styleable(Int) from Int to Int {
     var groupTag = 54; // STRING
     var cycle = 55; // BOOL
     var verticalFadeSize = 56; // DIMENSION
-    var scrollable = 57; // BOOL
+    var horizontalFadeSize = 57; // DIMENSION
+    var scrollable = 58; // BOOL
 
     var _custom = 500000000;
     var _layout = 1000000000;

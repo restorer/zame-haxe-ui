@@ -55,7 +55,7 @@ class Application extends Sprite implements Context {
         #end
     }
 
-    public function changeScene(scene:Scene, searchForScene:Scene = null):Void {
+    public function changeScene(scene:Scene, sceneParams:Dynamic = null, searchForScene:Scene = null):Void {
         if (searchForScene != null) {
             while (_sceneStack.length != 0 && _sceneStack.first() != searchForScene) {
                 _sceneStack.pop().removeFromApplicationStage();
@@ -75,11 +75,12 @@ class Application extends Sprite implements Context {
 
         if (scene != null) {
             _sceneStack.push(scene);
+            scene.sceneParams = sceneParams;
             scene.addToApplicationStage();
         }
     }
 
-    public function pushScene(scene:Scene):Void {
+    public function pushScene(scene:Scene, sceneParams:Dynamic = null):Void {
         if (scene == null) {
             return;
         }
@@ -91,6 +92,7 @@ class Application extends Sprite implements Context {
         }
 
         _sceneStack.push(scene);
+        scene.sceneParams = sceneParams;
         scene.addToApplicationStage();
     }
 
@@ -146,7 +148,7 @@ class Application extends Sprite implements Context {
     }
 
     /*
-    private var prevTime:Int = -1;
+    private var prevTime:Float = -1.0;
 
     ... {
     addEventListener(Event.ENTER_FRAME, onEnterFrame);
@@ -155,12 +157,12 @@ class Application extends Sprite implements Context {
     private function onEnterFrame(_):Void {
         var dt:Float;
 
-        if (prevTime < 0) {
-            prevTime = Lib.getTimer();
+        if (prevTime < 0.0) {
+            prevTime = haxe.Timer.stamp();
             dt = 0.0;
         } else {
-            var currentTime = Lib.getTimer();
-            dt = (currentTime - prevTime) / 1000.0;
+            var currentTime = haxe.Timer.stamp();
+            dt = currentTime - prevTime;
             prevTime = currentTime;
         }
 
