@@ -2,6 +2,7 @@ package org.zamedev.ui.view;
 
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 import org.zamedev.ui.Context;
@@ -296,65 +297,33 @@ class TextView extends View {
         #end
 
         if (_font.ttfFontName != null) {
-            switch (widthSpec) {
-                case MeasureSpec.UNSPECIFIED:
-                    _textField.width = 512;
-
-                case MeasureSpec.EXACT(size) | MeasureSpec.AT_MOST(size):
-                    _textField.width = size;
-            }
-
-            switch (heightSpec) {
-                case MeasureSpec.UNSPECIFIED:
-                    _textField.height = 512;
-
-                case MeasureSpec.EXACT(size) | MeasureSpec.AT_MOST(size):
-                    _textField.height = size;
-            }
+            _textField.autoSize = TextFieldAutoSize.LEFT;
 
             switch (widthSpec) {
-                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                    #if (native || mobile)
-                        _width = _textField.textWidth * 1.1;
-                    #elseif flash
-                        _width = _textField.textWidth + 5;
-                    #else
-                        _width = _textField.textWidth;
-                    #end
+                case MeasureSpec.UNSPECIFIED:
+                    _width = _textField.width;
 
-                    switch (widthSpec) {
-                        case MeasureSpec.AT_MOST(size):
-                            _width = Math.min(size, _width);
-
-                        default:
-                    }
+                case MeasureSpec.AT_MOST(size):
+                    _width = Math.min(size, _textField.width);
 
                 case MeasureSpec.EXACT(size):
                     _width = size;
             }
 
-            _textField.width = _width;
-
             switch (heightSpec) {
-                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                    _height = _textField.textHeight;
+                case MeasureSpec.UNSPECIFIED:
+                    _height = _textField.height;
 
-                    switch (heightSpec) {
-                        case MeasureSpec.AT_MOST(size):
-                            _height = Math.min(size, _height);
-
-                        default:
-                    }
+                case MeasureSpec.AT_MOST(size):
+                    _height = Math.min(size, _textField.height);
 
                 case MeasureSpec.EXACT(size):
                     _height = size;
             }
 
-            #if flash
-                _textField.height = _height + 4;
-            #else
-                _textField.height = _height;
-            #end
+            _textField.autoSize = TextFieldAutoSize.NONE;
+            _textField.width = _width;
+            _textField.height = _height;
 
             #if (!flash && !webgl && !dom)
                 updateCache();
