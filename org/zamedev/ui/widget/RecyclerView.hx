@@ -548,13 +548,23 @@ class RecyclerView extends BaseViewContainer {
     }
 
     public function updateFirstVisiblePosition(position:Int):Void {
-        if (_firstVisiblePosition == position || adapter == null) {
+        if (adapter == null) {
             return;
         }
 
         var maxPosition = adapter.getItemCount();
 
         if (maxPosition <= 0) {
+            return;
+        }
+
+        ensureScrollingStopped();
+
+        _scrollOffsetX = 0.0;
+        _scrollOffsetY = 0.0;
+
+        if (_firstVisiblePosition == position) {
+            updateBitmapData();
             return;
         }
 
@@ -566,11 +576,7 @@ class RecyclerView extends BaseViewContainer {
             }
         }
 
-        ensureScrollingStopped();
-
         _firstVisiblePosition = position;
-        _scrollOffsetX = 0.0;
-        _scrollOffsetY = 0.0;
 
         for (viewHolder in _attachedList.copy()) {
             detachViewHolder(viewHolder);

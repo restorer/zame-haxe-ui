@@ -88,11 +88,15 @@ class Drawable {
         return true;
     }
 
-    public static function bitmapFromAsset(assetId:String, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {
+    public static function bitmapFromBitmapData(bitmapData:BitmapData, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {
         if (pixelSnapping == null) {
             pixelSnapping = PixelSnapping.AUTO;
         }
 
-        return new Bitmap(Assets.getBitmapData(assetId), pixelSnapping, smoothing);
+        return new Bitmap(bitmapData, pixelSnapping, smoothing);
+    }
+
+    public static function bitmapFromAsset(assetId:String, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {
+        return bitmapFromBitmapData(Assets.getBitmapData(assetId));
     }
 }

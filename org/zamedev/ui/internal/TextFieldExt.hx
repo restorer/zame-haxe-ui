@@ -6,12 +6,8 @@ import openfl.text.TextField;
 
 import js.Browser;
 import js.html.DOMElement;
-import openfl._internal.renderer.RenderSession;
-import openfl.text.TextFieldAutoSize;
-import openfl.text.TextFormat;
-import openfl.text.TextFormatAlign;
-import openfl._internal.renderer.dom.DOMRenderer;
 import openfl._internal.renderer.dom.DOMTextField;
+import openfl.text.TextFormat;
 
 using StringTools;
 
@@ -35,26 +31,25 @@ class TextFieldExt extends TextField {
 
     @:noCompletion
     override public function set_text(value:String):String {
-        if (__isHTML || __text != value) {
+        if (__isHTML || _originalText != value) {
+            _originalText = value;
             _escapedText = value.htmlEscape().replace(" ", "&nbsp;").replace("\n", "<br />");
             _isMeasurementsDirty = true;
         }
 
-        _originalText = value;
         super.set_text(_escapedText);
         return value;
     }
 
     @:noCompletion
     override private function set_htmlText(value:String):String {
-        if (!__isHTML || __text != value) {
+        if (!__isHTML || _originalText != value) {
+            _originalText = value;
             _escapedText = value;
             _isMeasurementsDirty = true;
         }
 
-        _originalText = value;
-        super.set_htmlText(value);
-
+        super.set_htmlText(_escapedText);
         return value;
     }
 
@@ -100,40 +95,29 @@ class TextFieldExt extends TextField {
 
     @:noCompletion
     override public function get_textWidth():Float {
-        if (__canvas != null) {
-            return super.get_textWidth();
-        } else {
-            DOMTextFieldExt.measureText(this);
-            return __measuredWidth;
-        }
+        DOMTextFieldExt.measureText(this);
+        return __measuredWidth;
     }
 
     @:noCompletion
     override public function get_textHeight():Float {
-        if (__canvas != null) {
-            return super.get_textHeight();
-        } else {
-            DOMTextFieldExt.measureText(this);
-            return __measuredHeight;
-        }
+        DOMTextFieldExt.measureText(this);
+        return __measuredHeight;
     }
 }
 
 @:access(openfl.text.TextField)
 class DOMTextFieldExt {
     private static var _divExt:DOMElement = null;
-    private static var _isFirefox:Bool = false;
 
     private static function initialize():Void {
         _divExt = Browser.document.createElement("div");
         _divExt.style.position = "absolute";
-        _divExt.style.top = "110%";
+        _divExt.style.top = "0";
         _divExt.style.left = "0";
         _divExt.style.visibility = "hidden";
         _divExt.style.setProperty("pointer-events", "none", null);
         Browser.document.body.appendChild(_divExt);
-
-        _isFirefox = (Browser.navigator.userAgent.toLowerCase().indexOf("firefox") >= 0);
     }
 
     public static function measureText(textField:TextFieldExt):Void {

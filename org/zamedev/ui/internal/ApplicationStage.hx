@@ -1,9 +1,10 @@
 package org.zamedev.ui.internal;
 
-import org.zamedev.ui.graphics.ScaleMode;
 import openfl.display.Shape;
 import openfl.display.Sprite;
 import openfl.events.Event;
+import openfl.events.MouseEvent;
+import org.zamedev.ui.graphics.ScaleMode;
 
 class ApplicationStage extends Sprite {
     private var scaleMode:ScaleMode;
@@ -55,6 +56,22 @@ class ApplicationStage extends Sprite {
     public function setWeightSums(widthWeightSum:Float, heightWeightSum:Float) {
         this.widthWeightSum = widthWeightSum;
         this.heightWeightSum = heightWeightSum;
+    }
+
+    public function fixStageMouseEvent(me:MouseEvent):MouseEvent {
+        return new MouseEvent(
+            me.type,
+            me.bubbles,
+            me.cancelable,
+            (me.stageX - x) / scaleX,
+            (me.stageY - y) / scaleY,
+            me.relatedObject,
+            me.ctrlKey,
+            me.altKey,
+            me.shiftKey,
+            me.buttonDown,
+            me.delta
+        );
     }
 
     @:noCompletion
