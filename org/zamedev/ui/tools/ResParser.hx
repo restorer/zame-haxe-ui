@@ -15,6 +15,7 @@ using StringTools;
 using org.zamedev.lib.LambdaExt;
 using org.zamedev.lib.XmlExt;
 
+@:access(org.zamedev.ui.graphics.Drawable)
 class ResParser {
     private var resourceMap:LinkedMap<String, Xml>;
 
@@ -179,18 +180,11 @@ class ResParser {
             throw new UiParseError('${drawableName} - packed drawable not found');
         }
 
-        if (packedDrawable.type != DrawableType.BITMAP) {
+        if (packedDrawable.type != DrawableType.ASSET_BITMAP) {
             throw new UiParseError('${drawableName} - packed drawable must have bitmap type');
         }
 
-        return new Drawable(
-            DrawableType.PACKED,
-            packedDrawable.assetId,
-            packedX,
-            packedY,
-            packedW,
-            packedH
-        );
+        return Drawable.fromAssetPacked(packedDrawable.id, packedX, packedY, packedW, packedH);
     }
 
     private function parseLayout(name:String, node:Xml):Xml {

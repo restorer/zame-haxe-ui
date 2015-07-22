@@ -1,6 +1,7 @@
 package org.zamedev.ui.graphics;
 
 enum DrawableType {
-    BITMAP;
-    PACKED;
+    ASSET_BITMAP;
+    ASSET_PACKED;
+    BITMAP_DATA;
 }

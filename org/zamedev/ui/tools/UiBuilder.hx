@@ -26,12 +26,17 @@ class UiBuilder {
                     if (~/^\/drawable/.match(path.substr(assetsPath.length))) {
                         resGenerator.putDrawable(
                             Path.withoutExtension(Path.withoutDirectory(path)),
-                            new Drawable(DrawableType.BITMAP, path.substr(assetsPath.length + 1))
+                            Drawable.fromAssetBitmap(path.substr(assetsPath.length + 1))
                         );
                     }
 
                 case "xml":
-                    resParser.tryParse(File.getContent(path));
+                    try {
+                        resParser.tryParse(File.getContent(path));
+                    } catch (e:Dynamic) {
+                        trace('In file "${path}":');
+                        throw e;
+                    }
             }
         }
     }

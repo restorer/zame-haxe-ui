@@ -20,6 +20,7 @@ import org.zamedev.ui.widget.LinearLayoutOrientation;
 
 using StringTools;
 
+@:access(org.zamedev.ui.graphics.Drawable)
 class HaxeCode {
     public static function validateIdentifier(name:String):String {
         switch (name) {
@@ -74,11 +75,14 @@ class HaxeCode {
 
     public static function genDrawable(d:Drawable):String {
         switch (d.type) {
-            case BITMAP:
-                return 'new Drawable(DrawableType.BITMAP, ${genString(d.assetId)})';
+            case ASSET_BITMAP:
+                return 'Drawable.fromAssetBitmap(${genString(d.id)})';
 
-            case PACKED:
-                return 'new Drawable(DrawableType.PACKED, ${genString(d.assetId)}, ${d.packedX}, ${d.packedY}, ${d.packedW}, ${d.packedH})';
+            case ASSET_PACKED:
+                return 'Drawable.fromAssetPacked(${genString(d.id)}, ${d.packedX}, ${d.packedY}, ${d.packedW}, ${d.packedH})';
+
+            default:
+                throw new UiParseError('"${d.type}" drawable type is not supported for generation');
         }
     }
 

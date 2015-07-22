@@ -49,6 +49,7 @@ class ResGenerator {
         "AbsoluteLayout" => "org.zamedev.ui.widget.AbsoluteLayout",
         "Button" => "org.zamedev.ui.widget.Button",
         "FrameLayout" => "org.zamedev.ui.widget.FrameLayout",
+        "FullStageFrameLayout" => "org.zamedev.ui.widget.FullStageFrameLayout",
         "LinearLayout" => "org.zamedev.ui.widget.LinearLayout",
         "Progress" => "org.zamedev.ui.widget.Progress",
         "Radio" => "org.zamedev.ui.widget.Radio",
@@ -183,7 +184,7 @@ class ResGenerator {
     }
 
     private function validateClassName(name:String):String {
-        if (!~/^[A-Z][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name))) {
+        if (!~/^[A-Za-z][0-9A-Za-z_.]*$/.match(HaxeCode.validateIdentifier(name))) {
             throw new UiParseError('"${name}" is invalid class name');
         }
 

@@ -1,5 +1,6 @@
 package org.zamedev.ui.graphics;
 
+import haxe.Int64;
 import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
@@ -7,35 +8,30 @@ import openfl.display.DisplayObject;
 import openfl.display.PixelSnapping;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-import org.zamedev.ui.errors.UiError;
 
 class Drawable {
+    private static var int64one:Int64 = Int64.make(0, 1);
+    private static var customDrawableIndex:Int64 = Int64.make(0, 0);
+
     public var type(default, null):DrawableType;
-    public var assetId(default, null):String;
-    public var packedX(default, null):Int;
-    public var packedY(default, null):Int;
-    public var packedW(default, null):Int;
-    public var packedH(default, null):Int;
 
-    private var packedBitmapData:BitmapData;
+    private var id:String;
+    private var packedX:Int;
+    private var packedY:Int;
+    private var packedW:Int;
+    private var packedH:Int;
+    private var bitmapData:BitmapData = null;
 
-    public function new(type:DrawableType, assetId:String, packedX:Int = 0, packedY:Int = 0, packedW:Int = 0, packedH:Int = 0) {
+    private function new(type:DrawableType):Void {
         this.type = type;
-        this.assetId = assetId;
-        this.packedX = packedX;
-        this.packedY = packedY;
-        this.packedW = packedW;
-        this.packedH = packedH;
-
-        this.packedBitmapData = null;
     }
 
     public function toString() {
-        return '[Drawable type=${type} assetId=${assetId} packedX=${packedX} packedY=${packedY} packedW=${packedW} packedH=${packedH}]';
+        return '[Drawable type=${type} id=${id} packedX=${packedX} packedY=${packedY} packedW=${packedW} packedH=${packedH}]';
     }
 
     public function computeKey():String {
-        return '${Std.string(type)}:${assetId}:${packedX}:${packedY}:${packedW}:${packedH}';
+        return '${Std.string(type)}:${id}:${packedX}:${packedY}:${packedW}:${packedH}';
     }
 
     public function resolve():DisplayObject {
@@ -43,28 +39,32 @@ class Drawable {
     }
 
     public function resolveBitmapData():BitmapData {
-        if (type == DrawableType.BITMAP) {
-            return Assets.getBitmapData(assetId);
-        }
-
-        if (type == DrawableType.PACKED) {
-            if (packedBitmapData == null) {
-                packedBitmapData = new BitmapData(packedW, packedH, true, 0);
-
-                packedBitmapData.copyPixels(
-                    Assets.getBitmapData(assetId),
-                    new Rectangle(packedX, packedY, packedW, packedH),
-                    new Point(0, 0),
-                    null,
-                    null,
-                    true
-                );
+        switch (type) {
+            case ASSET_BITMAP: {
+                return Assets.getBitmapData(id);
             }
 
-            return packedBitmapData;
-        }
+            case ASSET_PACKED: {
+                if (bitmapData == null) {
+                    bitmapData = new BitmapData(packedW, packedH, true, 0);
 
-        throw new UiError("Unsupported drawable type: " + type);
+                    bitmapData.copyPixels(
+                        Assets.getBitmapData(id),
+                        new Rectangle(packedX, packedY, packedW, packedH),
+                        new Point(0, 0),
+                        null,
+                        null,
+                        true
+                    );
+                }
+
+                return bitmapData;
+            }
+
+            case BITMAP_DATA: {
+                return bitmapData;
+            }
+        }
     }
 
     public static function eq(a:Drawable, b:Drawable):Bool {
@@ -72,11 +72,11 @@ class Drawable {
             return true;
         }
 
-        if (a == null || b == null || a.type != b.type || a.assetId != b.assetId) {
+        if (a == null || b == null || a.type != b.type || a.id != b.id) {
             return false;
         }
 
-        if (a.type == DrawableType.PACKED && (
+        if (a.type == DrawableType.ASSET_PACKED && (
             a.packedX != b.packedX
             || a.packedY != b.packedY
             || a.packedW != b.packedW
@@ -86,6 +86,44 @@ class Drawable {
         }
 
         return true;
+    }
+
+    public static function fromAssetBitmap(assetId:String):Drawable {
+        var result = new Drawable(DrawableType.ASSET_BITMAP);
+
+        result.id = assetId;
+        result.packedX = 0;
+        result.packedY = 0;
+        result.packedW = 0;
+        result.packedH = 0;
+
+        return result;
+    }
+
+    public static function fromAssetPacked(assetId:String, packedX:Int, packedY:Int, packedW:Int, packedH:Int):Drawable {
+        var result = new Drawable(DrawableType.ASSET_PACKED);
+
+        result.id = assetId;
+        result.packedX = packedX;
+        result.packedY = packedY;
+        result.packedW = packedW;
+        result.packedH = packedH;
+
+        return result;
+    }
+
+    public static function fromBitmapData(bitmapData:BitmapData):Drawable {
+        var result = new Drawable(DrawableType.BITMAP_DATA);
+
+        customDrawableIndex = Int64.add(customDrawableIndex, int64one);
+        result.id = Int64.toStr(customDrawableIndex);
+        result.bitmapData = bitmapData;
+
+        return result;
+    }
+
+    public static function createEmpty(width:Int, height:Int):Drawable {
+        return fromBitmapData(new BitmapData(width, height, true, 0));
     }
 
     public static function bitmapFromBitmapData(bitmapData:BitmapData, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {

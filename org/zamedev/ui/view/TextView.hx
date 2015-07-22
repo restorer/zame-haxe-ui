@@ -22,8 +22,8 @@ using StringTools;
 class TextView extends View {
     private var _font:FontExt;
     private var _textColor:Null<Int>;
-    private var _textSize:Null<Float>;
-    private var _textLeading:Null<Float>;
+    private var _textSize:Null<Int>;
+    private var _textLeading:Null<Int>;
     private var _textAlign:TextAlignExt;
     private var _text:String;
     private var _htmlText:String;
@@ -41,8 +41,8 @@ class TextView extends View {
 
     public var font(get, set):FontExt;
     public var textColor(get, set):Null<Int>;
-    public var textSize(get, set):Null<Float>;
-    public var textLeading(get, set):Null<Float>;
+    public var textSize(get, set):Null<Int>;
+    public var textLeading(get, set):Null<Int>;
     public var textAlign(get, set):TextAlignExt;
     public var text(get, set):String;
     public var htmlText(never, set):String;
@@ -102,7 +102,7 @@ class TextView extends View {
 
                 updateBitmapTextFieldColor();
                 _bitmapTextField.size = (_textSize == null ? 1.0 : _textSize / _font.bitmapFont.size);
-                _bitmapTextField.lineSpacing = (_textLeading == null ? 0 : Std.int(_textLeading));
+                _bitmapTextField.lineSpacing = (_textLeading == null ? 0 : _textLeading);
                 _bitmapTextField.alignment = getAlignForBitmapTextField();
 
                 if (_text != null) {
@@ -144,7 +144,7 @@ class TextView extends View {
             _textFormat.font = _font.ttfFontName;
             _textFormat.color = _textColor;
             _textFormat.size = _textSize;
-            _textFormat.leading = #if flash (_textLeading == null ? null : _textLeading - 4.0) #else _textLeading #end;
+            _textFormat.leading = (_textLeading == null ? null : _textLeading - 4);
             _textFormat.align = getAlignForTextField();
 
             _textField.defaultTextFormat = _textFormat;
@@ -234,11 +234,11 @@ class TextView extends View {
                 return true;
 
             case Styleable.textSize:
-                textSize = computeDimension(cast value, true);
+                textSize = Std.int(computeDimension(cast value, true));
                 return true;
 
             case Styleable.textLeading:
-                textLeading = computeDimension(cast value, true);
+                textLeading = Std.int(computeDimension(cast value, true));
                 return true;
 
             case Styleable.textAlign:
@@ -384,12 +384,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_textSize():Null<Float> {
+    private function get_textSize():Null<Int> {
         return _textSize;
     }
 
     @:noCompletion
-    private function set_textSize(value:Null<Float>):Null<Float> {
+    private function set_textSize(value:Null<Int>):Null<Int> {
         if (_textSize != value) {
             _textSize = value;
 
@@ -417,12 +417,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_textLeading():Null<Float> {
+    private function get_textLeading():Null<Int> {
         return _textLeading;
     }
 
     @:noCompletion
-    private function set_textLeading(value:Null<Float>):Null<Float> {
+    private function set_textLeading(value:Null<Int>):Null<Int> {
         if (_textLeading != value) {
             _textLeading = value;
 
@@ -438,7 +438,7 @@ class TextView extends View {
             #end
 
             if (_font.ttfFontName != null) {
-                _textFormat.leading = #if flash (_textLeading == null ? null : _textLeading - 4.0) #else _textLeading #end;
+                _textFormat.leading = (_textLeading == null ? null : _textLeading - 4);
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
                 requestLayout();

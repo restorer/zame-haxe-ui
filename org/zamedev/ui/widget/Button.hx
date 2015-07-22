@@ -49,8 +49,8 @@ class Button extends ViewContainer {
     public var textOffset(get, set):Point;
     public var textOffsetX(get, set):Float;
     public var textOffsetY(get, set):Float;
-    public var textColor(get, set):Null<UInt>;
-    public var textSize(get, set):Null<Float>;
+    public var textColor(get, set):Null<Int>;
+    public var textSize(get, set):Null<Int>;
     public var textAlign(get, set):TextAlignExt;
     public var font(get, set):FontExt;
     public var text(get, set):String;
@@ -176,7 +176,7 @@ class Button extends ViewContainer {
                 return true;
 
             case Styleable.textSize:
-                textSize = computeDimension(cast value, true);
+                textSize = Std.int(computeDimension(cast value, true));
                 return true;
 
             case Styleable.textAlign:
@@ -309,6 +309,7 @@ class Button extends ViewContainer {
     @:noCompletion
     private function onMouseUp(e:Event):Void {
         if (listenersAdded) {
+            updateState("pressed", false);
             dispatchEvent(new Event(MouseEvent.CLICK));
         }
     }
@@ -324,6 +325,9 @@ class Button extends ViewContainer {
     @:noCompletion
     private function onRemovedFromStage(_):Void {
         if (listenersAdded) {
+            listenersAdded = false;
+            updateState("pressed", false);
+
             _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
             _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
@@ -599,23 +603,23 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
-    private function get_textColor():Null<UInt> {
+    private function get_textColor():Null<Int> {
         return textView.textColor;
     }
 
     @:noCompletion
-    private function set_textColor(value:Null<UInt>):Null<UInt> {
+    private function set_textColor(value:Null<UInt>):Null<Int> {
         textView.textColor = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textSize():Null<Float> {
+    private function get_textSize():Null<Int> {
         return textView.textSize;
     }
 
     @:noCompletion
-    private function set_textSize(value:Null<Float>):Null<Float> {
+    private function set_textSize(value:Null<Int>):Null<Int> {
         textView.textSize = value;
         return value;
     }

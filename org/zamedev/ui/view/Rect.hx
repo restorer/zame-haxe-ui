@@ -143,7 +143,6 @@ class Rect extends View {
         @:noCompletion
         private function get_buttonMode():Bool {
             return shape.buttonMode;
-            return false;
         }
 
         @:noCompletion
