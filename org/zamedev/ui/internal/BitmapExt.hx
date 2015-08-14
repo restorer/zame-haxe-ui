@@ -14,7 +14,7 @@ class BitmapExt extends Bitmap {
 
     public function new(bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
         super(bitmapData, pixelSnapping, smoothing);
-        mouseEnabled = false;
+        // mouseEnabled = false;
     }
 
     @:noCompletion
@@ -34,7 +34,7 @@ class BitmapExt extends Bitmap {
     @:noCompletion
     private function set_interactiveMode(value:Bool):Bool {
         interactiveMode = value;
-        mouseEnabled = value;
+        // mouseEnabled = value;
 
         if (__style != null) {
             __style.cursor = (interactiveMode ? "pointer" : "inherit");

@@ -121,9 +121,8 @@ class TextView extends View {
                 _textField = new TextFieldExt();
                 _textField.embedFonts = true;
                 _textField.selectable = false;
-
+                _textField.wordWrap = true;
                 // _textField.multiline = true;
-                // _textField.wordWrap = true;
 
                 // _textField.backgroundColor = 0x800000;
                 // _textField.background = true;
@@ -144,7 +143,7 @@ class TextView extends View {
             _textFormat.font = _font.ttfFontName;
             _textFormat.color = _textColor;
             _textFormat.size = _textSize;
-            _textFormat.leading = (_textLeading == null ? null : _textLeading - 4);
+            _textFormat.leading = (_textLeading == null ? null : _textLeading #if html5 - 4 #end );
             _textFormat.align = getAlignForTextField();
 
             _textField.defaultTextFormat = _textFormat;
@@ -297,25 +296,35 @@ class TextView extends View {
         #end
 
         if (_font.ttfFontName != null) {
+            switch (widthSpec) {
+                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
+                    _textField.wordWrap = false;
+
+                default:
+            }
+
             _textField.autoSize = TextFieldAutoSize.LEFT;
 
             switch (widthSpec) {
                 case MeasureSpec.UNSPECIFIED:
-                    _width = _textField.width;
+                    _width = _textField.textWidth + #if flash 8 #else 4 #end;
+                    _textField.wordWrap = true;
 
                 case MeasureSpec.AT_MOST(size):
-                    _width = Math.min(size, _textField.width);
+                    _width = Math.min(size, _textField.textWidth + #if flash 8 #else 4 #end);
 
                 case MeasureSpec.EXACT(size):
                     _width = size;
             }
 
+            _textField.width = _width;
+
             switch (heightSpec) {
                 case MeasureSpec.UNSPECIFIED:
-                    _height = _textField.height;
+                    _height = _textField.textHeight + 4;
 
                 case MeasureSpec.AT_MOST(size):
-                    _height = Math.min(size, _textField.height);
+                    _height = Math.min(size, _textField.textHeight + 4);
 
                 case MeasureSpec.EXACT(size):
                     _height = size;
@@ -438,7 +447,7 @@ class TextView extends View {
             #end
 
             if (_font.ttfFontName != null) {
-                _textFormat.leading = (_textLeading == null ? null : _textLeading - 4);
+                _textFormat.leading = (_textLeading == null ? null : _textLeading #if html5 - 4 #end );
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
                 requestLayout();
