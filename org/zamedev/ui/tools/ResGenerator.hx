@@ -55,6 +55,7 @@ class ResGenerator {
         "Radio" => "org.zamedev.ui.widget.Radio",
         "RecyclerView" => "org.zamedev.ui.widget.RecyclerView",
         "Toggle" => "org.zamedev.ui.widget.Toggle",
+        "EditText" => "org.zamedev.ui.widget.EditText",
     ];
 
     public function new():Void {

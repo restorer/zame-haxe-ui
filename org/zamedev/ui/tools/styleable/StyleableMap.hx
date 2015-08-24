@@ -71,6 +71,15 @@ class StyleableMap {
         m["verticalFadeSize"] = StyleableType.DIMENSION;
         m["horizontalFadeSize"] = StyleableType.DIMENSION;
         m["scrollable"] = StyleableType.BOOL;
+        m["placeholderTextColor"] = StyleableType.COLOR;
+        m["placeholderText"] = StyleableType.STRING;
+        m["paddingLeft"] = StyleableType.DIMENSION;
+        m["paddingRight"] = StyleableType.DIMENSION;
+        m["paddingTop"] = StyleableType.DIMENSION;
+        m["paddingBottom"] = StyleableType.DIMENSION;
+        m["paddingHorizontal"] = StyleableType.DIMENSION;
+        m["paddingVertical"] = StyleableType.DIMENSION;
+        m["padding"] = StyleableType.DIMENSION;
 
         m["layout_width"] = StyleableType.DIMENSION;
         m["layout_height"] = StyleableType.DIMENSION;

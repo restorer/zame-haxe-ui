@@ -8,6 +8,7 @@ class TexmapGenerator {
 	protected $rows = array();
 	protected $cols = array();
 	protected $free = array(array());
+	protected $images = array();
 
 	protected function tryToFit($r, $c, $w, $h) {
 		$rs = 0;
@@ -108,7 +109,7 @@ class TexmapGenerator {
 		return ($sizeA == $sizeB ? 0 : ($sizeA > $sizeB ? -1 : 1));
 	}
 
-	public function generate($fromDir, $resImageName, $resDataName, $packedDrawableName) {
+	protected function generatePart($resImageName) {
 		if ($this->img != null) {
 			imageDestroy($this->img);
 		}
@@ -129,34 +130,10 @@ class TexmapGenerator {
 			array(true),
 		);
 
-		$images = array();
-		$dh = @opendir($fromDir);
-
-		if ($dh === false) {
-			echo "Can't open \"${fromDir}\"\n";
-			return;
-		}
-
-		while (($name = readdir($dh)) !== false) {
-			if (!preg_match('/\.png$/i', $name)) {
-				continue;
-			}
-
-			$size = getImageSize($fromDir . '/' . $name);
-
-			$images[] = array(
-				'name' => preg_replace('/\.png$/i', '', $name),
-				'img' => imageCreateFromPNG($fromDir . '/' . $name),
-				'w' => $size[0],
-				'h' => $size[1]
-			);
-		}
-
-		closedir($dh);
-		usort($images, array($this, 'cmpBySizeDesc'));
 		$data = array();
+		$nextRoundImages = array();
 
-		foreach ($images as $idx => $item) {
+		foreach ($this->images as $idx => $item) {
 			if ($item['w'] == 1) {
 				$region = $this->getAndSplitRegion($item['w'] + 3, $item['h'] + 1);
 			} else {
@@ -164,13 +141,16 @@ class TexmapGenerator {
 			}
 
 			if (!$region) {
-				echo "{$item['name']}: Can't find region!\n";
+				// echo "{$item['name']}: Can't find region!\n";
 				// imagePNG($this->img, $resImageName);
-				return;
+				// return;
+
+				$nextRoundImages[] = $item;
+				continue;
 			}
 
-			$images[$idx]['x'] = $region['x'];
-			$images[$idx]['y'] = $region['y'];
+			$this->images[$idx]['x'] = $region['x'];
+			$this->images[$idx]['y'] = $region['y'];
 
 			if ($item['w'] == 1) {
 				imageCopy($this->img, $item['img'], $region['x'], $region['y'], 0, 0, $item['w'], $item['h']);
@@ -198,20 +178,68 @@ class TexmapGenerator {
 		}
 
 		imagePNG($this->img, $resImageName);
+
+		$this->images = $nextRoundImages;
+		return $data;
+	}
+
+	public function generate($fromDir, $toDir, $resXmlName, $packedDrawablePrefix) {
+		$this->images = array();
+		$dh = @opendir($fromDir);
+
+		if ($dh === false) {
+			echo "Can't open \"${fromDir}\"\n";
+			return;
+		}
+
+		while (($name = readdir($dh)) !== false) {
+			if (!preg_match('/\.png$/i', $name)) {
+				continue;
+			}
+
+			$size = getImageSize($fromDir . '/' . $name);
+
+			if ($size[0] > (self::WIDTH - 2) || $size[1] > (self::HEIGHT - 2)) {
+				echo "Image \"{$name}\" is too big\n";
+				return;
+			}
+
+			$this->images[] = array(
+				'name' => preg_replace('/\.png$/i', '', $name),
+				'img' => imageCreateFromPNG($fromDir . '/' . $name),
+				'w' => $size[0],
+				'h' => $size[1]
+			);
+		}
+
+		closedir($dh);
+		usort($this->images, array($this, 'cmpBySizeDesc'));
+
+		$index = 1;
+		$dataMap = array();
+
+		while (count($this->images)) {
+			$packedDrawableName = $packedDrawablePrefix . $index;
+			$dataMap[$packedDrawableName] = $this->generatePart("{$toDir}/{$packedDrawableName}.png");
+			$index++;
+		}
+
 		$resData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n";
 
-		foreach ($data as $name => $item) {
-			$resData .= "    <drawable name=\"{$name}\">\n"
-				. "        <packed drawable=\"@drawable/{$packedDrawableName}\""
-				. " x=\"{$item['x']}\""
-				. " y=\"{$item['y']}\""
-				. " w=\"{$item['w']}\""
-				. " h=\"{$item['h']}\" />\n"
-				. "    </drawable>\n";
+		foreach ($dataMap as $packedDrawableName => $data) {
+			foreach ($data as $name => $item) {
+				$resData .= "    <drawable name=\"{$name}\">\n"
+					. "        <packed drawable=\"@drawable/{$packedDrawableName}\""
+					. " x=\"{$item['x']}\""
+					. " y=\"{$item['y']}\""
+					. " w=\"{$item['w']}\""
+					. " h=\"{$item['h']}\" />\n"
+					. "    </drawable>\n";
+			}
 		}
 
 		$resData .= "</resources>\n";
-		file_put_contents($resDataName, $resData);
+		file_put_contents($resXmlName, $resData);
 	}
 }
 
@@ -219,7 +247,7 @@ $gen = new TexmapGenerator();
 
 $gen->generate(
 	__DIR__ . '/drawable-parts',
-	__DIR__ . '/../assets/drawable/packed_1.png',
+	__DIR__ . '/../assets/drawable',
 	__DIR__ . '/../assets/resource/drawable.xml',
-	'packed_1'
+	'packed_'
 );

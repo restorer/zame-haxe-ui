@@ -60,6 +60,15 @@ abstract Styleable(Int) from Int to Int {
     var verticalFadeSize = 56; // DIMENSION
     var horizontalFadeSize = 57; // DIMENSION
     var scrollable = 58; // BOOL
+    var placeholderTextColor = 59; // COLOR
+    var placeholderText = 60; // STRING
+    var paddingLeft = 61; // DIMENSION
+    var paddingRight = 62; // DIMENSION
+    var paddingTop = 63; // DIMENSION
+    var paddingBottom = 64; // DIMENSION
+    var paddingHorizontal = 65; // DIMENSION
+    var paddingVertical = 66; // DIMENSION
+    var padding = 67; // DIMENSION
 
     var _custom = 500000000;
     var _layout = 1000000000;

@@ -2,7 +2,9 @@ package org.zamedev.ui.view;
 
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.events.FocusEvent;
 import openfl.text.TextFieldAutoSize;
+import openfl.text.TextFieldType;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 import org.zamedev.ui.Context;
@@ -11,6 +13,7 @@ import org.zamedev.ui.graphics.TextAlignExt;
 import org.zamedev.ui.internal.TextFieldExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
+import org.zamedev.ui.view.TextView;
 
 using StringTools;
 
@@ -27,9 +30,11 @@ class TextView extends View {
     private var _textAlign:TextAlignExt;
     private var _text:String;
     private var _htmlText:String;
+    private var _editable:Bool;
 
     private var _textField:TextFieldExt;
     private var _textFormat:TextFormat;
+    private var _listenersAdded:Bool;
 
     #if (!flash && !webgl && !dom)
         private var _cachedBitmap:Bitmap;
@@ -46,6 +51,7 @@ class TextView extends View {
     public var textAlign(get, set):TextAlignExt;
     public var text(get, set):String;
     public var htmlText(never, set):String;
+    public var editable(get, set):Bool;
 
     @:keep
     public function new(context:Context) {
@@ -58,9 +64,11 @@ class TextView extends View {
         _textAlign = null;
         _text = null;
         _htmlText = null;
+        _editable = false;
 
         _textField = null;
         _textFormat = null;
+        _listenersAdded = false;
 
         #if (!flash && !webgl && !dom)
             _cachedBitmap = null;
@@ -73,11 +81,21 @@ class TextView extends View {
 
     private function reConfigure():Void {
         if (_textField != null && _textField.parent != null) {
+            if (_editable) {
+                updateEditedText();
+
+                if (_listenersAdded) {
+                    _textField.removeEventListener(FocusEvent.FOCUS_IN, onFocusIn);
+                    _textField.removeEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+                    _listenersAdded = false;
+                }
+            }
+
             _sprite.removeChild(_textField);
         }
 
         #if (!flash && !webgl && !dom)
-            if (_cachedBitmap != null) {
+            if (_cachedBitmap != null && _cachedBitmap.parent != null) {
                 _sprite.removeChild(_cachedBitmap);
             }
         #end
@@ -120,12 +138,11 @@ class TextView extends View {
             if (_textField == null) {
                 _textField = new TextFieldExt();
                 _textField.embedFonts = true;
-                _textField.selectable = false;
-                _textField.wordWrap = true;
-                // _textField.multiline = true;
 
-                // _textField.backgroundColor = 0x800000;
-                // _textField.background = true;
+                #if debug_ui
+                    _textField.backgroundColor = 0x800000;
+                    _textField.background = true;
+                #end
 
                 _textFormat = new TextFormat();
 
@@ -134,8 +151,24 @@ class TextView extends View {
                 #end
             }
 
+            if (_editable) {
+                _textField.selectable = true;
+                _textField.wordWrap = false;
+                _textField.multiline = false;
+                _textField.type = TextFieldType.INPUT;
+            } else {
+                _textField.selectable = false;
+                _textField.wordWrap = true;
+                _textField.multiline = true;
+                _textField.type = TextFieldType.DYNAMIC;
+            }
+
             #if (!flash && !webgl && !dom)
-                _sprite.addChild(_cachedBitmap);
+                if (_editable) {
+                    _sprite.addChild(_textField);
+                } else {
+                    _sprite.addChild(_cachedBitmap);
+                }
             #else
                 _sprite.addChild(_textField);
             #end
@@ -154,6 +187,18 @@ class TextView extends View {
             } else if (_htmlText != null) {
                 _textField.htmlText = getHtmlTextForTextField();
             }
+
+            if (_editable && !_listenersAdded) {
+                _textField.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
+                _textField.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+                _listenersAdded = true;
+            }
+
+            #if (!flash && !webgl && !dom)
+                if (!_editable) {
+                    updateCache();
+                }
+            #end
         }
     }
 
@@ -182,7 +227,7 @@ class TextView extends View {
             return null;
         }
 
-        return ~/"@(font\/[^"]+)"/g.map(_htmlText, function(re:EReg):String {
+        var result = ~/"@(font\/[^"]+)"/g.map(_htmlText, function(re:EReg):String {
             var resId = _context.resourceManager.findIdByName(re.matched(1));
             var font =_context.resourceManager.getFont(resId == null ? 0 : resId);
 
@@ -191,7 +236,12 @@ class TextView extends View {
             #end
 
             return "\"" + font.ttfFontName + "\"";
-        }).replace("\n", " ");
+        });
+
+        result = ~/[\n]?<br[^\/>]*\/?>[\n]?/g.replace(result, "<br>");
+        result = result.replace("\n", " ");
+
+        return result;
     }
 
     #if bitmapFont
@@ -335,7 +385,9 @@ class TextView extends View {
             _textField.height = _height;
 
             #if (!flash && !webgl && !dom)
-                updateCache();
+                if (!_editable) {
+                    updateCache();
+                }
             #end
         }
 
@@ -356,6 +408,21 @@ class TextView extends View {
             _cachedBitmap.smoothing = true;
         }
     #end
+
+    private function onFocusIn(_):Void {
+        if (_textField != null && _textField.stage != null #if !legacy && _textField.stage.focus == _textField #end) {
+            dispatchEvent(new FocusEvent(FocusEvent.FOCUS_IN));
+        }
+    }
+
+    private function onFocusOut(_):Void {
+        dispatchEvent(new FocusEvent(FocusEvent.FOCUS_OUT));
+    }
+
+    private function updateEditedText():Void {
+        _htmlText = null;
+        _text = _textField.text;
+    }
 
     @:noCompletion
     private function get_textColor():Null<Int> {
@@ -384,7 +451,9 @@ class TextView extends View {
                 _textField.setTextFormat(_textFormat);
 
                 #if (!flash && !webgl && !dom)
-                    updateCache();
+                    if (!_editable) {
+                        updateCache();
+                    }
                 #end
             }
         }
@@ -484,7 +553,9 @@ class TextView extends View {
                 _textField.setTextFormat(_textFormat);
 
                 #if (!flash && !webgl && !dom)
-                    updateCache();
+                    if (!_editable) {
+                        updateCache();
+                    }
                 #end
             }
         }
@@ -523,6 +594,10 @@ class TextView extends View {
 
     @:noCompletion
     private function get_text():String {
+        if (_editable && _textField != null) {
+            updateEditedText();
+        }
+
         return _text;
     }
 
@@ -575,6 +650,21 @@ class TextView extends View {
                 _textField.htmlText = getHtmlTextForTextField();
                 requestLayout();
             }
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_editable():Bool {
+        return _editable;
+    }
+
+    @:noCompletion
+    private function set_editable(value:Bool):Bool {
+        if (_editable != value) {
+            _editable = value;
+            reConfigure();
         }
 
         return value;
