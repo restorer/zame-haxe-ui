@@ -69,6 +69,9 @@ abstract Styleable(Int) from Int to Int {
     var paddingHorizontal = 65; // DIMENSION
     var paddingVertical = 66; // DIMENSION
     var padding = 67; // DIMENSION
+    var displayAsPassword = 68; // BOOL
+    var placeholderFont = 69; // FONT
+    var editableFont = 70; // FONT
 
     var _custom = 500000000;
     var _layout = 1000000000;

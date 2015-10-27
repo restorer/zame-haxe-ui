@@ -35,6 +35,8 @@ class EditText extends ViewContainer {
     public var placeholderTextColor(get, set):Null<Int>;
     public var textSize(get, set):Null<Int>;
     public var font(get, set):FontExt;
+    public var placeholderFont(get, set):FontExt;
+    public var editableFont(get, set):FontExt;
     public var text(get, set):String;
     public var placeholderText(get, set):String;
     public var paddingLeft(get, set):Float;
@@ -42,6 +44,7 @@ class EditText extends ViewContainer {
     public var paddingHorizontal(never, set):Float;
     public var padding(never, set):Float;
     public var disabled(get, set):Bool;
+    public var displayAsPassword(get, set):Bool;
 
     @:keep
     public function new(context:Context) {
@@ -96,6 +99,14 @@ class EditText extends ViewContainer {
                 font = cast value;
                 return true;
 
+            case Styleable.placeholderFont:
+                placeholderFont = cast value;
+                return true;
+
+            case Styleable.editableFont:
+                editableFont = cast value;
+                return true;
+
             case Styleable.text:
                 text = cast value;
                 return true;
@@ -122,6 +133,10 @@ class EditText extends ViewContainer {
 
             case Styleable.disabled:
                 disabled = cast value;
+                return true;
+
+            case Styleable.displayAsPassword:
+                displayAsPassword = cast value;
                 return true;
 
             default:
@@ -306,6 +321,28 @@ class EditText extends ViewContainer {
     }
 
     @:noCompletion
+    private function get_placeholderFont():FontExt {
+        return placeholderTextView.font;
+    }
+
+    @:noCompletion
+    private function set_placeholderFont(value:FontExt):FontExt {
+        placeholderTextView.font = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_editableFont():FontExt {
+        return editableTextView.font;
+    }
+
+    @:noCompletion
+    private function set_editableFont(value:FontExt):FontExt {
+        editableTextView.font = value;
+        return value;
+    }
+
+    @:noCompletion
     private function get_text():String {
         return editableTextView.text;
     }
@@ -387,6 +424,17 @@ class EditText extends ViewContainer {
             editableTextView.editable = !_disabled;
         }
 
+        return value;
+    }
+
+    @:noCompletion
+    private function get_displayAsPassword():Bool {
+        return editableTextView.displayAsPassword;
+    }
+
+    @:noCompletion
+    private function set_displayAsPassword(value:Bool):Bool {
+        editableTextView.displayAsPassword = value;
         return value;
     }
 }

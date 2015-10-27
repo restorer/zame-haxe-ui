@@ -80,6 +80,9 @@ class StyleableMap {
         m["paddingHorizontal"] = StyleableType.DIMENSION;
         m["paddingVertical"] = StyleableType.DIMENSION;
         m["padding"] = StyleableType.DIMENSION;
+        m["displayAsPassword"] = StyleableType.BOOL;
+        m["placeholderFont"] = StyleableType.FONT;
+        m["editableFont"] = StyleableType.FONT;
 
         m["layout_width"] = StyleableType.DIMENSION;
         m["layout_height"] = StyleableType.DIMENSION;

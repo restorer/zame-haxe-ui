@@ -31,12 +31,13 @@ class TextView extends View {
     private var _text:String;
     private var _htmlText:String;
     private var _editable:Bool;
+    private var _displayAsPassword:Bool;
 
     private var _textField:TextFieldExt;
     private var _textFormat:TextFormat;
     private var _listenersAdded:Bool;
 
-    #if (!flash && !webgl && !dom)
+    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
         private var _cachedBitmap:Bitmap;
     #end
 
@@ -52,6 +53,7 @@ class TextView extends View {
     public var text(get, set):String;
     public var htmlText(never, set):String;
     public var editable(get, set):Bool;
+    public var displayAsPassword(get, set):Bool;
 
     @:keep
     public function new(context:Context) {
@@ -65,12 +67,13 @@ class TextView extends View {
         _text = null;
         _htmlText = null;
         _editable = false;
+        _displayAsPassword = false;
 
         _textField = null;
         _textFormat = null;
         _listenersAdded = false;
 
-        #if (!flash && !webgl && !dom)
+        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
             _cachedBitmap = null;
         #end
 
@@ -94,7 +97,7 @@ class TextView extends View {
             _sprite.removeChild(_textField);
         }
 
-        #if (!flash && !webgl && !dom)
+        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
             if (_cachedBitmap != null && _cachedBitmap.parent != null) {
                 _sprite.removeChild(_cachedBitmap);
             }
@@ -140,13 +143,13 @@ class TextView extends View {
                 _textField.embedFonts = true;
 
                 #if debug_ui
-                    _textField.backgroundColor = 0x800000;
-                    _textField.background = true;
+                    _textField.borderColor = 0x800000;
+                    _textField.border = true;
                 #end
 
                 _textFormat = new TextFormat();
 
-                #if (!flash && !webgl && !dom)
+                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
                     _cachedBitmap = new Bitmap();
                 #end
             }
@@ -163,7 +166,7 @@ class TextView extends View {
                 _textField.type = TextFieldType.DYNAMIC;
             }
 
-            #if (!flash && !webgl && !dom)
+            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
                 if (_editable) {
                     _sprite.addChild(_textField);
                 } else {
@@ -181,6 +184,7 @@ class TextView extends View {
 
             _textField.defaultTextFormat = _textFormat;
             _textField.setTextFormat(_textFormat);
+            _textField.displayAsPassword = _displayAsPassword;
 
             if (_text != null) {
                 _textField.text = _text;
@@ -194,7 +198,7 @@ class TextView extends View {
                 _listenersAdded = true;
             }
 
-            #if (!flash && !webgl && !dom)
+            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
                 if (!_editable) {
                     updateCache();
                 }
@@ -306,6 +310,10 @@ class TextView extends View {
                 htmlText = cast value;
                 return true;
 
+            case Styleable.displayAsPassword:
+                displayAsPassword = cast value;
+                return true;
+
             default:
                 return false;
         }
@@ -357,11 +365,11 @@ class TextView extends View {
 
             switch (widthSpec) {
                 case MeasureSpec.UNSPECIFIED:
-                    _width = _textField.textWidth + #if flash 8 #else 4 #end;
+                    _width = (_textField.textWidth + #if flash 8 #else 4 #end) #if (native && openfl_legacy) * 1.09 #end;
                     _textField.wordWrap = true;
 
                 case MeasureSpec.AT_MOST(size):
-                    _width = Math.min(size, _textField.textWidth + #if flash 8 #else 4 #end);
+                    _width = Math.min(size, (_textField.textWidth + #if flash 8 #else 4 #end) #if (native && openfl_legacy) * 1.09 #end);
 
                 case MeasureSpec.EXACT(size):
                     _width = size;
@@ -384,7 +392,7 @@ class TextView extends View {
             _textField.width = _width;
             _textField.height = _height;
 
-            #if (!flash && !webgl && !dom)
+            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
                 if (!_editable) {
                     updateCache();
                 }
@@ -394,7 +402,7 @@ class TextView extends View {
         return true;
     }
 
-    #if (!flash && !webgl && !dom)
+    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
         private function updateCache():Void {
             var cachedBitmapData = new BitmapData(
                 Std.int(Math.max(1, Math.ceil(_width))),
@@ -450,7 +458,7 @@ class TextView extends View {
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
 
-                #if (!flash && !webgl && !dom)
+                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
                     if (!_editable) {
                         updateCache();
                     }
@@ -552,7 +560,7 @@ class TextView extends View {
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
 
-                #if (!flash && !webgl && !dom)
+                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
                     if (!_editable) {
                         updateCache();
                     }
@@ -664,6 +672,21 @@ class TextView extends View {
     private function set_editable(value:Bool):Bool {
         if (_editable != value) {
             _editable = value;
+            reConfigure();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_displayAsPassword():Bool {
+        return _displayAsPassword;
+    }
+
+    @:noCompletion
+    private function set_displayAsPassword(value:Bool):Bool {
+        if (_displayAsPassword != value) {
+            _displayAsPassword = value;
             reConfigure();
         }
 
