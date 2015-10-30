@@ -232,12 +232,14 @@ class TextView extends View {
         }
 
         var result = ~/"@(font\/[^"]+)"/g.map(_htmlText, function(re:EReg):String {
+            #if bitmapFont
+                if (_font.bitmapFont != null) {
+                    return re.matched(0);
+                }
+            #end
+
             var resId = _context.resourceManager.findIdByName(re.matched(1));
             var font =_context.resourceManager.getFont(resId == null ? 0 : resId);
-
-            #if bitmapFont
-                return re.matched(0);
-            #end
 
             return "\"" + font.ttfFontName + "\"";
         });
@@ -354,28 +356,23 @@ class TextView extends View {
         #end
 
         if (_font.ttfFontName != null) {
-            switch (widthSpec) {
-                case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
-                    _textField.wordWrap = false;
-
-                default:
-            }
-
+            _textField.wordWrap = false;
             _textField.autoSize = TextFieldAutoSize.LEFT;
 
             switch (widthSpec) {
                 case MeasureSpec.UNSPECIFIED:
-                    _width = (_textField.textWidth + #if flash 8 #else 4 #end) #if (native && openfl_legacy) * 1.09 #end;
-                    _textField.wordWrap = true;
+                    _width = (_textField.textWidth + #if flash 8 #else 4 #end);
 
                 case MeasureSpec.AT_MOST(size):
-                    _width = Math.min(size, (_textField.textWidth + #if flash 8 #else 4 #end) #if (native && openfl_legacy) * 1.09 #end);
+                    _width = Math.min(size, (_textField.textWidth + #if flash 8 #else 4 #end));
+                    _textField.wordWrap = true;
+                    _textField.width = size;
 
                 case MeasureSpec.EXACT(size):
                     _width = size;
+                    _textField.wordWrap = true;
+                    _textField.width = size;
             }
-
-            _textField.width = _width;
 
             switch (heightSpec) {
                 case MeasureSpec.UNSPECIFIED:
@@ -388,8 +385,20 @@ class TextView extends View {
                     _height = size;
             }
 
-            _textField.autoSize = TextFieldAutoSize.NONE;
-            _textField.width = _width;
+            #if html5
+                // simple multiline text detector
+                if (_textLeading != null &&  _textField.textHeight > (_textSize == null ? 0 : _textSize) + _textLeading) {
+                    _height += _textLeading;
+                }
+            #end
+
+            switch (widthSpec) {
+                case MeasureSpec.AT_MOST(_) | MeasureSpec.EXACT(_):
+                    _textField.autoSize = TextFieldAutoSize.NONE;
+
+                default:
+            }
+
             _textField.height = _height;
 
             #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
