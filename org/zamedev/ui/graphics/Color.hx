@@ -1,5 +1,6 @@
 package org.zamedev.ui.graphics;
 
+import de.polygonal.Printf;
 import org.zamedev.ui.errors.UiParseError;
 
 class Color {
@@ -47,5 +48,9 @@ class Color {
         }
 
         throw new UiParseError(s);
+    }
+
+    public static function toHexString(c:Int):String {
+        return "#" + Printf.format("%06x", [c]);
     }
 }

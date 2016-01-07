@@ -8,6 +8,7 @@ import openfl.text.TextFieldType;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 import org.zamedev.ui.Context;
+import org.zamedev.ui.graphics.Color;
 import org.zamedev.ui.graphics.FontExt;
 import org.zamedev.ui.graphics.TextAlignExt;
 import org.zamedev.ui.internal.TextFieldExt;
@@ -244,6 +245,20 @@ class TextView extends View {
             return "\"" + font.ttfFontName + "\"";
         });
 
+        result = ~/"@(color\/[^"]+)"/g.map(result, function(re:EReg):String {
+            var resId = _context.resourceManager.findIdByName(re.matched(1));
+            var color = _context.resourceManager.getColor(resId == null ? 0 : resId);
+
+            return "\"" + Color.toHexString(color) + "\"";
+        });
+
+        result = ~/"@(dimen\/[^"]+)"/g.map(result, function(re:EReg):String {
+            var resId = _context.resourceManager.findIdByName(re.matched(1));
+            var dimen = _context.resourceManager.getDimension(resId == null ? 0 : resId);
+
+            return "\"" + computeDimension(dimen, true) + "\"";
+        });
+
         result = ~/[\n]?<br[^\/>]*\/?>[\n]?/g.replace(result, "<br>");
         result = result.replace("\n", " ");
 
@@ -386,8 +401,9 @@ class TextView extends View {
             }
 
             #if html5
-                // simple multiline text detector
-                if (_textLeading != null &&  _textField.textHeight > (_textSize == null ? 0 : _textSize) + _textLeading) {
+                // if (_textLeading != null && _textField.textHeight > (_textSize == null ? 0 : _textSize) + _textLeading) {
+
+                if (_textLeading != null && _textField.numLines > 1) {
                     _height += _textLeading;
                 }
             #end

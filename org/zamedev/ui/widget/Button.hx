@@ -15,6 +15,8 @@ import org.zamedev.ui.view.TextView;
 import org.zamedev.ui.view.ViewContainer;
 
 class Button extends ViewContainer {
+    private static inline var HIT_AREA_OFFSET = 15;
+
     private var backgroundView:ImageView;
     private var leftIconView:ImageView;
     private var rightIconView:ImageView;
@@ -89,11 +91,14 @@ class Button extends ViewContainer {
             hitTestView.buttonMode = true;
         #end
 
-        hitTestView.alpha = 0.0;
+        #if debug_ui
+            hitTestView.fillColor = 0xff0000;
+            hitTestView.alpha = 0.25;
+        #else
+            hitTestView.alpha = 0.0;
+        #end
 
         _sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-        _sprite.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-        _sprite.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
         _sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
     }
 
@@ -283,8 +288,14 @@ class Button extends ViewContainer {
         downIconView.cx = textCx;
         downIconView.y = textView.ey + downIconMargin;
 
-        hitTestView.selfLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
+        layoutHitTestView();
         return true;
+    }
+
+    private function layoutHitTestView():Void {
+        hitTestView.offsetX = 0.0;
+        hitTestView.offsetY = 0.0;
+        hitTestView.selfLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
     }
 
     @:noCompletion
@@ -297,9 +308,13 @@ class Button extends ViewContainer {
             listenersAdded = true;
             updateState("pressed", true);
 
+            hitTestView.offsetX = - HIT_AREA_OFFSET;
+            hitTestView.offsetY = - HIT_AREA_OFFSET;
+            hitTestView.selfLayout(MeasureSpec.EXACT(_width + HIT_AREA_OFFSET * 2.0), MeasureSpec.EXACT(_height + HIT_AREA_OFFSET * 2.0));
+
             if (_sprite.stage != null) {
-                _sprite.stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-                _sprite.stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+                _sprite.stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove, true);
+                _sprite.stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp, true);
             }
         }
 
@@ -307,45 +322,35 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
-    private function onMouseUp(e:Event):Void {
-        if (listenersAdded) {
-            updateState("pressed", false);
-            dispatchEvent(new Event(MouseEvent.CLICK));
-        }
-    }
-
-    @:noCompletion
-    private function onMouseMove(e:Event):Void {
-        if (listenersAdded) {
-            e.stopPropagation();
-            updateState("pressed", true);
-        }
-    }
-
-    @:noCompletion
     private function onRemovedFromStage(_):Void {
         if (listenersAdded) {
             listenersAdded = false;
+            layoutHitTestView();
             updateState("pressed", false);
 
-            _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-            _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove, true);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp, true);
         }
     }
 
     @:noCompletion
-    private function onStageMouseMove(_):Void {
-        updateState("pressed", false);
+    private function onStageMouseMove(e:Event):Void {
+        updateState("pressed", e.target == hitTestView._sprite);
     }
 
     @:noCompletion
-    private function onStageMouseUp(_):Void {
+    private function onStageMouseUp(e:Event):Void {
         if (listenersAdded) {
             listenersAdded = false;
+            layoutHitTestView();
             updateState("pressed", false);
 
-            _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
-            _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove, true);
+            _sprite.stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp, true);
+
+            if (e.target == hitTestView._sprite) {
+                dispatchEvent(new Event(MouseEvent.CLICK));
+            }
         }
     }
 
