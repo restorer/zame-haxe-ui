@@ -5,10 +5,13 @@ import org.zamedev.ui.errors.UiParseError;
 import org.zamedev.ui.graphics.Color;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.Drawable;
-import org.zamedev.ui.graphics.DrawableType;
+import org.zamedev.ui.i18n.Quantity;
 import org.zamedev.ui.tools.generator.GenFont;
+import org.zamedev.ui.tools.generator.GenPlural;
+import org.zamedev.ui.tools.generator.GenPosition;
+import org.zamedev.ui.tools.parser.ConfigurationHelper;
 import org.zamedev.ui.tools.parser.ParseHelper;
-import org.zamedev.ui.tools.parser.SelectorParser;
+import org.zamedev.ui.tools.parser.ParseItem;
 import org.zamedev.ui.tools.parser.StyleParser;
 
 using StringTools;
@@ -17,82 +20,92 @@ using org.zamedev.lib.XmlExt;
 
 @:access(org.zamedev.ui.graphics.Drawable)
 class ResParser {
-    private var resourceMap:LinkedMap<String, Xml>;
+    private var resourceMap : LinkedMap<String, Map<String, ParseItem>>;
 
-    public function new():Void {
-        resourceMap = new LinkedMap<String, Xml>();
+    public function new() {
+        resourceMap = new LinkedMap<String, Map<String, ParseItem>>();
     }
 
-    public function tryParse(xmlString:String):Bool {
+    public function parseResources(xmlString : String, pos : GenPosition) : Void {
         var root = Xml.parse(xmlString).elementsNamed("resources").next();
 
         if (root == null) {
-            return false;
+            throw new UiParseError("Xml must have \"resources\" root node", pos);
         }
 
         for (node in root.elements()) {
+            // TODO: somehow get line number in xml file
             var name = node.get("name");
 
-            if (name != null) {
-                var resPath = node.nodeName + "/" + name;
+            if (name == null) {
+                throw new UiParseError("Node with empty name found", pos);
+            }
 
-                if (resourceMap.exists(resPath)) {
-                    throw new UiParseError('duplicate resource "${name}" of type "${node.nodeName}"');
-                } else {
-                    resourceMap[resPath] = node;
+            var resPath = node.nodeName + "/" + name;
+            var qKey = pos.configuration.toQualifierString();
+
+            if (!resourceMap.exists(resPath)) {
+                resourceMap[resPath] = new Map<String, ParseItem>();
+            } else if (resourceMap[resPath].exists(qKey)) {
+                throw new UiParseError(
+                    'Duplicate resource "${name}" of type "${node.nodeName}"' + (qKey == "" ? "" : ' (for "${qKey}")'),
+                    pos
+                );
+            }
+
+            resourceMap[resPath][qKey] = {
+                node : node,
+                pos : pos,
+            }
+        }
+    }
+
+    public function toGenerator(resGenerator : ResGenerator) : Void {
+        var styleParser = new StyleParser();
+
+        for (itemMap in resourceMap) {
+            for (item in itemMap) {
+                var resolved = resolveResourceValue(item.node, null, item.pos);
+                var name = item.node.get("name");
+
+                switch (item.node.nodeName) {
+                    case "color":
+                        resGenerator.putColor(name, Color.parse(resolved.innerText(), item.pos), item.pos);
+
+                    case "dimen":
+                        resGenerator.putDimension(name, DimensionTools.parse(resolved.innerText(), item.pos), item.pos);
+
+                    case "string":
+                        resGenerator.putString(name, parseString(resolved.innerText()), item.pos);
+
+                    case "plurals":
+                        resGenerator.putPlural(name, parsePlural(name, resolved, item.pos), item.pos);
+
+                    case "font":
+                        resGenerator.putFont(name, parseFont(resolved.innerText()), item.pos);
+
+                    case "drawable":
+                        resGenerator.putDrawable(name, parseDrawable(name, item.node, resGenerator, item.pos), item.pos);
+
+                    case "style":
+                        styleParser.parse(name, item.node, item.pos);
+
+                    case "layout":
+                        resGenerator.putLayout(name, parseLayout(resGenerator, name, item.node, item.pos), item.pos);
+
+                    case "layoutpart":
+                        resGenerator.putLayoutPart(name, parseLayout(resGenerator, name, item.node, item.pos), item.pos);
+
+                    default:
+                        throw new UiParseError('Unknown resource of type "${item.node.nodeName}"', item.pos);
                 }
             }
         }
 
-        return true;
-    }
-
-    public function toGenerator(resGenerator:ResGenerator):Void {
-        var styleParser = new StyleParser();
-        var selectorParser = new SelectorParser();
-
-        for (node in resourceMap) {
-            var resolved = resolveResourceValue(node);
-            var name = node.get("name");
-
-            switch (node.nodeName) {
-                case "color":
-                    resGenerator.putColor(name, Color.parse(resolved.innerText()));
-
-                case "dimen":
-                    resGenerator.putDimen(name, DimensionTools.parse(resolved.innerText()));
-
-                case "string":
-                    resGenerator.putString(name, parseString(resolved.innerText()));
-
-                case "font":
-                    resGenerator.putFont(name, parseFont(resolved.innerText()));
-
-                case "drawable":
-                    resGenerator.putDrawable(name, parseDrawable(name, node, resGenerator));
-
-                case "style":
-                    styleParser.parse(name, node);
-
-                case "selector":
-                    selectorParser.parse(name, node);
-
-                case "layout":
-                    resGenerator.putLayout(name, parseLayout(name, node));
-
-                case "layoutpart":
-                    resGenerator.putLayoutPart(name, parseLayout(name, node));
-
-                default:
-                    throw new UiParseError('unknown resource type: ${node.nodeName}');
-            }
-        }
-
         styleParser.toGenerator(resGenerator);
-        selectorParser.toGenerator(resGenerator);
     }
 
-    private function resolveResourceValue(node:Xml, visitedMap:Map<String, Bool> = null):Xml {
+    private function resolveResourceValue(node : Xml, visitedMap : Map<String, Bool>, pos : GenPosition) : Xml {
         var refInfo = ParseHelper.parseRef(node.innerText());
 
         if (refInfo == null) {
@@ -104,22 +117,50 @@ class ResParser {
         if (visitedMap == null) {
             visitedMap = new Map<String, Bool>();
         } else if (visitedMap.exists(referenceKey)) {
-            throw new UiParseError('circular dependency: @${referenceKey}');
+            throw new UiParseError('Circular dependency: @${referenceKey}', pos);
         }
 
         if (!resourceMap.exists(referenceKey)) {
-            throw new UiParseError('reference not found: @${referenceKey}');
+            throw new UiParseError('Reference not found: @${referenceKey}', pos);
         }
 
         visitedMap[node.nodeName + "/" + node.get("name")] = true;
-        return resolveResourceValue(resourceMap.get(referenceKey), visitedMap);
+        var itemMap = resourceMap[referenceKey];
+
+        for (key in ConfigurationHelper.computeQualifierKeys(pos.configuration)) {
+            if (itemMap.exists(key)) {
+                return resolveResourceValue(itemMap[key].node, visitedMap, pos);
+            }
+        }
+
+        throw new UiParseError("Internal error", pos);
     }
 
-    private function parseString(s:String):String {
+    private function parseString(s : String) : String {
         return s.replace("\\n", "\n").trim().replace("\\t", "    ");
     }
 
-    private function parseFont(value:String):GenFont {
+    private function parsePlural(name : String, node : Xml, pos : GenPosition) : GenPlural {
+        var result = new Map<Quantity, String>();
+
+        for (innerNode in node.elements()) {
+            if (innerNode.nodeName != "item") {
+                throw new UiParseError('Invalid inner node "${innerNode.nodeName}" for plural "${name}"', pos);
+            }
+
+            var quantityStr = innerNode.get("quantity");
+
+            if (quantityStr == null) {
+                throw new UiParseError('Item without quantity found for plural "${name}"', pos);
+            }
+
+            result[ParseHelper.parseQuantity(quantityStr, pos)] = innerNode.innerText();
+        }
+
+        return result;
+    }
+
+    private function parseFont(value : String) : GenFont {
         var value = value.trim();
 
         if (~/\.fnt$/i.match(value)) {
@@ -139,17 +180,17 @@ class ResParser {
         }
     }
 
-    private function parseDrawable(name:String, node:Xml, resGenerator:ResGenerator):Drawable {
+    private function parseDrawable(name : String, node : Xml, resGenerator : ResGenerator, pos : GenPosition) : Drawable {
         var drawableName = "@drawable/" + name;
 
         if (node.elements().count() != 1) {
-            throw new UiParseError('${drawableName} must have exactly one child');
+            throw new UiParseError('${drawableName} must have exactly one child', pos);
         }
 
         var innerNode = node.firstElement();
 
         if (innerNode.nodeName != "packed") {
-            throw new UiParseError('${drawableName} must be packed');
+            throw new UiParseError('${drawableName} must be packed', pos);
         }
 
         var packedDrawable = innerNode.get("drawable");
@@ -165,33 +206,40 @@ class ResParser {
             || packedW == null
             || packedH == null
         ) {
-            throw new UiParseError('${drawableName} - error in packed node');
+            throw new UiParseError('${drawableName} - error in packed node', pos);
         }
 
         var refInfo = ParseHelper.parseRef(packedDrawable);
 
         if (refInfo == null || refInfo.type != "drawable") {
-            throw new UiParseError('${drawableName} - invalid drawable reference');
+            throw new UiParseError('${drawableName} - invalid drawable reference', pos);
         }
 
-        var packedDrawable = resGenerator.getDrawable(refInfo.name);
-
-        if (packedDrawable == null) {
-            throw new UiParseError('${drawableName} - packed drawable not found');
-        }
-
-        if (packedDrawable.type != DrawableType.ASSET_BITMAP) {
-            throw new UiParseError('${drawableName} - packed drawable must have bitmap type');
-        }
-
+        var packedDrawable = resGenerator.getPackedDrawable(refInfo.name, pos);
         return Drawable.fromAssetPacked(packedDrawable.id, packedX, packedY, packedW, packedH);
     }
 
-    private function parseLayout(name:String, node:Xml):Xml {
+    private function parseLayout(resGenerator : ResGenerator, name : String, node : Xml, pos : GenPosition) : Xml {
         if (node.elements().count() != 1) {
-            throw new UiParseError('@layout/${name} must have exactly one child');
+            throw new UiParseError('@layout/${name} must have exactly one child', pos);
         }
 
-        return node.firstElement();
+        var layoutRoot = node.firstElement();
+        extractIds(resGenerator, layoutRoot, pos);
+        return layoutRoot;
+    }
+
+    private function extractIds(resGenerator : ResGenerator, node : Xml, pos : GenPosition) : Void {
+        for (att in node.attributes()) {
+            var value = node.get(att);
+
+            if (value.substr(0, 4) == "@id/") {
+                resGenerator.putIdentifier(value.substr(4), pos);
+            }
+        }
+
+        for (innerNode in node.elements()) {
+            extractIds(resGenerator, innerNode, pos);
+        }
     }
 }

@@ -3,3 +3,12 @@
 -neko styleable-generator.n
 -cmd neko styleable-generator.n
 -cmd rm styleable-generator.n
+
+--next
+
+-lib zame-miscutils
+-lib lime
+-lib openfl
+-lib polygonal-printf
+-main org.zamedev.ui.tools.UiBuilder
+-neko run.n

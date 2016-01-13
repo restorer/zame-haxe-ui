@@ -17,40 +17,40 @@ import org.zamedev.ui.view.ViewVisibility;
 using StringTools;
 
 class RecyclerView extends BaseViewContainer {
-    private var _adapter:RecyclerViewAdapter;
-    private var _attachedList:Array<RecyclerViewHolder>;
-    private var _detachedMap:Map<Int, List<RecyclerViewHolder>>;
-    private var computedWidth:Float;
-    private var computedHeight:Float;
-    private var isChangingDataset:Bool;
-    private var renderedBitmap:Bitmap;
-    private var bitmapData:BitmapData;
-    private var renderToBitmap:Bool;
-    private var _firstVisiblePosition:Int;
-    private var _scrollOffsetX:Float;
-    private var _scrollOffsetY:Float;
-    private var _cycle:Bool;
-    private var _verticalFadeSize:Int;
-    private var _horizontalFadeSize:Int;
-    private var _isScrolling:Bool;
-    private var _scrollable:Bool;
+    private var _adapter : RecyclerViewAdapter;
+    private var _attachedList : Array<RecyclerViewHolder>;
+    private var _detachedMap : Map<Int, List<RecyclerViewHolder>>;
+    private var computedWidth : Float;
+    private var computedHeight : Float;
+    private var isChangingDataset : Bool;
+    private var renderedBitmap : Bitmap;
+    private var bitmapData : BitmapData;
+    private var renderToBitmap : Bool;
+    private var _firstVisiblePosition : Int;
+    private var _scrollOffsetX : Float;
+    private var _scrollOffsetY : Float;
+    private var _cycle : Bool;
+    private var _verticalFadeSize : Int;
+    private var _horizontalFadeSize : Int;
+    private var _isScrolling : Bool;
+    private var _scrollable : Bool;
 
-    private var _diffOffsetX:Float;
-    private var _diffOffsetY:Float;
-    private var _scrollingCurrentOffsetX:Float;
-    private var _scrollingCurrentOffsetY:Float;
+    private var _diffOffsetX : Float;
+    private var _diffOffsetY : Float;
+    private var _scrollingCurrentOffsetX : Float;
+    private var _scrollingCurrentOffsetY : Float;
 
-    public var layoutManager(default, null):RecyclerViewLayoutManager;
-    public var adapter(get, set):RecyclerViewAdapter;
-    public var scrollOffsetX(get, set):Float;
-    public var scrollOffsetY(get, set):Float;
-    public var cycle(get, set):Bool;
-    public var verticalFadeSize(get, set):Int;
-    public var horizontalFadeSize(get, set):Int;
-    public var scrollable(get, set):Bool;
+    public var layoutManager(default, null) : RecyclerViewLayoutManager;
+    public var adapter(get, set) : RecyclerViewAdapter;
+    public var scrollOffsetX(get, set) : Float;
+    public var scrollOffsetY(get, set) : Float;
+    public var cycle(get, set) : Bool;
+    public var verticalFadeSize(get, set) : Int;
+    public var horizontalFadeSize(get, set) : Int;
+    public var scrollable(get, set) : Bool;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _adapter = null;
@@ -76,7 +76,7 @@ class RecyclerView extends BaseViewContainer {
         addEventListener(Event.REMOVED_FROM_STAGE, onRecyclerViewRemovedFromApplicationStage);
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -103,7 +103,7 @@ class RecyclerView extends BaseViewContainer {
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -175,24 +175,24 @@ class RecyclerView extends BaseViewContainer {
         return true;
     }
 
-    private function onRecyclerViewAddedToApplicationStage(e:Event):Void {
+    private function onRecyclerViewAddedToApplicationStage(e : Event) : Void {
         for (viewHolder in _attachedList) {
             viewHolder._view.dispatchEvent(e);
         }
     }
 
-    private function onRecyclerViewRemovedFromApplicationStage(e:Event):Void {
+    private function onRecyclerViewRemovedFromApplicationStage(e : Event) : Void {
         for (viewHolder in _attachedList) {
             viewHolder._view.dispatchEvent(e);
         }
     }
 
-    private function detachViewHolder(viewHolder:RecyclerViewHolder):Void {
+    private function detachViewHolder(viewHolder : RecyclerViewHolder) : Void {
         _attachedList.remove(viewHolder);
         viewHolder.onDetach();
     }
 
-    public function _detachViewHolderFinishedInternal(viewHolder:RecyclerViewHolder):Void {
+    public function _detachViewHolderFinishedInternal(viewHolder : RecyclerViewHolder) : Void {
         if (viewHolder._view._sprite.parent == _sprite) {
             _sprite.removeChild(viewHolder._view._sprite);
         }
@@ -209,8 +209,8 @@ class RecyclerView extends BaseViewContainer {
         }
     }
 
-    private function attachViewHolder(position:Int, attachToSprite:Bool, addToBegin:Bool):RecyclerViewHolder {
-        var viewHolder:RecyclerViewHolder;
+    private function attachViewHolder(position : Int, attachToSprite : Bool, addToBegin : Bool) : RecyclerViewHolder {
+        var viewHolder : RecyclerViewHolder;
         var viewType = _adapter.getItemViewType(position);
 
         if (_detachedMap.exists(viewType) && !_detachedMap[viewType].isEmpty()) {
@@ -242,7 +242,7 @@ class RecyclerView extends BaseViewContainer {
         return viewHolder;
     }
 
-    private function bindViewHolder(viewHolder:RecyclerViewHolder, position:Int):Void {
+    private function bindViewHolder(viewHolder : RecyclerViewHolder, position : Int) : Void {
         viewHolder._view.isInLayout = true;
         _adapter.onBindViewHolder(viewHolder, position);
         viewHolder._view.isInLayout = false;
@@ -262,7 +262,7 @@ class RecyclerView extends BaseViewContainer {
         viewHolder._view.selfLayout(widthSpec, heightSpec, true);
     }
 
-    public function notifyDataSetChanged():Void {
+    public function notifyDataSetChanged() : Void {
         if (_visibility == ViewVisibility.GONE) {
             return;
         }
@@ -273,7 +273,7 @@ class RecyclerView extends BaseViewContainer {
         isChangingDataset = false;
     }
 
-    private function handleDataSetChanged():Void {
+    private function handleDataSetChanged() : Void {
         computedWidth = 0.0;
         computedHeight = 0.0;
 
@@ -334,7 +334,7 @@ class RecyclerView extends BaseViewContainer {
                 var viewHolder = attachViewHolder(position, true, false);
                 bindViewHolder(viewHolder, position);
 
-                var view:View = viewHolder._view;
+                var view : View = viewHolder._view;
                 layoutManager.layout(view);
 
                 computedWidth = Math.max(computedWidth, view.x + view.width);
@@ -343,7 +343,7 @@ class RecyclerView extends BaseViewContainer {
         }
     }
 
-    private function prependViewHolder(maxPosition:Int):View {
+    private function prependViewHolder(maxPosition : Int) : View {
         if (_firstVisiblePosition == 0) {
             if (_cycle) {
                 _firstVisiblePosition = maxPosition - 1;
@@ -357,13 +357,13 @@ class RecyclerView extends BaseViewContainer {
         var viewHolder = attachViewHolder(_firstVisiblePosition, false, true);
         bindViewHolder(viewHolder, _firstVisiblePosition);
 
-        var view:View = viewHolder._view;
+        var view : View = viewHolder._view;
         layoutManager.prepend(view);
 
         return view;
     }
 
-    private function updateBitmapData():Void {
+    private function updateBitmapData() : Void {
         if (!renderToBitmap || adapter == null) {
             return;
         }
@@ -398,7 +398,7 @@ class RecyclerView extends BaseViewContainer {
                 continue;
             }
 
-            var view:View = viewHolder._view;
+            var view : View = viewHolder._view;
             layoutManager.layout(view);
 
             if (layoutManager.isBeforeStart(view)) {
@@ -440,7 +440,7 @@ class RecyclerView extends BaseViewContainer {
                 var viewHolder = attachViewHolder(position, false, false);
                 bindViewHolder(viewHolder, position);
 
-                var view:View = viewHolder._view;
+                var view : View = viewHolder._view;
                 layoutManager.layout(view);
                 bitmapData.draw(view._sprite, view._sprite.transform.matrix);
 
@@ -494,11 +494,11 @@ class RecyclerView extends BaseViewContainer {
         renderedBitmap.smoothing = true;
     }
 
-    public function scrollBy(offsetX:Float, offsetY:Float, duration:Float = 0.0):Void {
+    public function scrollBy(offsetX : Float, offsetY : Float, duration : Float = 0.0) : Void {
         scrollTo(_scrollOffsetX + offsetX, _scrollOffsetY + offsetY, duration);
     }
 
-    public function scrollTo(offsetX:Float, offsetY:Float, duration:Float = 0.0):Void {
+    public function scrollTo(offsetX : Float, offsetY : Float, duration : Float = 0.0) : Void {
         if ((offsetX == _scrollOffsetX && offsetY == _scrollOffsetY) || !renderToBitmap) {
             return;
         }
@@ -524,13 +524,13 @@ class RecyclerView extends BaseViewContainer {
         }).onUpdate(_handleScrollUpdate).onComplete(_handleScrollComplete);
     }
 
-    private function ensureScrollingStopped() {
+    private function ensureScrollingStopped() : Void {
         if (_isScrolling) {
             Actuate.stop(this, null, true);
         }
     }
 
-    private function _handleScrollUpdate():Void {
+    private function _handleScrollUpdate() : Void {
         _scrollOffsetX = _scrollingCurrentOffsetX + _diffOffsetX;
         _scrollOffsetY = _scrollingCurrentOffsetY + _diffOffsetY;
 
@@ -543,11 +543,11 @@ class RecyclerView extends BaseViewContainer {
         _diffOffsetY += (_scrollOffsetY - prevScrollOffsetY);
     }
 
-    private function _handleScrollComplete():Void {
+    private function _handleScrollComplete() : Void {
         _isScrolling = false;
     }
 
-    public function updateFirstVisiblePosition(position:Int):Void {
+    public function updateFirstVisiblePosition(position : Int) : Void {
         if (adapter == null) {
             return;
         }
@@ -585,7 +585,7 @@ class RecyclerView extends BaseViewContainer {
         updateBitmapData();
     }
 
-    public function scrollByDir(dir:Int, duration:Float = 0.0):Void {
+    public function scrollByDir(dir : Int, duration : Float = 0.0) : Void {
         if (dir == 0 || !renderToBitmap || adapter == null || _attachedList.length == 0) {
             return;
         }
@@ -620,12 +620,12 @@ class RecyclerView extends BaseViewContainer {
     }
 
     @:noCompletion
-    private function get_adapter():RecyclerViewAdapter {
+    private function get_adapter() : RecyclerViewAdapter {
         return _adapter;
     }
 
     @:noCompletion
-    private function set_adapter(value:RecyclerViewAdapter):RecyclerViewAdapter {
+    private function set_adapter(value : RecyclerViewAdapter) : RecyclerViewAdapter {
         if (_adapter != value) {
             var event = new Event(Event.REMOVED_FROM_STAGE);
 
@@ -655,12 +655,12 @@ class RecyclerView extends BaseViewContainer {
     }
 
     @:noCompletion
-    private function get_firstVisiblePosition():Int {
+    private function get_firstVisiblePosition() : Int {
         return _firstVisiblePosition;
     }
 
     @:noCompletion
-    private function set_firstVisiblePosition(value:Int):Int {
+    private function set_firstVisiblePosition(value : Int) : Int {
         if (_firstVisiblePosition != value) {
             _firstVisiblePosition = value;
             updateBitmapData();
@@ -670,12 +670,12 @@ class RecyclerView extends BaseViewContainer {
     }
 
     @:noCompletion
-    private function get_scrollOffsetX():Float {
+    private function get_scrollOffsetX() : Float {
         return _scrollOffsetX;
     }
 
     @:noCompletion
-    private function set_scrollOffsetX(value:Float):Float {
+    private function set_scrollOffsetX(value : Float) : Float {
         if (_scrollOffsetX != value) {
             _scrollOffsetX = value;
             updateBitmapData();
@@ -685,12 +685,12 @@ class RecyclerView extends BaseViewContainer {
     }
 
     @:noCompletion
-    private function get_scrollOffsetY():Float {
+    private function get_scrollOffsetY() : Float {
         return _scrollOffsetY;
     }
 
     @:noCompletion
-    private function set_scrollOffsetY(value:Float):Float {
+    private function set_scrollOffsetY(value : Float) : Float {
         if (_scrollOffsetY != value) {
             _scrollOffsetY = value;
             updateBitmapData();
@@ -700,12 +700,12 @@ class RecyclerView extends BaseViewContainer {
     }
 
     @:noCompletion
-    private function get_cycle():Bool {
+    private function get_cycle() : Bool {
         return _cycle;
     }
 
     @:noCompletion
-    private function set_cycle(value:Bool):Bool {
+    private function set_cycle(value : Bool) : Bool {
         if (_cycle != value) {
             _cycle = value;
 
@@ -719,13 +719,13 @@ class RecyclerView extends BaseViewContainer {
 
     @:keep
     @:noCompletion
-    private function get_verticalFadeSize():Int {
+    private function get_verticalFadeSize() : Int {
         return _verticalFadeSize;
     }
 
     @:keep
     @:noCompletion
-    private function set_verticalFadeSize(value:Int):Int {
+    private function set_verticalFadeSize(value : Int) : Int {
         if (_verticalFadeSize != value) {
             _verticalFadeSize = value;
 
@@ -739,13 +739,13 @@ class RecyclerView extends BaseViewContainer {
 
     @:keep
     @:noCompletion
-    private function get_horizontalFadeSize():Int {
+    private function get_horizontalFadeSize() : Int {
         return _horizontalFadeSize;
     }
 
     @:keep
     @:noCompletion
-    private function set_horizontalFadeSize(value:Int):Int {
+    private function set_horizontalFadeSize(value : Int) : Int {
         if (_horizontalFadeSize != value) {
             _horizontalFadeSize = value;
 
@@ -758,12 +758,12 @@ class RecyclerView extends BaseViewContainer {
     }
 
     @:noCompletion
-    private function get_scrollable():Bool {
+    private function get_scrollable() : Bool {
         return _scrollable;
     }
 
     @:noCompletion
-    private function set_scrollable(value:Bool):Bool {
+    private function set_scrollable(value : Bool) : Bool {
         if (_scrollable != value) {
             _scrollable = value;
             notifyDataSetChanged();

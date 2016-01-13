@@ -12,21 +12,21 @@ import org.zamedev.ui.res.ResourceManager;
 
 class Application extends Sprite implements Context {
     #if (debug || fps)
-        private var fps:FPS;
+        private var fps : FPS;
     #end
 
-    private var _applicationStage:ApplicationStage;
-    private var _locale:String;
-    private var _resourceManager:ResourceManager;
-    private var _inflater:Inflater;
-    private var _sceneStack:List<Scene>;
+    private var _applicationStage : ApplicationStage;
+    private var _locale : String;
+    private var _resourceManager : ResourceManager;
+    private var _inflater : Inflater;
+    private var _sceneStack : List<Scene>;
 
-    public var context(get, null):Context;
-    public var application(get, null):Application;
-    public var applicationStage(get, null):ApplicationStage;
-    public var locale(get, set):String;
-    public var resourceManager(get, null):ResourceManager;
-    public var inflater(get, null):Inflater;
+    public var context(get, null) : Context;
+    public var application(get, null) : Application;
+    public var applicationStage(get, null) : ApplicationStage;
+    public var locale(get, set) : String;
+    public var resourceManager(get, null) : ResourceManager;
+    public var inflater(get, null) : Inflater;
 
     public function new() {
         super();
@@ -47,7 +47,7 @@ class Application extends Sprite implements Context {
         create();
     }
 
-    private function create():Void {
+    private function create() : Void {
         addChild(_applicationStage);
 
         #if (debug || fps)
@@ -55,7 +55,7 @@ class Application extends Sprite implements Context {
         #end
     }
 
-    public function changeScene(scene:Scene, sceneParams:Dynamic = null, searchForScene:Scene = null):Void {
+    public function changeScene(scene : Scene, ?sceneParams : Dynamic, ?searchForScene : Scene) : Void {
         if (searchForScene != null) {
             while (_sceneStack.length != 0 && _sceneStack.first() != searchForScene) {
                 _sceneStack.pop().removeFromApplicationStage();
@@ -80,7 +80,7 @@ class Application extends Sprite implements Context {
         }
     }
 
-    public function pushScene(scene:Scene, sceneParams:Dynamic = null):Void {
+    public function pushScene(scene : Scene, ?sceneParams : Dynamic) : Void {
         if (scene == null) {
             return;
         }
@@ -96,7 +96,7 @@ class Application extends Sprite implements Context {
         scene.addToApplicationStage();
     }
 
-    public function popScene():Void {
+    public function popScene() : Void {
         var scene = _sceneStack.pop();
 
         if (scene != null) {
@@ -111,71 +111,39 @@ class Application extends Sprite implements Context {
     }
 
     @:noCompletion
-    private function get_context():Context {
+    private function get_context() : Context {
         return this;
     }
 
     @:noCompletion
-    private function get_application():Application {
+    private function get_application() : Application {
         return this;
     }
 
     @:noCompletion
-    private function get_applicationStage():ApplicationStage {
+    private function get_applicationStage() : ApplicationStage {
         return _applicationStage;
     }
 
     @:noCompletion
-    private function get_locale():String {
+    private function get_locale() : String {
         return _locale;
     }
 
     @:noCompletion
-    private function set_locale(value:String):String {
+    private function set_locale(value : String) : String {
         _locale = value;
         _resourceManager.reload();
         return value;
     }
 
     @:noCompletion
-    private function get_resourceManager():ResourceManager {
+    private function get_resourceManager() : ResourceManager {
         return _resourceManager;
     }
 
     @:noCompletion
-    private function get_inflater():Inflater {
+    private function get_inflater() : Inflater {
         return _inflater;
     }
-
-    /*
-    private var prevTime:Float = -1.0;
-
-    ... {
-    addEventListener(Event.ENTER_FRAME, onEnterFrame);
-    }
-
-    private function onEnterFrame(_):Void {
-        var dt:Float;
-
-        if (prevTime < 0.0) {
-            prevTime = haxe.Timer.stamp();
-            dt = 0.0;
-        } else {
-            var currentTime = haxe.Timer.stamp();
-            dt = currentTime - prevTime;
-            prevTime = currentTime;
-        }
-
-        if (dt > 10.0) {
-            dt = 10.0;
-        }
-
-        while (dt > 0.0) {
-            update(dt);
-            dt -= 1.0;
-        }
-
-        render();
-    }
-    */
 }

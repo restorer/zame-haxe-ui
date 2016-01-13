@@ -1,6 +1,6 @@
 package org.zamedev.ui.internal;
 
 typedef StagePosition = {
-    stageX:Float,
-    stageY:Float,
+    stageX : Float,
+    stageY : Float,
 };

@@ -7,15 +7,15 @@ using Lambda;
 
 class ViewGroup extends ViewContainer {
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
     }
 
-    public function createLayoutParams():LayoutParams {
+    public function createLayoutParams() : LayoutParams {
         return new LayoutParams();
     }
 
-    private function measureSelf(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
+    private function measureSelf(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Void {
         switch (widthSpec) {
             case MeasureSpec.UNSPECIFIED | MeasureSpec.AT_MOST(_):
                 _width = -1.0;
@@ -161,18 +161,18 @@ class ViewGroup extends ViewContainer {
         }
     }
 
-    private function refineSelfMeasure(measureWidth:Bool, measureHeight:Bool):Void {
+    private function refineSelfMeasure(measureWidth : Bool, measureHeight : Bool) : Void {
     }
 
-    public function addChild(view:View, reLayout:Bool = true):Void {
+    public function addChild(view : View, reLayout : Bool = true) : Void {
         _addChild(view, reLayout);
     }
 
-    public function removeChild(view:View, reLayout:Bool = true):Void {
+    public function removeChild(view : View, reLayout : Bool = true) : Void {
         _removeChild(view, reLayout);
     }
 
-    public function removeAllChildren(reLayout:Bool = true):Void {
+    public function removeAllChildren(reLayout : Bool = true) : Void {
         for (child in children.copy()) {
             removeChild(child, false);
         }
@@ -182,7 +182,7 @@ class ViewGroup extends ViewContainer {
         }
     }
 
-    public function findViewById(id:String, deep:Bool = true):View {
+    public function findViewById(id : Int, deep : Bool = true) : View {
         for (child in children) {
             if (child.id == id) {
                 return child;
@@ -204,7 +204,7 @@ class ViewGroup extends ViewContainer {
         return null;
     }
 
-    public function findViewsByTag(tag:String, deep:Bool = true):Array<View> {
+    public function findViewsByTag(tag : String, deep : Bool = true) : Array<View> {
         var result = new Array<View>();
 
         for (child in children) {

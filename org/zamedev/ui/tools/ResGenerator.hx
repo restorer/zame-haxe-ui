@@ -1,46 +1,46 @@
 package org.zamedev.ui.tools;
 
-import de.polygonal.Printf;
 import org.zamedev.lib.ds.LinkedMap;
 import org.zamedev.ui.errors.UiParseError;
-import org.zamedev.ui.graphics.Color;
 import org.zamedev.ui.graphics.Dimension;
-import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.DimensionType;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.graphics.DrawableType;
-import org.zamedev.ui.graphics.Gravity;
-import org.zamedev.ui.graphics.GravityTools;
 import org.zamedev.ui.graphics.GravityType;
+import org.zamedev.ui.res.Configuration;
 import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.tools.generator.GenFont;
-import org.zamedev.ui.tools.generator.HaxeCode;
 import org.zamedev.ui.tools.generator.GenItem;
-import org.zamedev.ui.tools.generator.GenSelector;
+import org.zamedev.ui.tools.generator.GenItemValue;
+import org.zamedev.ui.tools.generator.GenPlural;
+import org.zamedev.ui.tools.generator.GenPosition;
 import org.zamedev.ui.tools.generator.GenStyle;
-import org.zamedev.ui.tools.styleable.StyleableMap;
-import org.zamedev.ui.tools.styleable.StyleableType;
-import org.zamedev.ui.tools.parser.ParseHelper;
+import org.zamedev.ui.tools.generator.HaxeCode;
+import org.zamedev.ui.tools.generator.LayoutGenerator;
+import org.zamedev.ui.tools.generator.StyleGenerator;
+import org.zamedev.ui.tools.parser.ConfigurationHelper;
 
+using Lambda;
 using StringTools;
 using org.zamedev.lib.LambdaExt;
 
 class ResGenerator {
-    private var resId:Int = 0;
-    private var nameToIdMap:LinkedMap<String, Int> = new LinkedMap<String, Int>();
-    private var colorMap:LinkedMap<String, GenItem<Int>> = new LinkedMap<String, GenItem<Int>>();
-    private var dimenMap:LinkedMap<String, GenItem<Dimension>> = new LinkedMap<String, GenItem<Dimension>>();
-    private var stringMap:LinkedMap<String, GenItem<String>> = new LinkedMap<String, GenItem<String>>();
-    private var fontMap:LinkedMap<String, GenItem<GenFont>> = new LinkedMap<String, GenItem<GenFont>>();
-    private var drawableMap:LinkedMap<String, GenItem<Drawable>> = new LinkedMap<String, GenItem<Drawable>>();
-    private var styleMap:LinkedMap<String, GenItem<GenStyle>> = new LinkedMap<String, GenItem<GenStyle>>();
-    private var selectorMap:LinkedMap<String, GenItem<GenSelector>> = new LinkedMap<String, GenItem<GenSelector>>();
-    private var layoutMap:LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
-    private var layoutPartMap:LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
-    private var genLayoutViewId:Int;
-    private var includeMap:Map<String, Bool>;
+    private var resId : Int = 0;
+    private var nameToIdMap : LinkedMap<String, Int> = new LinkedMap<String, Int>();
 
-    private var classMap:Map<String, String> = [
+    public var includeMap : Map<String, Bool>;
+    public var identifierMap : LinkedMap<String, GenItem<Void>> = new LinkedMap<String, GenItem<Void>>();
+    public var colorMap : LinkedMap<String, GenItem<Int>> = new LinkedMap<String, GenItem<Int>>();
+    public var dimenMap : LinkedMap<String, GenItem<Dimension>> = new LinkedMap<String, GenItem<Dimension>>();
+    public var stringMap : LinkedMap<String, GenItem<String>> = new LinkedMap<String, GenItem<String>>();
+    public var pluralMap : LinkedMap<String, GenItem<GenPlural>> = new LinkedMap<String, GenItem<GenPlural>>();
+    public var fontMap : LinkedMap<String, GenItem<GenFont>> = new LinkedMap<String, GenItem<GenFont>>();
+    public var drawableMap : LinkedMap<String, GenItem<Drawable>> = new LinkedMap<String, GenItem<Drawable>>();
+    public var styleMap : LinkedMap<String, GenItem<GenStyle>> = new LinkedMap<String, GenItem<GenStyle>>();
+    public var layoutMap : LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
+    public var layoutPartMap : LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
+
+    public var classMap : Map<String, String> = [
         "ImageView" => "org.zamedev.ui.view.ImageView",
         "Rect" => "org.zamedev.ui.view.Rect",
         "SpaceView" => "org.zamedev.ui.view.SpaceView",
@@ -58,59 +58,96 @@ class ResGenerator {
         "EditText" => "org.zamedev.ui.widget.EditText",
     ];
 
-    public function new():Void {
+    public function new() {
     }
 
-    public function putColor(name:String, value:Int):Void {
-        putIfNotExists("color", colorMap, name, value);
+    public function putIdentifier(name : String, pos : GenPosition) : Void {
+        putToMap("id", identifierMap, name, null, pos);
     }
 
-    public function putDimen(name:String, value:Dimension):Void {
-        putIfNotExists("dimen", dimenMap, name, value);
+    public function putColor(name : String, value : Int, pos : GenPosition) : Void {
+        putIfNotExists("color", colorMap, name, value, pos);
     }
 
-    public function putString(name:String, value:String):Void {
-        putIfNotExists("string", stringMap, name, value);
+    public function putDimension(name : String, value : Dimension, pos : GenPosition) : Void {
+        putIfNotExists("dimen", dimenMap, name, value, pos);
     }
 
-    public function putFont(name:String, value:GenFont):Void {
-        putIfNotExists("font", fontMap, name, value);
+    public function putString(name : String, value : String, pos : GenPosition) : Void {
+        putIfNotExists("string", stringMap, name, value, pos);
     }
 
-    public function putDrawable(name:String, value:Drawable):Void {
-        putIfNotExists("drawable", drawableMap, name, value);
+    public function putPlural(name : String, value : GenPlural, pos : GenPosition) : Void {
+        putIfNotExists("plurals", pluralMap, name, value, pos);
     }
 
-    public function putStyle(name:String, value:GenStyle):Void {
-        putIfNotExists("style", styleMap, name, value);
+    public function putFont(name : String, value : GenFont, pos : GenPosition) : Void {
+        putIfNotExists("font", fontMap, name, value, pos);
     }
 
-    public function putSelector(name:String, value:GenSelector):Void {
-        putIfNotExists("selector", selectorMap, name, value);
+    public function putDrawable(name : String, value : Drawable, pos : GenPosition) : Void {
+        putIfNotExists("drawable", drawableMap, name, value, pos);
     }
 
-    public function putLayout(name:String, value:Xml):Void {
-        if (layoutPartMap.exists(name)) {
-            throw new UiParseError('duplicate resource "${name}" of type "layout" (in "layoutPart")');
+    public function putStyle(name : String, value : GenStyle, pos : GenPosition) : Void {
+        putIfNotExists("style", styleMap, name, value, pos);
+    }
+
+    public function putLayout(name : String, value : Xml, pos : GenPosition) : Void {
+        putIfNotExists("layout", layoutMap, name, value, pos);
+    }
+
+    public function putLayoutPart(name : String, value : Xml, pos : GenPosition) : Void {
+        putIfNotExists("layoutpart", layoutPartMap, name, value, pos);
+    }
+
+    public function getPackedDrawable(name : String, pos : GenPosition) : Drawable {
+        var item = drawableMap[validateResourceName(name, pos)];
+
+        if (item == null) {
+            return null;
         }
 
-        putIfNotExists("layout", layoutMap, name, value);
-    }
+        var result = findQualifiedValue(item.map, pos);
 
-    public function putLayoutPart(name:String, value:Xml):Void {
-        if (layoutMap.exists(name)) {
-            throw new UiParseError('duplicate resource "${name}" of type "layoutPart" (in "layout")');
+        if (result == null) {
+            throw new UiParseError('${getDisplayName(name, pos)} - packed drawable not found', pos);
         }
 
-        putIfNotExists("layoutPart", layoutPartMap, name, value);
+        if (result.type != DrawableType.ASSET_BITMAP) {
+            throw new UiParseError('${getDisplayName(name, pos)} - packed drawable must have bitmap type', pos);
+        }
+
+        return result;
     }
 
-    public function getDrawable(name:String):Drawable {
-        var item = drawableMap[validateResourceName(name)];
-        return (item == null ? null : item.value);
+    public function validateResourceName(name : String, pos : GenPosition) : String {
+        if (!~/^[A-Za-z_][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name, pos))) {
+            throw new UiParseError('${getDisplayName(name, pos)} is not valid resource identifier', pos);
+        }
+
+        return name;
     }
 
-    public function generate():String {
+    public function getDisplayName(name : String, pos : GenPosition) : String {
+        if (pos.configuration.isEmpty()) {
+            return '"${name}"';
+        } else {
+            return '"${name}" (for "${pos.configuration.toQualifierString()}")';
+        }
+    }
+
+    public function findQualifiedValue<T>(map : Map<String, GenItemValue<T>>, pos : GenPosition) : T {
+        for (key in ConfigurationHelper.computeQualifierKeys(pos.configuration)) {
+            if (map.exists(key)) {
+                return map[key].value;
+            }
+        }
+
+        throw new UiParseError("Internal error", pos);
+    }
+
+    public function generate() : String {
         includeMap = [
             "org.zamedev.ui.graphics.Dimension" => true,
             "org.zamedev.ui.graphics.DimensionType" => true,
@@ -119,13 +156,15 @@ class ResGenerator {
             "org.zamedev.ui.graphics.FontExt" => true,
             "org.zamedev.ui.graphics.GravityType" => true,
             "org.zamedev.ui.graphics.TextAlignExt" => true,
+            "org.zamedev.ui.i18n.Quantity" => true,
+            "org.zamedev.ui.res.Configuration" => true,
             "org.zamedev.ui.res.ResourceManager" => true,
             "org.zamedev.ui.res.Selector" => true,
             "org.zamedev.ui.res.Style" => true,
             "org.zamedev.ui.res.Styleable" => true,
+            "org.zamedev.ui.view.LayoutParams" => true,
             "org.zamedev.ui.view.View" => true,
             "org.zamedev.ui.view.ViewVisibility" => true,
-            "org.zamedev.ui.view.LayoutParams" => true,
             "org.zamedev.ui.widget.LinearLayoutOrientation" => true,
         ];
 
@@ -134,32 +173,73 @@ class ResGenerator {
         sb.add("class R {\n");
 
         generateNameToIdMap(sb);
+
+        generateIds(sb, "id", identifierMap);
         generateIds(sb, "color", colorMap);
         generateIds(sb, "dimen", dimenMap);
         generateIds(sb, "string", stringMap);
+        generateIds(sb, "plurals", pluralMap);
         generateIds(sb, "font", fontMap);
         generateIds(sb, "drawable", drawableMap);
         generateIds(sb, "style", styleMap);
-        generateIds(sb, "selector", selectorMap);
         generateIds(sb, "layout", layoutMap);
 
-        sb.add("\tpublic static function _loadInto(r:ResourceManager, locale:String):Void {");
+        sb.add("\tpublic static function _loadInto(r : ResourceManager, c : Configuration) : Void {");
 
-        generateLoadColor(sb);
-        generateLoadDimen(sb);
-        generateLoadString(sb);
-        generateLoadFont(sb);
-        generateLoadDrawable(sb);
-        generateLoadStyle(sb);
-        generateLoadSelector(sb);
-        generateLoadLayout(sb);
+        generateLoadValues(sb, colorMap, function(key : String, value : Int, pos : GenPosition) : String {
+            return 'r.colorMap[color.${key}] = ${HaxeCode.genColor(value)};';
+        });
+
+        generateLoadValues(sb, dimenMap, function(key : String, value : Dimension, pos : GenPosition) : String {
+            return 'r.dimenMap[dimen.${key}] = ${HaxeCode.genDimension(value)};';
+        });
+
+        generateLoadValues(sb, stringMap, function(key : String, value : String, pos : GenPosition) : String {
+            return 'r.stringMap[string.${key}] = ${HaxeCode.genString(value)};';
+        });
+
+        generateLoadValues(sb, pluralMap, function(key : String, value : GenPlural, pos : GenPosition) : String {
+            var result = 'r.pluralMap[string.${key}] = { locale : ${HaxeCode.genString(pos.configuration.locale)}, valueMap : [';
+            var sep = false;
+
+            for (quantity in value.keys()) {
+                if (sep) {
+                    result += ',';
+                }
+
+                result += ' ${HaxeCode.genQuantity(quantity)} => ${HaxeCode.genString(value[quantity])}';
+                sep = true;
+            }
+
+            return result + ' ] };';
+        });
+
+        generateLoadValues(sb, fontMap, function(key : String, value : GenFont, pos : GenPosition) : String {
+            return 'r.fontMap[font.${key}] = ${HaxeCode.genFont(value)};';
+        });
+
+        generateLoadValues(sb, drawableMap, function(key : String, value : Drawable, pos : GenPosition) : String {
+            return 'r.drawableMap[drawable.${key}] = ${HaxeCode.genDrawable(value, pos)};';
+        });
+
+        generateLoadValues(sb, styleMap, function(key : String, value : GenStyle, pos : GenPosition) : String {
+            var prefix = pos.configuration.toArray().join("_");
+            var staticPart = value.staticMap.empty() ? "null" : '_staticStyle_${prefix}_${key}';
+            var runtimePart = value.runtimeMap.empty() ? "null" : '_runtimeStyle_${prefix}_${key}';
+            return 'r.styleMap[style.${key}] = { staticFunc : ${staticPart}, runtimeFunc : ${runtimePart} };';
+        });
+
+        generateLoadValues(sb, layoutMap, function(key : String, value : Xml, pos : GenPosition) : String {
+            return 'r.layoutMap[layout.${key}] = _inflateLayout_${pos.configuration.toArray().join("_")}_${key};';
+        });
 
         sb.add("\t}\n");
 
-        for (key in layoutMap.keys()) {
-            var item = layoutMap[key];
-            generateInflateLayout(sb, key, item.value);
-        }
+        var styleGenerator = new StyleGenerator(this);
+        styleGenerator.generate(sb);
+
+        var layoutGenerator = new LayoutGenerator(this);
+        layoutGenerator.generate(sb);
 
         sb.add("}\n");
 
@@ -173,58 +253,62 @@ class ResGenerator {
             sbPrepend.add('import ${name};\n');
         }
 
-        return sbPrepend.toString() + sb.toString();
+        return sbPrepend.toString() + sb.toString().replace("\n\n\n", "\n\n");
     }
 
-    private function validateResourceName(name:String):String {
-        if (!~/^[A-Za-z_][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name))) {
-            throw new UiParseError('"${name}" is invalid resource identifier');
+    private function putToMap<T>(
+        resType : String,
+        map : LinkedMap<String, GenItem<T>>,
+        name : String,
+        value : T,
+        pos : GenPosition
+    ) : Bool {
+        name = validateResourceName(name, pos);
+        var qKey = pos.configuration.toQualifierString();
+
+        if (!map.exists(name)) {
+            resId++;
+            nameToIdMap['${resType}/${name}'] = resId;
+
+            map[name] = {
+                id : resId,
+                map : new Map<String, GenItemValue<T>>(),
+            };
+        } else if (map[name].map.exists(qKey)) {
+            return false;
         }
 
-        return name;
-    }
-
-    private function validateClassName(name:String):String {
-        if (!~/^[A-Za-z][0-9A-Za-z_.]*$/.match(HaxeCode.validateIdentifier(name))) {
-            throw new UiParseError('"${name}" is invalid class name');
-        }
-
-        return name;
-    }
-
-    private function validateAttributeName(name:String):String {
-        if (!~/^[A-Za-z][0-9A-Za-z_]*$/.match(HaxeCode.validateIdentifier(name))) {
-            throw new UiParseError('"${name}" is invalid attribute name');
-        }
-
-        return name;
-    }
-
-    private function putIfNotExists<T>(resType:String, map:LinkedMap<String, GenItem<T>>, name:String, value:T):Void {
-        if (map.exists(validateResourceName(name))) {
-            throw new UiParseError('duplicate resource "${name}" of type "${resType}"');
-        }
-
-        resId++;
-        nameToIdMap['${resType}/${name}'] = resId;
-
-        map[name] = {
-            id: resId,
-            value: value,
+        map[name].map[qKey] = {
+            value : value,
+            pos : pos,
         };
+
+        return true;
     }
 
-    private function generateNameToIdMap(sb:StringBuf):Void {
-        sb.add('\tpublic static var nameToIdMap:Map<String, Int> = [\n');
+    private function putIfNotExists<T>(
+        resType : String,
+        map : LinkedMap<String, GenItem<T>>,
+        name : String,
+        value : T,
+        pos : GenPosition
+    ) : Void {
+        if (!putToMap(resType, map, name, value, pos)) {
+            throw new UiParseError('Duplicate resource ${getDisplayName(name, pos)} of type "${resType}"', pos);
+        }
+    }
+
+    private function generateNameToIdMap(sb : StringBuf) : Void {
+        sb.add('\tpublic static var nameToIdMap : Map<String, Int> = [\n');
 
         for (key in nameToIdMap.keys()) {
-            sb.add('\t\t${HaxeCode.genString(key)} => ${nameToIdMap[key]},\n');
+            sb.add('\t\t${HaxeCode.genString(key)} => ${HaxeCode.getInt(nameToIdMap[key])},\n');
         }
 
         sb.add("\t];\n\n");
     }
 
-    private function generateIds<T>(sb:StringBuf, name:String, map:LinkedMap<String, GenItem<T>>):Void {
+    private function generateIds<T>(sb : StringBuf, name : String, map : LinkedMap<String, GenItem<T>>) : Void {
         sb.add('\tpublic static var ${name} = {\n');
 
         for (key in map.keys()) {
@@ -234,298 +318,63 @@ class ResGenerator {
         sb.add("\t};\n\n");
     }
 
-    private function generateLoadColor(sb:StringBuf):Void {
+    // https://developer.android.com/guide/topics/resources/providing-resources.html#BestMatch
+    private function generateLoadValues<T>(
+        sb : StringBuf,
+        map : LinkedMap<String, GenItem<T>>,
+        func : String -> T -> GenPosition -> String
+    ) : Void {
         sb.add("\n");
 
-        for (key in colorMap.keys()) {
-            sb.add('\t\tr.colorMap[color.${key}] = ${HaxeCode.genColor(colorMap[key].value)};\n');
-        }
-    }
+        for (key in map.keys()) {
+            var genItem = map[key];
 
-    private function generateLoadDimen(sb:StringBuf):Void {
-        sb.add("\n");
+            var posList = ConfigurationHelper.sortPositions(genItem.map.map(function(v : GenItemValue<T>) : GenPosition {
+                return v.pos;
+            }).array());
 
-        for (key in dimenMap.keys()) {
-            sb.add('\t\tr.dimenMap[dimen.${key}] = ${HaxeCode.genDimension(dimenMap[key].value)};\n');
-        }
-    }
-
-    private function generateLoadString(sb:StringBuf):Void {
-        sb.add("\n");
-
-        for (key in stringMap.keys()) {
-            sb.add('\t\tr.stringMap[string.${key}] = ${HaxeCode.genString(stringMap[key].value)};\n');
-        }
-    }
-
-    private function generateLoadFont(sb:StringBuf):Void {
-        sb.add("\n");
-
-        for (key in fontMap.keys()) {
-            sb.add('\t\tr.fontMap[font.${key}] = ${HaxeCode.genFont(fontMap[key].value)};\n');
-        }
-    }
-
-    private function generateLoadDrawable(sb:StringBuf):Void {
-        sb.add("\n");
-
-        for (key in drawableMap.keys()) {
-            sb.add('\t\tr.drawableMap[drawable.${key}] = ${HaxeCode.genDrawable(drawableMap[key].value)};\n');
-        }
-    }
-
-    private function generateLoadStyle(sb:StringBuf):Void {
-        for (key in styleMap.keys()) {
-            var genStyle = styleMap[key].value;
-            sb.add('\n\t\tr.styleMap[style.${key}] = new Style([\n');
-
-            for (name in genStyle.keys()) {
-                var type = StyleableMap.getTypeByName(name);
-                sb.add('\t\t\t${HaxeCode.genStyleable(name)} => ${HaxeCode.genResolvedValue(genStyle[name], type)},\n');
-            }
-
-            sb.add('\t\t]);\n');
-        }
-    }
-
-    private function generateLoadSelector(sb:StringBuf):Void {
-        for (key in selectorMap.keys()) {
-            var genSelector = selectorMap[key].value;
-            sb.add('\n\t\tr.selectorMap[selector.${key}] = new Selector([\n');
-
-            for (name in genSelector.keys()) {
-                var type = StyleableMap.getTypeByName(name);
-
-                if (genSelector[name].length == 0) {
-                    sb.add('\t\t\t${HaxeCode.genStyleable(name)} => [],\n');
-                } else {
-                    sb.add('\t\t\t${HaxeCode.genStyleable(name)} => [{\n');
-                    var sep = false;
-
-                    for (genSelectorItem in genSelector[name]) {
-                        if (sep) {
-                            sb.add("\t\t\t}, {\n");
-                        } else {
-                            sep = true;
-                        }
-
-                        if (Lambda.empty(genSelectorItem.stateMap)) {
-                            sb.add("\t\t\t\tstateMap: new Map<String, Bool>(),\n");
-                        } else {
-                            sb.add("\t\t\t\tstateMap: [\n");
-
-                            for (tag in genSelectorItem.stateMap.keys()) {
-                                sb.add('\t\t\t\t\t${HaxeCode.genString(tag)} => ${HaxeCode.genBool(genSelectorItem.stateMap[tag])},\n');
-                            }
-
-                            sb.add("\t\t\t\t],\n");
-                        }
-
-                        sb.add('\t\t\t\tvalue: ${HaxeCode.genResolvedValue(genSelectorItem.value, type)},\n');
-                    }
-
-                    sb.add("\t\t\t}],\n");
-                }
-            }
-
-            sb.add('\t\t]);\n');
-        }
-    }
-
-    private function generateLoadLayout(sb:StringBuf):Void {
-        sb.add("\n");
-
-        for (key in layoutMap.keys()) {
-            sb.add('\t\tr.layoutMap[layout.${key}] = _inflateLayout_${key};\n');
-        }
-    }
-
-    private function generateInflateLayout(sb:StringBuf, layoutName:String, node:Xml):Void {
-        sb.add('\n\tprivate static function _inflateLayout_${layoutName}(l:LayoutParams, r:ResourceManager):View {\n');
-        genLayoutViewId = 1;
-
-        generateInflateLayoutNode(
-            sb,
-            layoutName,
-            node,
-            "(l == null ? new LayoutParams() : l)",
-            new Map<String, Bool>(),
-            new Map<String, String>(),
-            new Map<String, String>()
-        );
-
-        sb.add("\t\treturn v1;\n");
-        sb.add("\t}\n");
-    }
-
-    private function generateInflateLayoutNode(
-        sb:StringBuf,
-        layoutName:String,
-        node:Xml,
-        layoutParamsHaxeCode:String,
-        visitedMap:Map<String, Bool>,
-        vars:Map<String, String>,
-        overrides:Map<String, String>
-    ):Void {
-        visitedMap[layoutName] = true;
-        var className = node.nodeName;
-
-        if (className == "include") {
-            var includeResId = node.get("layout");
-
-            if (includeResId == null) {
-                throw new UiParseError('@layout/${layoutName} - layout is not specified in include tag');
-            }
-
-            var refInfo = ParseHelper.parseRef(includeResId);
-
-            if (refInfo == null || refInfo.type != "layout") {
-                throw new UiParseError('@layout/${layoutName} - invalid layout reference in include tag (${includeResId})');
-            }
-
-            if (visitedMap.exists(refInfo.name)) {
-                throw new UiParseError('@layout/${layoutName} - circular dependency on ${includeResId}');
-            }
-
-            var incLayoutItem = layoutMap[refInfo.name];
-
-            if (incLayoutItem == null) {
-                incLayoutItem = layoutPartMap[refInfo.name];
-            }
-
-            if (incLayoutItem == null) {
-                throw new UiParseError('@layout/${layoutName} - included layout not found (${includeResId})');
-            }
-
-            var newVars = new Map<String, String>();
-            var newOverrides = new Map<String, String>();
-
-            for (att in node.attributes()) {
-                if (att == "layout") {
-                    continue;
-                }
-
-                var value = node.get(att);
-
-                if (value.substr(0, 5) == "@var/") {
-                    var value = vars[value.substr(5)];
-
-                    if (value == null) {
-                        throw new UiParseError(
-                            '@layout/${layoutName} - ${node.get(att)} not found for attribute ${att} in include tag (${includeResId})'
-                        );
-                    }
-                }
-
-                if (att.substr(0, 4) == "var_") {
-                    newVars[att.substr(4)] = value;
-                } else {
-                    newOverrides[att] = value;
-                }
-            }
-
-            var newVisitedMap = new Map<String, Bool>();
-
-            for (key in visitedMap.keys()) {
-                newVisitedMap[key] = visitedMap[key];
-            }
-
-            sb.add("\n");
-
-            generateInflateLayoutNode(
-                sb,
-                refInfo.name,
-                incLayoutItem.value,
-                layoutParamsHaxeCode,
-                newVisitedMap,
-                newVars,
-                newOverrides
-            );
-
-            return;
-        }
-
-        var varName = 'v${genLayoutViewId}';
-        validateClassName(className);
-
-        if (classMap.exists(className)) {
-            includeMap[classMap[className]] = true;
-        }
-
-        sb.add('\t\tvar ${varName} = new ${className}(r.context);\n');
-        sb.add('\t\t${varName}.onInflateStarted();\n');
-        sb.add('\t\t${varName}.layoutParams = ${layoutParamsHaxeCode};\n');
-
-        var styleResId = (overrides.exists("style") ? overrides["style"] : node.get("style"));
-
-        if (styleResId != null) {
-            var refInfo = ParseHelper.parseRef(styleResId);
-
-            if (refInfo == null || refInfo.type != "style") {
-                throw new UiParseError('@layout/${layoutName} - invalid style reference (${styleResId})');
-            }
-
-            sb.add('\t\tr.styleMap[style.${validateResourceName(refInfo.name)}].apply(${varName});\n');
-        }
-
-        var layoutAttMap = new LinkedMap<String, String>();
-        var viewAttMap = new LinkedMap<String, String>();
-
-        for (att in node.attributes()) {
-            if (att == "style" || overrides.exists(att)) {
+            if (posList.length == 1 && posList[0].configuration.isEmpty()) {
+                sb.add("\t\t");
+                sb.add(func(key, genItem.map[""].value, posList[0]));
+                sb.add("\n");
                 continue;
             }
 
-            var value = node.get(att);
+            var isFirst = true;
 
-            if (value.substr(0, 5) == "@var/") {
-                value = vars[value.substr(5)];
+            for (pos in posList) {
+                sb.add("\n\t\t");
 
-                if (value == null) {
-                    throw new UiParseError('@layout/${layoutName} - class ${className}, ${node.get(att)} not found for attribute ${att}');
-                }
-            }
+                if (!pos.configuration.isEmpty()) {
+                    sb.add(isFirst ? "if (" : "} else if (");
 
-            if (att.substr(0, 7) == "layout_") {
-                layoutAttMap[validateAttributeName(att)] = value;
-            } else {
-                viewAttMap[validateAttributeName(att)] = value;
-            }
-        }
+                    var sep = false;
+                    var configMap = pos.configuration.toMap();
 
-        for (att in overrides.keys()) {
-            if (att != "style") {
-                if (att.substr(0, 7) == "layout_") {
-                    layoutAttMap[validateAttributeName(att)] = overrides[att];
+                    for (configKey in configMap.keys()) {
+                        if (sep) {
+                            sb.add(" && ");
+                        }
+
+                        sb.add('c.${configKey} == ${HaxeCode.genString(configMap[configKey])}');
+                        sep = true;
+                    }
+
+                    sb.add(") {\n");
+                } else if (isFirst) {
+                    throw new UiParseError('Internal error');
                 } else {
-                    viewAttMap[validateAttributeName(att)] = overrides[att];
+                    sb.add("} else {\n");
                 }
+
+                sb.add("\t\t\t");
+                sb.add(func(key, genItem.map[pos.configuration.toQualifierString()].value, pos));
+                sb.add("\n");
+
+                isFirst = false;
             }
+
+            sb.add("\t\t}\n\n");
         }
-
-        for (att in layoutAttMap.keys()) {
-            var type = StyleableMap.getTypeByName(att);
-            sb.add('\t\t${varName}.inflate(Styleable.${att}, ${HaxeCode.genResolvedValue(layoutAttMap[att], type)});\n');
-        }
-
-        for (att in viewAttMap.keys()) {
-            var type = StyleableMap.getTypeByName(att);
-            sb.add('\t\t${varName}.inflate(Styleable.${att}, ${HaxeCode.genResolvedValue(viewAttMap[att], type)});\n');
-        }
-
-        var childViewId = 0;
-
-        for (innerNode in node.elements()) {
-            childViewId = ++genLayoutViewId;
-            sb.add("\n");
-            generateInflateLayoutNode(sb, layoutName, innerNode, '${varName}.createLayoutParams()', visitedMap, vars, new Map<String, String>());
-            sb.add('\t\t${varName}.addChild(v${childViewId}, false);\n');
-        }
-
-        if (childViewId != 0) {
-            sb.add("\n");
-        }
-
-        sb.add('\t\t${varName}.onInflateFinished();\n');
     }
 }

@@ -1,28 +1,24 @@
 package org.zamedev.ui.widget;
 
 import org.zamedev.ui.view.View;
-
-typedef ScrollPosition = {
-    x:Float,
-    y:Float,
-};
+import org.zamedev.ui.graphics.Position;
 
 class RecyclerViewLayoutManager {
-    public var x(default, null):Float;
-    public var y(default, null):Float;
-    public var px(default, null):Float;
-    public var py(default, null):Float;
+    public var x(default, null) : Float;
+    public var y(default, null) : Float;
+    public var px(default, null) : Float;
+    public var py(default, null) : Float;
 
-    private var maxWidth:Float;
-    private var maxHeight:Float;
+    private var maxWidth : Float;
+    private var maxHeight : Float;
 
-    public var orientation:LinearLayoutOrientation;
+    public var orientation : LinearLayoutOrientation;
 
     public function new() {
         this.orientation = LinearLayoutOrientation.VERTICAL;
     }
 
-    public function init(x:Float, y:Float, maxWidth:Float, maxHeight:Float) {
+    public function init(x : Float, y : Float, maxWidth : Float, maxHeight : Float) : Void {
         this.x = x;
         this.y = y;
         this.px = x;
@@ -31,7 +27,7 @@ class RecyclerViewLayoutManager {
         this.maxHeight = maxHeight;
     }
 
-    public function prepend(view:View):Void {
+    public function prepend(view : View) : Void {
         if (orientation == LinearLayoutOrientation.VERTICAL) {
             py -= view.height;
         } else {
@@ -42,7 +38,7 @@ class RecyclerViewLayoutManager {
         view.y = py;
     }
 
-    public function layout(view:View):Void {
+    public function layout(view : View) : Void {
         view.x = x;
         view.y = y;
 
@@ -53,7 +49,7 @@ class RecyclerViewLayoutManager {
         }
     }
 
-    public function canPrepend():Bool {
+    public function canPrepend() : Bool {
         if (orientation == LinearLayoutOrientation.VERTICAL) {
             return (py > 0);
         } else {
@@ -61,7 +57,7 @@ class RecyclerViewLayoutManager {
         }
     }
 
-    public function isBeforeStart(view:View):Bool {
+    public function isBeforeStart(view : View) : Bool {
         if (orientation == LinearLayoutOrientation.VERTICAL) {
             return ((view.y + view.height) <= 0);
         } else {
@@ -69,7 +65,7 @@ class RecyclerViewLayoutManager {
         }
     }
 
-    public function isAtEnd(view:View):Bool {
+    public function isAtEnd(view : View) : Bool {
         if (orientation == LinearLayoutOrientation.VERTICAL) {
             return ((view.y + view.height) >= maxHeight);
         } else {
@@ -77,7 +73,7 @@ class RecyclerViewLayoutManager {
         }
     }
 
-    public function computePrevScrollPosition(view:View):ScrollPosition {
+    public function computePrevScrollPosition(view : View) : Position {
         if (orientation == LinearLayoutOrientation.VERTICAL) {
             return {
                 x: 0.0,
@@ -91,7 +87,7 @@ class RecyclerViewLayoutManager {
         }
     }
 
-    public function computeNextScrollPosition(view:View):ScrollPosition {
+    public function computeNextScrollPosition(view : View) : Position {
         if (orientation == LinearLayoutOrientation.VERTICAL) {
             return {
                 x: 0.0,

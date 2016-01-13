@@ -8,15 +8,15 @@ import org.zamedev.ui.view.ViewVisibility;
 
 class FrameLayout extends ViewGroup {
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
     }
 
-    override public function createLayoutParams():LayoutParams {
+    override public function createLayoutParams() : LayoutParams {
         return new FrameLayoutParams();
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -68,7 +68,7 @@ class FrameLayout extends ViewGroup {
         return true;
     }
 
-    override private function refineSelfMeasure(measureWidth:Bool, measureHeight:Bool):Void {
+    override private function refineSelfMeasure(measureWidth : Bool, measureHeight : Bool) : Void {
         for (child in children) {
             var layoutParams = child.layoutParams;
 
@@ -82,7 +82,7 @@ class FrameLayout extends ViewGroup {
         }
     }
 
-    override private function computeMatchParentMeasureSpec(childLayoutParams:LayoutParams, size:Float, vertical:Bool):MeasureSpec {
+    override private function computeMatchParentMeasureSpec(childLayoutParams : LayoutParams, size : Float, vertical : Bool) : MeasureSpec {
         var layoutParams = cast(childLayoutParams, FrameLayoutParams);
 
         return MeasureSpec.EXACT(size - (vertical

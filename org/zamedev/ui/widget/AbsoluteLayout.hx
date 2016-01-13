@@ -8,15 +8,15 @@ import org.zamedev.ui.view.ViewGroup;
 
 class AbsoluteLayout extends ViewGroup {
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
     }
 
-    override public function createLayoutParams():LayoutParams {
+    override public function createLayoutParams() : LayoutParams {
         return new AbsoluteLayoutParams();
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -32,7 +32,7 @@ class AbsoluteLayout extends ViewGroup {
         return true;
     }
 
-    override private function refineSelfMeasure(measureWidth:Bool, measureHeight:Bool):Void {
+    override private function refineSelfMeasure(measureWidth : Bool, measureHeight : Bool) : Void {
         for (child in children) {
             var layoutParams = child.layoutParams;
 
@@ -46,7 +46,13 @@ class AbsoluteLayout extends ViewGroup {
         }
     }
 
-    private function computeChildPosition(child:View, startDimen:Dimension, centerParam:Dimension, endDimen:Dimension, vertical:Bool):Float {
+    private function computeChildPosition(
+        child : View,
+        startDimen : Dimension,
+        centerParam : Dimension,
+        endDimen : Dimension,
+        vertical : Bool
+    ) : Float {
         if (startDimen != null) {
             return computeChildDimension(child, startDimen, vertical);
         } else if (centerParam != null) {

@@ -5,21 +5,21 @@ import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
 
 class LayoutParams {
-    public var width:Dimension;
-    public var height:Dimension;
+    public var width : Dimension;
+    public var height : Dimension;
 
-    public var _widthSpec:MeasureSpec;
-    public var _heightSpec:MeasureSpec;
-    public var _measured:Bool;
-    public var _measuredWidth:Float;
-    public var _measuredHeight:Float;
+    public var _widthSpec : MeasureSpec;
+    public var _heightSpec : MeasureSpec;
+    public var _measured : Bool;
+    public var _measuredWidth : Float;
+    public var _measuredHeight : Float;
 
-    public function new(width:Dimension = null, height:Dimension = null) {
+    public function new(?width : Dimension, ?height : Dimension) {
         this.width = (width == null ? Dimension.WRAP_CONTENT : width);
         this.height = (height == null ? Dimension.WRAP_CONTENT : height);
     }
 
-    private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         switch (attId) {
             case Styleable.layout_width:
                 width = cast value;

@@ -2,16 +2,17 @@ package org.zamedev.ui.graphics;
 
 import de.polygonal.Printf;
 import org.zamedev.ui.errors.UiParseError;
+import org.zamedev.ui.tools.generator.GenPosition;
 
 class Color {
-    public static function parse(s:String):Int {
+    public static function parse(s : String, ?pos : GenPosition) : Int {
         var re = ~/^\s*#([0-9A-Fa-f]{6})\s*$/;
 
         if (re.match(s)) {
             var val = Std.parseInt("0x" + re.matched(1));
 
             if (val == null) {
-                throw new UiParseError(s);
+                throw new UiParseError('Invalid color value: "${s}"', pos);
             }
 
             return val;
@@ -23,7 +24,7 @@ class Color {
             var val = Std.parseInt("0x" + re.matched(1));
 
             if (val == null) {
-                throw new UiParseError(s);
+                throw new UiParseError('Invalid color value: "${s}"', pos);
             }
 
             var r = (val & 0xf00) >> 8;
@@ -41,16 +42,16 @@ class Color {
             var b = Std.parseInt(re.matched(3));
 
             if (r == null || r > 255 || g == null || g > 255 || b == null || b > 255) {
-                throw new UiParseError(s);
+                throw new UiParseError('Invalid color value: "${s}"', pos);
             }
 
             return (r << 16) | (g << 8) | b;
         }
 
-        throw new UiParseError(s);
+        throw new UiParseError('Invalid color value: "${s}"', pos);
     }
 
-    public static function toHexString(c:Int):String {
+    public static function toHexString(c : Int) : String {
         return "#" + Printf.format("%06x", [c]);
     }
 }

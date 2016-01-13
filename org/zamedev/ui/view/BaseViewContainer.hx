@@ -8,15 +8,15 @@ import org.zamedev.ui.res.MeasureSpec;
 
 class BaseViewContainer extends View {
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
     }
 
-    private function computeMatchParentMeasureSpec(childLayoutParams:LayoutParams, size:Float, vertical:Bool):MeasureSpec {
+    private function computeMatchParentMeasureSpec(childLayoutParams : LayoutParams, size : Float, vertical : Bool) : MeasureSpec {
         return MeasureSpec.EXACT(size);
     }
 
-    private function computeChildMeasureSpec(layoutParams:LayoutParams, dimen:Dimension, vertical:Bool):MeasureSpec {
+    private function computeChildMeasureSpec(layoutParams : LayoutParams, dimen : Dimension, vertical : Bool) : MeasureSpec {
         switch (dimen) {
             case Dimension.WRAP_CONTENT:
                 return MeasureSpec.UNSPECIFIED;
@@ -61,7 +61,7 @@ class BaseViewContainer extends View {
         }
     }
 
-    private function computeChildDimension(child:View, dimension:Dimension, vertical:Bool):Float {
+    private function computeChildDimension(child : View, dimension : Dimension, vertical : Bool) : Float {
         switch (dimension) {
             case Dimension.WRAP_CONTENT:
                 return (vertical ? child._height : child._width);

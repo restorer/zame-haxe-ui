@@ -1,11 +1,12 @@
 package org.zamedev.ui.graphics;
 
 import org.zamedev.ui.errors.UiParseError;
+import org.zamedev.ui.tools.generator.GenPosition;
 
 using StringTools;
 
 class DimensionTools {
-    public static function resolveVertical(relWidth:Float, relHeight:Float, type:DimensionType, vertical:Bool):Bool {
+    public static function resolveVertical(relWidth : Float, relHeight : Float, type : DimensionType, vertical : Bool) : Bool {
         switch (type) {
             case DimensionType.UNSPECIFIED:
                 return vertical;
@@ -24,14 +25,14 @@ class DimensionTools {
         }
     }
 
-    public static function resolveWeight(weight:Float, size:Float, sizeWeightSum:Float, useWeightSum:Bool):Float {
+    public static function resolveWeight(weight : Float, size : Float, sizeWeightSum : Float, useWeightSum : Bool) : Float {
         return (useWeightSum
             ? (weight * size / sizeWeightSum)
             : (weight * size)
         );
     }
 
-    public static function parse(s:String):Dimension {
+    public static function parse(s : String, ?pos : GenPosition) : Dimension {
         s = s.trim().toLowerCase();
 
         if (s == "match_parent") {
@@ -48,7 +49,7 @@ class DimensionTools {
             var value = Std.parseFloat(re.matched(1));
 
             if (Math.isNaN(value)) {
-                throw new UiParseError(s);
+                throw new UiParseError('Invalid dimension value: "${s}"', pos);
             }
 
             if (re.matched(2) == null && re.matched(3) == null && re.matched(4) == null) {
@@ -85,6 +86,6 @@ class DimensionTools {
             }
         }
 
-        throw new UiParseError(s);
+        throw new UiParseError('Invalid dimension value: "${s}"', pos);
     }
 }

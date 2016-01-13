@@ -7,14 +7,14 @@ import openfl.Assets;
 #end
 
 class FontExt {
-    public var ttfFontName:String;
+    public var ttfFontName : String;
 
     #if bitmapFont
-        public var bitmapFontName:String;
-        public var bitmapFont:BitmapFont;
+        public var bitmapFontName : String;
+        public var bitmapFont : BitmapFont;
     #end
 
-    public function new(ttfFontName:String = null #if bitmapFont , bitmapFontName:String = null, bitmapFont:BitmapFont = null #end):Void {
+    public function new(?ttfFontName : String #if bitmapFont , ?bitmapFontName : String, ?bitmapFont : BitmapFont #end) : Void {
         this.ttfFontName = ttfFontName;
 
         #if bitmapFont
@@ -23,7 +23,7 @@ class FontExt {
         #end
     }
 
-    public static function equals(a:FontExt, b:FontExt):Bool {
+    public static function equals(a : FontExt, b : FontExt) : Bool {
         if (a == null && b == null) {
             return true;
         }
@@ -39,12 +39,12 @@ class FontExt {
         #end
     }
 
-    public static function createTtf(assetId:String) {
+    public static function createTtf(assetId : String) : FontExt {
         return new FontExt(Assets.getFont(assetId).fontName);
     }
 
     #if bitmapFont
-        public static function createBitmap(name:String, imageAssetId:String, xmlAssetId:String) {
+        public static function createBitmap(name : String, imageAssetId : String, xmlAssetId : String) : FontExt {
             return new FontExt(null, name, BitmapFont.fromAngelCode(
                 Assets.getBitmapData(imageAssetId),
                 Xml.parse(Assets.getText(xmlAssetId))

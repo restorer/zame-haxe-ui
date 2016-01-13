@@ -5,11 +5,11 @@ import org.zamedev.ui.Context;
 import org.zamedev.ui.res.Styleable;
 
 class Radio extends Button {
-    public var selected(get, set):Bool;
-    public var groupTag:String;
+    public var selected(get, set) : Bool;
+    public var groupTag : String;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         groupTag = null;
@@ -17,7 +17,7 @@ class Radio extends Button {
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -37,16 +37,16 @@ class Radio extends Button {
     }
 
     @:noCompletion
-    private function onMouseClick(_):Void {
+    private function onMouseClick(_) : Void {
         selected = true;
     }
 
     @:noCompletion
-    private function get_selected():Bool {
+    private function get_selected() : Bool {
         return hasState("selected");
     }
 
-    private function set_selected(value:Bool):Bool {
+    private function set_selected(value : Bool) : Bool {
         updateState("selected", value);
 
         if (!isInLayout && parent != null && groupTag != null) {

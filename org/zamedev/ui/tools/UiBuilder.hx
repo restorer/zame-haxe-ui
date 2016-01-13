@@ -2,42 +2,64 @@ package org.zamedev.ui.tools;
 
 import haxe.io.Path;
 import neko.Lib;
+import org.zamedev.ui.errors.UiParseError;
 import org.zamedev.ui.graphics.Drawable;
-import org.zamedev.ui.graphics.DrawableType;
+import org.zamedev.ui.res.Configuration;
+import org.zamedev.ui.tools.generator.GenPosition;
+import org.zamedev.ui.tools.parser.ConfigurationHelper;
 import sys.FileSystem;
 import sys.io.File;
 
 class UiBuilder {
-    private static var assetsPath:String;
-    private static var resGenerator:ResGenerator;
-    private static var resParser:ResParser;
+    private static var assetsPath : String;
+    private static var resGenerator : ResGenerator;
+    private static var resParser : ResParser;
 
-    private static function processAssets(basePath:String):Void {
+    private static function processAssetItems(basePath : String, type : String, configuration : Configuration) : Void {
         for (name in FileSystem.readDirectory(basePath)) {
             var path = Path.join([basePath, name]);
 
             if (FileSystem.isDirectory(path)) {
-                processAssets(path);
                 continue;
             }
 
             switch (Path.extension(name).toLowerCase()) {
                 case "png" | "jpg" | "jpeg" | "bmp":
-                    if (~/^\/drawable/.match(path.substr(assetsPath.length))) {
-                        resGenerator.putDrawable(
-                            Path.withoutExtension(Path.withoutDirectory(path)),
-                            Drawable.fromAssetBitmap(path.substr(assetsPath.length + 1))
+                    if (type != "drawable") {
+                        throw new UiParseError(
+                            "Drawable must be in \"drawable\" folder (maybe with qualifiers)",
+                            new GenPosition(configuration, path)
                         );
                     }
 
+                    resGenerator.putDrawable(
+                        Path.withoutExtension(Path.withoutDirectory(path)),
+                        Drawable.fromAssetBitmap(path.substr(assetsPath.length + 1)),
+                        new GenPosition(configuration, path)
+                    );
+
                 case "xml":
-                    try {
-                        resParser.tryParse(File.getContent(path));
-                    } catch (e:Dynamic) {
-                        trace('In file "${path}":');
-                        throw e;
-                    }
+                    resParser.parseResources(File.getContent(path), new GenPosition(configuration, path));
             }
+        }
+    }
+
+    private static function processAssets(basePath : String) : Void {
+        for (name in FileSystem.readDirectory(basePath)) {
+            var path = Path.join([basePath, name]);
+
+            if (!FileSystem.isDirectory(path)) {
+                continue;
+            }
+
+            var qualifiers = name.split("-");
+            var type = qualifiers.splice(0, 1)[0];
+
+            if (type != 'drawable' && type != 'resource' && type != 'layout') {
+                continue;
+            }
+
+            processAssetItems(path, type, ConfigurationHelper.parse(qualifiers, path));
         }
     }
 

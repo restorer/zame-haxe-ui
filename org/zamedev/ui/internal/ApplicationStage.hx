@@ -7,15 +7,15 @@ import openfl.events.MouseEvent;
 import org.zamedev.ui.graphics.ScaleMode;
 
 class ApplicationStage extends Sprite {
-    private var scaleMode:ScaleMode;
-    private var appStageWidth:Float;
-    private var appStageHeight:Float;
-    private var maskShape:Shape;
-    private var listenerAdded:Bool;
+    private var scaleMode : ScaleMode;
+    private var appStageWidth : Float;
+    private var appStageHeight : Float;
+    private var maskShape : Shape;
+    private var listenerAdded : Bool;
 
-    public var clippingEnabled(default, set):Bool;
-    public var widthWeightSum(default, set):Float;
-    public var heightWeightSum(default, set):Float;
+    public var clippingEnabled(default, set) : Bool;
+    public var widthWeightSum(default, set) : Float;
+    public var heightWeightSum(default, set) : Float;
 
     public function new() {
         super();
@@ -37,7 +37,7 @@ class ApplicationStage extends Sprite {
         }
     }
 
-    public function setStageSize(width:Float, height:Float, scaleMode:ScaleMode = null):Void {
+    public function setStageSize(width : Float, height : Float, ?scaleMode : ScaleMode) : Void {
         if (scaleMode == null) {
             scaleMode = ScaleMode.CENTER_INSIDE;
         }
@@ -53,12 +53,12 @@ class ApplicationStage extends Sprite {
         }
     }
 
-    public function setWeightSums(widthWeightSum:Float, heightWeightSum:Float) {
+    public function setWeightSums(widthWeightSum : Float, heightWeightSum : Float) : Void {
         this.widthWeightSum = widthWeightSum;
         this.heightWeightSum = heightWeightSum;
     }
 
-    public function fixStageMouseEvent(me:MouseEvent):MouseEvent {
+    public function fixStageMouseEvent(me : MouseEvent) : MouseEvent {
         return new MouseEvent(
             me.type,
             me.bubbles,
@@ -75,19 +75,19 @@ class ApplicationStage extends Sprite {
     }
 
     @:noCompletion
-    private function set_widthWeightSum(value:Float):Float {
+    private function set_widthWeightSum(value : Float) : Float {
         widthWeightSum = Math.max(1.0, value);
         return value;
     }
 
     @:noCompletion
-    private function set_heightWeightSum(value:Float):Float {
+    private function set_heightWeightSum(value : Float) : Float {
         heightWeightSum = Math.max(1.0, value);
         return value;
     }
 
     @:noCompletion
-    private function set_clippingEnabled(value:Bool):Bool {
+    private function set_clippingEnabled(value : Bool) : Bool {
         if (clippingEnabled != value) {
             if (!value) {
                 mask = null;
@@ -107,13 +107,13 @@ class ApplicationStage extends Sprite {
     #if flash
         @:noCompletion
         @:getter(width)
-        private function get_width():Float {
+        private function get_width() : Float {
             return appStageWidth;
         }
 
         @:noCompletion
         @:setter(width)
-        private function set_width(value:Float):Void {
+        private function set_width(value : Float) : Void {
             if (appStageWidth != value) {
                 appStageWidth = value;
                 onStageResize(null);
@@ -122,13 +122,13 @@ class ApplicationStage extends Sprite {
 
         @:noCompletion
         @:getter(height)
-        private function get_height():Float {
+        private function get_height() : Float {
             return appStageHeight;
         }
 
         @:noCompletion
         @:setter(height)
-        private function set_height(value:Float):Void {
+        private function set_height(value : Float) : Void {
             if (appStageHeight != value) {
                 appStageHeight = value;
                 onStageResize(null);
@@ -136,12 +136,12 @@ class ApplicationStage extends Sprite {
         }
     #else
         @:noCompletion
-        override private function get_width():Float {
+        override private function get_width() : Float {
             return appStageWidth;
         }
 
         @:noCompletion
-        override private function set_width(value:Float):Float {
+        override private function set_width(value : Float) : Float {
             if (appStageWidth != value) {
                 appStageWidth = value;
                 onStageResize(null);
@@ -151,12 +151,12 @@ class ApplicationStage extends Sprite {
         }
 
         @:noCompletion
-        override private function get_height():Float {
+        override private function get_height() : Float {
             return appStageHeight;
         }
 
         @:noCompletion
-        override private function set_height(value:Float):Float {
+        override private function set_height(value : Float) : Float {
             if (appStageHeight != value) {
                 appStageHeight = value;
                 onStageResize(null);
@@ -166,7 +166,7 @@ class ApplicationStage extends Sprite {
         }
     #end
 
-    private function updateMask():Void {
+    private function updateMask() : Void {
         maskShape.graphics.clear();
 
         if (clippingEnabled && appStageWidth > 0 && appStageHeight > 0) {
@@ -176,21 +176,21 @@ class ApplicationStage extends Sprite {
         }
     }
 
-    private function onAddedToStage(_):Void {
+    private function onAddedToStage(_) : Void {
         if (!listenerAdded) {
             listenerAdded = true;
             stage.addEventListener(Event.RESIZE, onStageResize);
         }
     }
 
-    private function onRemovedFromStage(_):Void {
+    private function onRemovedFromStage(_) : Void {
         if (listenerAdded) {
             listenerAdded = false;
             stage.removeEventListener(Event.RESIZE, onStageResize);
         }
     }
 
-    private function onStageResize(_):Void {
+    private function onStageResize(_) : Void {
         if (stage.stageWidth < 1 || stage.stageHeight < 1 || appStageWidth < 1 || appStageHeight < 1) {
             x = 0;
             y = 0;
@@ -201,7 +201,7 @@ class ApplicationStage extends Sprite {
                 case CENTER_INSIDE | CENTER_CROP: {
                     var desiredRatio = appStageWidth / appStageHeight;
                     var stageRatio = stage.stageWidth / stage.stageHeight;
-                    var scale:Float;
+                    var scale : Float;
 
                     if ((scaleMode == CENTER_INSIDE && stageRatio < desiredRatio)
                         || (scaleMode == CENTER_CROP && stageRatio > desiredRatio)

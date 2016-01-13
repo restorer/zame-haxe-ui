@@ -1,12 +1,13 @@
 package org.zamedev.ui.tools.styleable;
 
 enum StyleableType {
+    IDENTIFIER;
     COLOR;
     DIMENSION;
     STRING;
     FONT;
     DRAWABLE;
-    SELECTOR;
+    STYLE;
     FLOAT;
     BOOL;
     STRING_ARRAY;

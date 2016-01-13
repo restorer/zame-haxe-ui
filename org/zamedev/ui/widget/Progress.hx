@@ -12,13 +12,13 @@ import org.zamedev.ui.view.ImageView;
 import org.zamedev.ui.view.View;
 
 class Progress extends View {
-    private var imageView:ImageView;
-    private var _pivotSprite:Sprite;
+    private var imageView : ImageView;
+    private var _pivotSprite : Sprite;
 
-    public var drawable(get, set):Drawable;
+    public var drawable(get, set) : Drawable;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _sprite.addChild(_pivotSprite = new Sprite());
@@ -30,7 +30,7 @@ class Progress extends View {
         addEventListener(Event.REMOVED_FROM_STAGE, onProgressRemovedFromApplicationStage);
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -45,7 +45,7 @@ class Progress extends View {
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -67,13 +67,13 @@ class Progress extends View {
         return true;
     }
 
-    private function onProgressAddedToApplicationStage(e:Event):Void {
+    private function onProgressAddedToApplicationStage(e : Event) : Void {
         imageView.dispatchEvent(e);
         Actuate.tween(_pivotSprite, 1.5, { rotation: 359 }).ease(Linear.easeNone).repeat();
         // Actuate.tween(_pivotSprite, 1.5, { rotation: 359 }).ease(motion.easing.Sine.easeInOut).repeat();
     }
 
-    private function onProgressRemovedFromApplicationStage(e:Event):Void {
+    private function onProgressRemovedFromApplicationStage(e : Event) : Void {
         imageView.dispatchEvent(e);
 
         Actuate.stop(_pivotSprite, "rotation");
@@ -81,12 +81,12 @@ class Progress extends View {
     }
 
     @:noCompletion
-    private function get_drawable():Drawable {
+    private function get_drawable() : Drawable {
         return imageView.drawable;
     }
 
     @:noCompletion
-    private function set_drawable(value:Drawable):Drawable {
+    private function set_drawable(value : Drawable) : Drawable {
         imageView.drawable = value;
         return value;
     }

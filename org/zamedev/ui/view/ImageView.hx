@@ -8,21 +8,21 @@ import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
 
 class ImageView extends View {
-    private var _drawable:Drawable;
-    private var displayObject:DisplayObject;
-    private var displayObjectCache:Map<String, DisplayObject>;
-    private var imageWidth:Float;
-    private var imageHeight:Float;
-    private var _scaleX:Float;
-    private var _scaleY:Float;
+    private var _drawable : Drawable;
+    private var displayObject : DisplayObject;
+    private var displayObjectCache : Map<String, DisplayObject>;
+    private var imageWidth : Float;
+    private var imageHeight : Float;
+    private var _scaleX : Float;
+    private var _scaleY : Float;
 
-    public var drawable(get, set):Drawable;
-    public var scaleX(get, set):Float;
-    public var scaleY(get, set):Float;
-    public var scale(never, set):Float;
+    public var drawable(get, set) : Drawable;
+    public var scaleX(get, set) : Float;
+    public var scaleY(get, set) : Float;
+    public var scale(never, set) : Float;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _drawable = null;
@@ -34,7 +34,7 @@ class ImageView extends View {
         _scaleY = 1.0;
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -61,7 +61,7 @@ class ImageView extends View {
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -98,7 +98,7 @@ class ImageView extends View {
 
     override public function addEventListener(
         type:String,
-        listener:Dynamic->Void,
+        listener:Dynamic -> Void,
         useCapture:Bool = false,
         priority:Int = 0,
         useWeakReference:Bool = false
@@ -110,7 +110,7 @@ class ImageView extends View {
         }
     }
 
-    override public function removeEventListener(type:String, listener:Dynamic->Void, capture:Bool = false):Void {
+    override public function removeEventListener(type : String, listener : Dynamic -> Void, capture : Bool = false) : Void {
         if (type == MouseEvent.CLICK) {
             sprite.removeEventListener(type, listener, capture);
         } else {
@@ -119,13 +119,13 @@ class ImageView extends View {
     }
 
     @:noCompletion
-    private function get_drawable():Drawable {
+    private function get_drawable() : Drawable {
         return _drawable;
     }
 
     @:noCompletion
-    private function set_drawable(value:Drawable):Drawable {
-        if (Drawable.eq(_drawable, value)) {
+    private function set_drawable(value : Drawable) : Drawable {
+        if (Drawable.equals(_drawable, value)) {
             return value;
         }
 
@@ -161,13 +161,13 @@ class ImageView extends View {
 
     @:keep
     @:noCompletion
-    private function get_scaleX():Float {
+    private function get_scaleX() : Float {
         return _scaleX;
     }
 
     @:keep
     @:noCompletion
-    private function set_scaleX(value:Float):Float {
+    private function set_scaleX(value : Float) : Float {
         if (_scaleX != value) {
             _scaleX = value;
 
@@ -183,13 +183,13 @@ class ImageView extends View {
 
     @:keep
     @:noCompletion
-    private function get_scaleY():Float {
+    private function get_scaleY() : Float {
         return _scaleY;
     }
 
     @:keep
     @:noCompletion
-    private function set_scaleY(value:Float):Float {
+    private function set_scaleY(value : Float) : Float {
         if (_scaleY != value) {
             _scaleY = value;
 
@@ -204,7 +204,7 @@ class ImageView extends View {
     }
 
     @:noCompletion
-    private function set_scale(value:Float):Float {
+    private function set_scale(value : Float) : Float {
         if (value != _scaleX || value != _scaleY) {
             _scaleX = value;
             _scaleY = value;

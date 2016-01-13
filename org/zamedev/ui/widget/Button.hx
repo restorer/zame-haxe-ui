@@ -17,57 +17,57 @@ import org.zamedev.ui.view.ViewContainer;
 class Button extends ViewContainer {
     private static inline var HIT_AREA_OFFSET = 15;
 
-    private var backgroundView:ImageView;
-    private var leftIconView:ImageView;
-    private var rightIconView:ImageView;
-    private var upIconView:ImageView;
-    private var downIconView:ImageView;
-    private var textView:TextView;
-    private var hitTestView:Rect;
+    private var backgroundView : ImageView;
+    private var leftIconView : ImageView;
+    private var rightIconView : ImageView;
+    private var upIconView : ImageView;
+    private var downIconView : ImageView;
+    private var textView : TextView;
+    private var hitTestView : Rect;
 
-    private var listenersAdded:Bool;
-    private var _disabled:Bool;
+    private var listenersAdded : Bool;
+    private var _disabled : Bool;
 
-    public var background(get, set):Drawable;
-    public var leftIcon(get, set):Drawable;
-    public var rightIcon(get, set):Drawable;
-    public var upIcon(get, set):Drawable;
-    public var downIcon(get, set):Drawable;
-    public var backgroundOffset(get, set):Point;
-    public var backgroundOffsetX(get, set):Float;
-    public var backgroundOffsetY(get, set):Float;
-    public var leftIconOffset(get, set):Point;
-    public var leftIconOffsetX(get, set):Float;
-    public var leftIconOffsetY(get, set):Float;
-    public var rightIconOffset(get, set):Point;
-    public var rightIconOffsetX(get, set):Float;
-    public var rightIconOffsetY(get, set):Float;
-    public var upIconOffset(get, set):Point;
-    public var upIconOffsetX(get, set):Float;
-    public var upIconOffsetY(get, set):Float;
-    public var downIconOffset(get, set):Point;
-    public var downIconOffsetX(get, set):Float;
-    public var downIconOffsetY(get, set):Float;
-    public var textOffset(get, set):Point;
-    public var textOffsetX(get, set):Float;
-    public var textOffsetY(get, set):Float;
-    public var textColor(get, set):Null<Int>;
-    public var textSize(get, set):Null<Int>;
-    public var textAlign(get, set):TextAlignExt;
-    public var font(get, set):FontExt;
-    public var text(get, set):String;
-    public var leftIconMargin(default, set):Float;
-    public var rightIconMargin(default, set):Float;
-    public var upIconMargin(default, set):Float;
-    public var downIconMargin(default, set):Float;
-    public var disabled(get, set):Bool;
-    public var leftIconAlpha(get, set):Float;
-    public var rightIconAlpha(get, set):Float;
-    public var upIconAlpha(get, set):Float;
-    public var downIconAlpha(get, set):Float;
+    public var background(get, set) : Drawable;
+    public var leftIcon(get, set) : Drawable;
+    public var rightIcon(get, set) : Drawable;
+    public var upIcon(get, set) : Drawable;
+    public var downIcon(get, set) : Drawable;
+    public var backgroundOffset(get, set) : Point;
+    public var backgroundOffsetX(get, set) : Float;
+    public var backgroundOffsetY(get, set) : Float;
+    public var leftIconOffset(get, set) : Point;
+    public var leftIconOffsetX(get, set) : Float;
+    public var leftIconOffsetY(get, set) : Float;
+    public var rightIconOffset(get, set) : Point;
+    public var rightIconOffsetX(get, set) : Float;
+    public var rightIconOffsetY(get, set) : Float;
+    public var upIconOffset(get, set) : Point;
+    public var upIconOffsetX(get, set) : Float;
+    public var upIconOffsetY(get, set) : Float;
+    public var downIconOffset(get, set) : Point;
+    public var downIconOffsetX(get, set) : Float;
+    public var downIconOffsetY(get, set) : Float;
+    public var textOffset(get, set) : Point;
+    public var textOffsetX(get, set) : Float;
+    public var textOffsetY(get, set) : Float;
+    public var textColor(get, set) : Null<Int>;
+    public var textSize(get, set) : Null<Int>;
+    public var textAlign(get, set) : TextAlignExt;
+    public var font(get, set) : FontExt;
+    public var text(get, set) : String;
+    public var leftIconMargin(default, set) : Float;
+    public var rightIconMargin(default, set) : Float;
+    public var upIconMargin(default, set) : Float;
+    public var downIconMargin(default, set) : Float;
+    public var disabled(get, set) : Bool;
+    public var leftIconAlpha(get, set) : Float;
+    public var rightIconAlpha(get, set) : Float;
+    public var upIconAlpha(get, set) : Float;
+    public var downIconAlpha(get, set) : Float;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _addChild(backgroundView = new ImageView(context));
@@ -102,7 +102,7 @@ class Button extends ViewContainer {
         _sprite.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -237,7 +237,7 @@ class Button extends ViewContainer {
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -292,14 +292,14 @@ class Button extends ViewContainer {
         return true;
     }
 
-    private function layoutHitTestView():Void {
+    private function layoutHitTestView() : Void {
         hitTestView.offsetX = 0.0;
         hitTestView.offsetY = 0.0;
         hitTestView.selfLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
     }
 
     @:noCompletion
-    private function onMouseDown(e:Event):Void {
+    private function onMouseDown(e : Event) : Void {
         if (_disabled) {
             return;
         }
@@ -322,7 +322,7 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
-    private function onRemovedFromStage(_):Void {
+    private function onRemovedFromStage(_) : Void {
         if (listenersAdded) {
             listenersAdded = false;
             layoutHitTestView();
@@ -334,12 +334,12 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
-    private function onStageMouseMove(e:Event):Void {
+    private function onStageMouseMove(e : Event) : Void {
         updateState("pressed", e.target == hitTestView._sprite);
     }
 
     @:noCompletion
-    private function onStageMouseUp(e:Event):Void {
+    private function onStageMouseUp(e : Event) : Void {
         if (listenersAdded) {
             listenersAdded = false;
             layoutHitTestView();
@@ -355,393 +355,393 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
-    private function get_background():Drawable {
+    private function get_background() : Drawable {
         return backgroundView.drawable;
     }
 
     @:noCompletion
-    private function set_background(value:Drawable):Drawable {
+    private function set_background(value : Drawable) : Drawable {
         backgroundView.drawable = value;
         return value;
     }
 
     @:noCompletion
-    private function get_leftIcon():Drawable {
+    private function get_leftIcon() : Drawable {
         return leftIconView.drawable;
     }
 
     @:noCompletion
-    private function set_leftIcon(value:Drawable):Drawable {
+    private function set_leftIcon(value : Drawable) : Drawable {
         leftIconView.drawable = value;
         return value;
     }
 
     @:noCompletion
-    private function get_rightIcon():Drawable {
+    private function get_rightIcon() : Drawable {
         return rightIconView.drawable;
     }
 
     @:noCompletion
-    private function set_rightIcon(value:Drawable):Drawable {
+    private function set_rightIcon(value : Drawable) : Drawable {
         rightIconView.drawable = value;
         return value;
     }
 
     @:noCompletion
-    private function get_upIcon():Drawable {
+    private function get_upIcon() : Drawable {
         return upIconView.drawable;
     }
 
     @:noCompletion
-    private function set_upIcon(value:Drawable):Drawable {
+    private function set_upIcon(value : Drawable) : Drawable {
         upIconView.drawable = value;
         return value;
     }
 
     @:noCompletion
-    private function get_downIcon():Drawable {
+    private function get_downIcon() : Drawable {
         return downIconView.drawable;
     }
 
     @:noCompletion
-    private function set_downIcon(value:Drawable):Drawable {
+    private function set_downIcon(value : Drawable) : Drawable {
         downIconView.drawable = value;
         return value;
     }
 
     @:noCompletion
-    private function get_backgroundOffset():Point {
+    private function get_backgroundOffset() : Point {
         return backgroundView.offset;
     }
 
     @:noCompletion
-    private function set_backgroundOffset(value:Point):Point {
+    private function set_backgroundOffset(value : Point) : Point {
         backgroundView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_backgroundOffsetX():Float {
+    private function get_backgroundOffsetX() : Float {
         return backgroundView.offsetX;
     }
 
     @:noCompletion
-    private function set_backgroundOffsetX(value:Float):Float {
+    private function set_backgroundOffsetX(value : Float) : Float {
         backgroundView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_backgroundOffsetY():Float {
+    private function get_backgroundOffsetY() : Float {
         return backgroundView.offsetY;
     }
 
     @:noCompletion
-    private function set_backgroundOffsetY(value:Float):Float {
+    private function set_backgroundOffsetY(value : Float) : Float {
         backgroundView.offsetY = value;
         return value;
     }
 
     @:noCompletion
-    private function get_leftIconOffset():Point {
+    private function get_leftIconOffset() : Point {
         return leftIconView.offset;
     }
 
     @:noCompletion
-    private function set_leftIconOffset(value:Point):Point {
+    private function set_leftIconOffset(value : Point) : Point {
         leftIconView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_leftIconOffsetX():Float {
+    private function get_leftIconOffsetX() : Float {
         return leftIconView.offsetX;
     }
 
     @:noCompletion
-    private function set_leftIconOffsetX(value:Float):Float {
+    private function set_leftIconOffsetX(value : Float) : Float {
         leftIconView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_leftIconOffsetY():Float {
+    private function get_leftIconOffsetY() : Float {
         return leftIconView.offsetY;
     }
 
     @:noCompletion
-    private function set_leftIconOffsetY(value:Float):Float {
+    private function set_leftIconOffsetY(value : Float) : Float {
         leftIconView.offsetY = value;
         return value;
     }
 
     @:noCompletion
-    private function get_rightIconOffset():Point {
+    private function get_rightIconOffset() : Point {
         return rightIconView.offset;
     }
 
     @:noCompletion
-    private function set_rightIconOffset(value:Point):Point {
+    private function set_rightIconOffset(value : Point) : Point {
         rightIconView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_rightIconOffsetX():Float {
+    private function get_rightIconOffsetX() : Float {
         return rightIconView.offsetX;
     }
 
     @:noCompletion
-    private function set_rightIconOffsetX(value:Float):Float {
+    private function set_rightIconOffsetX(value : Float) : Float {
         rightIconView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_rightIconOffsetY():Float {
+    private function get_rightIconOffsetY() : Float {
         return rightIconView.offsetY;
     }
 
     @:noCompletion
-    private function set_rightIconOffsetY(value:Float):Float {
+    private function set_rightIconOffsetY(value : Float) : Float {
         rightIconView.offsetY = value;
         return value;
     }
 
     @:noCompletion
-    private function get_upIconOffset():Point {
+    private function get_upIconOffset() : Point {
         return upIconView.offset;
     }
 
     @:noCompletion
-    private function set_upIconOffset(value:Point):Point {
+    private function set_upIconOffset(value : Point) : Point {
         upIconView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_upIconOffsetX():Float {
+    private function get_upIconOffsetX() : Float {
         return upIconView.offsetX;
     }
 
     @:noCompletion
-    private function set_upIconOffsetX(value:Float):Float {
+    private function set_upIconOffsetX(value : Float) : Float {
         upIconView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_upIconOffsetY():Float {
+    private function get_upIconOffsetY() : Float {
         return upIconView.offsetY;
     }
 
     @:noCompletion
-    private function set_upIconOffsetY(value:Float):Float {
+    private function set_upIconOffsetY(value : Float) : Float {
         upIconView.offsetY = value;
         return value;
     }
 
     @:noCompletion
-    private function get_downIconOffset():Point {
+    private function get_downIconOffset() : Point {
         return downIconView.offset;
     }
 
     @:noCompletion
-    private function set_downIconOffset(value:Point):Point {
+    private function set_downIconOffset(value : Point) : Point {
         downIconView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_downIconOffsetX():Float {
+    private function get_downIconOffsetX() : Float {
         return downIconView.offsetX;
     }
 
     @:noCompletion
-    private function set_downIconOffsetX(value:Float):Float {
+    private function set_downIconOffsetX(value : Float) : Float {
         downIconView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_downIconOffsetY():Float {
+    private function get_downIconOffsetY() : Float {
         return downIconView.offsetY;
     }
 
     @:noCompletion
-    private function set_downIconOffsetY(value:Float):Float {
+    private function set_downIconOffsetY(value : Float) : Float {
         downIconView.offsetY = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textOffset():Point {
+    private function get_textOffset() : Point {
         return textView.offset;
     }
 
     @:noCompletion
-    private function set_textOffset(value:Point):Point {
+    private function set_textOffset(value : Point) : Point {
         textView.offset = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textOffsetX():Float {
+    private function get_textOffsetX() : Float {
         return textView.offsetX;
     }
 
     @:noCompletion
-    private function set_textOffsetX(value:Float):Float {
+    private function set_textOffsetX(value : Float) : Float {
         textView.offsetX = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textOffsetY():Float {
+    private function get_textOffsetY() : Float {
         return textView.offsetY;
     }
 
     @:noCompletion
-    private function set_textOffsetY(value:Float):Float {
+    private function set_textOffsetY(value : Float) : Float {
         textView.offsetY = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textColor():Null<Int> {
+    private function get_textColor() : Null<Int> {
         return textView.textColor;
     }
 
     @:noCompletion
-    private function set_textColor(value:Null<UInt>):Null<Int> {
+    private function set_textColor(value : Null<UInt>) : Null<Int> {
         textView.textColor = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textSize():Null<Int> {
+    private function get_textSize() : Null<Int> {
         return textView.textSize;
     }
 
     @:noCompletion
-    private function set_textSize(value:Null<Int>):Null<Int> {
+    private function set_textSize(value : Null<Int>) : Null<Int> {
         textView.textSize = value;
         return value;
     }
 
     @:noCompletion
-    private function get_textAlign():TextAlignExt {
+    private function get_textAlign() : TextAlignExt {
         return textView.textAlign;
     }
 
     @:noCompletion
-    private function set_textAlign(value:TextAlignExt):TextAlignExt {
+    private function set_textAlign(value : TextAlignExt) : TextAlignExt {
         textView.textAlign = value;
         return value;
     }
 
     @:noCompletion
-    private function get_font():FontExt {
+    private function get_font() : FontExt {
         return textView.font;
     }
 
     @:noCompletion
-    private function set_font(value:FontExt):FontExt {
+    private function set_font(value : FontExt) : FontExt {
         textView.font = value;
         return value;
     }
 
     @:noCompletion
-    private function get_text():String {
+    private function get_text() : String {
         return textView.text;
     }
 
     @:noCompletion
-    private function set_text(value:String):String {
+    private function set_text(value : String) : String {
         textView.text = value;
         return value;
     }
 
     @:noCompletion
-    private function set_leftIconMargin(value:Float):Float {
+    private function set_leftIconMargin(value : Float) : Float {
         leftIconMargin = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function set_rightIconMargin(value:Float):Float {
+    private function set_rightIconMargin(value : Float) : Float {
         rightIconMargin = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function set_upIconMargin(value:Float):Float {
+    private function set_upIconMargin(value : Float) : Float {
         upIconMargin = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function set_downIconMargin(value:Float):Float {
+    private function set_downIconMargin(value : Float) : Float {
         downIconMargin = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function get_disabled():Bool {
+    private function get_disabled() : Bool {
         return _disabled;
     }
 
     @:noCompletion
-    private function set_disabled(value:Bool):Bool {
+    private function set_disabled(value : Bool) : Bool {
         _disabled = value;
         updateState("disabled", value);
         return value;
     }
 
     @:noCompletion
-    private function get_leftIconAlpha():Float {
+    private function get_leftIconAlpha() : Float {
         return leftIconView.alpha;
     }
 
     @:noCompletion
-    private function set_leftIconAlpha(value:Float):Float {
+    private function set_leftIconAlpha(value : Float) : Float {
         leftIconView.alpha = value;
         return value;
     }
 
     @:noCompletion
-    private function get_rightIconAlpha():Float {
+    private function get_rightIconAlpha() : Float {
         return rightIconView.alpha;
     }
 
     @:noCompletion
-    private function set_rightIconAlpha(value:Float):Float {
+    private function set_rightIconAlpha(value : Float) : Float {
         rightIconView.alpha = value;
         return value;
     }
 
     @:noCompletion
-    private function get_upIconAlpha():Float {
+    private function get_upIconAlpha() : Float {
         return upIconView.alpha;
     }
 
     @:noCompletion
-    private function set_upIconAlpha(value:Float):Float {
+    private function set_upIconAlpha(value : Float) : Float {
         upIconView.alpha = value;
         return value;
     }
 
     @:noCompletion
-    private function get_downIconAlpha():Float {
+    private function get_downIconAlpha() : Float {
         return downIconView.alpha;
     }
 
     @:noCompletion
-    private function set_downIconAlpha(value:Float):Float {
+    private function set_downIconAlpha(value : Float) : Float {
         downIconView.alpha = value;
         return value;
     }

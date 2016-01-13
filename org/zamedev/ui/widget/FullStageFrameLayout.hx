@@ -6,12 +6,14 @@ import org.zamedev.ui.res.MeasureSpec;
 
 class FullStageFrameLayout extends FrameLayout {
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
-        context.applicationStage.addEventListener(Event.RESIZE, onRootResize);
+
+        addEventListener(Event.ADDED_TO_STAGE, onFullStageFrameLayoutAddedToApplicationStage);
+        addEventListener(Event.REMOVED_FROM_STAGE, onFullStageFrameLayoutRemovedFromApplicationStage);
     }
 
-    override private function measureSelf(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Void {
+    override private function measureSelf(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Void {
         var appStage = _context.applicationStage;
 
         offsetX = - appStage.x / appStage.scaleX;
@@ -23,7 +25,15 @@ class FullStageFrameLayout extends FrameLayout {
         );
     }
 
-    private function onRootResize(_):Void {
+    private function onFullStageFrameLayoutAddedToApplicationStage(_) : Void {
+        context.applicationStage.addEventListener(Event.RESIZE, onRootResize);
+    }
+
+    private function onFullStageFrameLayoutRemovedFromApplicationStage(_) : Void {
+        context.applicationStage.removeEventListener(Event.RESIZE, onRootResize);
+    }
+
+    private function onRootResize(_) : Void {
         selfLayout(widthSpec, heightSpec, true);
     }
 }

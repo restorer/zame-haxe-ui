@@ -13,18 +13,18 @@ class Scene extends ContextWrapper {
     public static inline var COVERED = "covered";
     public static inline var UNCOVERED = "uncovered";
 
-    private var _contentView:View;
-    private var sceneSprite:SceneSprite;
-    private var maskShape:Shape;
-    private var coverMaskColor:Int = 0x000000;
-    private var coverMaskAlpha:Float = 0.75;
-    private var addedToApplicationStage:Bool;
-    private var isCovered:Bool;
+    private var _contentView : View;
+    private var sceneSprite : SceneSprite;
+    private var maskShape : Shape;
+    private var coverMaskColor : Int = 0x000000;
+    private var coverMaskAlpha : Float = 0.75;
+    private var addedToApplicationStage : Bool;
+    private var isCovered : Bool;
 
-    public var contentView(get, set):View;
-    public var sceneParams:Dynamic = null;
+    public var contentView(get, set) : View;
+    public var sceneParams : Dynamic = null;
 
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _contentView = null;
@@ -39,15 +39,15 @@ class Scene extends ContextWrapper {
         create();
     }
 
-    public function create():Void {
+    public function create() : Void {
     }
 
     @:noCompletion
-    private function get_contentView():View {
+    private function get_contentView() : View {
         return _contentView;
     }
 
-    private function set_contentView(view:View):View {
+    private function set_contentView(view : View) : View {
         if (_contentView == view) {
             return view;
         }
@@ -62,7 +62,7 @@ class Scene extends ContextWrapper {
         return view;
     }
 
-    public function addToApplicationStage():Void {
+    public function addToApplicationStage() : Void {
         if (addedToApplicationStage) {
             return;
         }
@@ -85,7 +85,7 @@ class Scene extends ContextWrapper {
         });
     }
 
-    public function removeFromApplicationStage():Void {
+    public function removeFromApplicationStage() : Void {
         if (!addedToApplicationStage) {
             return;
         }
@@ -112,7 +112,7 @@ class Scene extends ContextWrapper {
         });
     }
 
-    public function onCovered():Void {
+    public function onCovered() : Void {
         if (isCovered) {
             return;
         }
@@ -126,7 +126,7 @@ class Scene extends ContextWrapper {
         Actuate.tween(maskShape, TRANSITION_DURATION, { alpha: coverMaskAlpha });
     }
 
-    public function onUncovered():Void {
+    public function onUncovered() : Void {
         if (!isCovered) {
             return;
         }
@@ -139,7 +139,7 @@ class Scene extends ContextWrapper {
         });
     }
 
-    private function onRootResize(_):Void {
+    private function onRootResize(_) : Void {
         if (!isCovered) {
             return;
         }

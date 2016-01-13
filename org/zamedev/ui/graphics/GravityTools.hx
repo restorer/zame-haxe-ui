@@ -1,12 +1,16 @@
 package org.zamedev.ui.graphics;
 
 import org.zamedev.ui.errors.UiParseError;
+import org.zamedev.ui.tools.generator.GenPosition;
 
 using StringTools;
 
 class GravityTools {
-    public static function parse(s:String):Gravity {
-        var result:Gravity = { horizontalType: GravityType.NONE, verticalType: GravityType.NONE };
+    public static function parse(s : String, ?pos : GenPosition) : Gravity {
+        var result : Gravity = {
+            horizontalType : GravityType.NONE,
+            verticalType : GravityType.NONE
+        };
 
         for (item in s.split("|")) {
             item = item.trim().toLowerCase();
@@ -47,7 +51,7 @@ class GravityTools {
                     result.verticalType = GravityType.END;
 
                 default:
-                    throw new UiParseError(s);
+                    throw new UiParseError('Invalid gravity value: "${s}"', pos);
             }
         }
 

@@ -7,11 +7,11 @@ import org.zamedev.ui.graphics.Dimension;
 import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.DimensionType;
 import org.zamedev.ui.graphics.Drawable;
-import org.zamedev.ui.graphics.DrawableType;
 import org.zamedev.ui.graphics.Gravity;
 import org.zamedev.ui.graphics.GravityTools;
 import org.zamedev.ui.graphics.GravityType;
 import org.zamedev.ui.graphics.TextAlignExt;
+import org.zamedev.ui.i18n.Quantity;
 import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.tools.parser.ParseHelper;
 import org.zamedev.ui.tools.styleable.StyleableType;
@@ -22,7 +22,7 @@ using StringTools;
 
 @:access(org.zamedev.ui.graphics.Drawable)
 class HaxeCode {
-    public static function validateIdentifier(name:String):String {
+    public static function validateIdentifier(name : String, pos : GenPosition) : String {
         switch (name) {
             case "package"
             | "import"
@@ -36,15 +36,18 @@ class HaxeCode {
             | "var"
             | "function"
             | "default":
-                throw new UiParseError('"${name}" is reserved haxe identifier');
+                throw new UiParseError('"${name}" is reserved haxe identifier', pos);
 
             default:
                 return name;
         }
     }
 
+    public static function getInt(value : Int) : String {
+        return Std.string(value);
+    }
 
-    public static function genString(s:String):String {
+    public static function genString(s : String) : String {
         s = s.replace("\"", "\\\"")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
@@ -53,19 +56,19 @@ class HaxeCode {
         return '"${s}"';
     }
 
-    public static function genBool(value:Bool):String {
+    public static function genBool(value : Bool) : String {
         return (value ? "true" : "false");
     }
 
-    public static function genColor(color:Int):String {
+    public static function genColor(color : Int) : String {
         return "0x" + Printf.format("%06x", [color]);
     }
 
-    public static function genStyleable(name:String):String {
+    public static function genStyleable(name : String) : String {
         return 'Styleable.${name}';
     }
 
-    public static function genFont(f:GenFont):String {
+    public static function genFont(f : GenFont) : String {
         if (f.bitmapName == null) {
             return 'FontExt.createTtf(${genString(f.ttfAssetId)})';
         } else {
@@ -73,7 +76,7 @@ class HaxeCode {
         }
     }
 
-    public static function genDrawable(d:Drawable):String {
+    public static function genDrawable(d : Drawable, pos : GenPosition) : String {
         switch (d.type) {
             case ASSET_BITMAP:
                 return 'Drawable.fromAssetBitmap(${genString(d.id)})';
@@ -82,11 +85,11 @@ class HaxeCode {
                 return 'Drawable.fromAssetPacked(${genString(d.id)}, ${d.packedX}, ${d.packedY}, ${d.packedW}, ${d.packedH})';
 
             default:
-                throw new UiParseError('"${d.type}" drawable type is not supported for generation');
+                throw new UiParseError('"${d.type}" drawable type is not supported for generation', pos);
         }
     }
 
-    public static function genGravityType(gravityType:GravityType):String {
+    public static function genGravityType(gravityType : GravityType) : String {
         switch (gravityType) {
             case NONE:
                 return "GravityType.NONE";
@@ -102,11 +105,11 @@ class HaxeCode {
         }
     }
 
-    public static function genGravity(gravity:Gravity):String {
-        return '{ horizontalType: ${genGravityType(gravity.horizontalType)}, verticalType: ${genGravityType(gravity.verticalType)} }';
+    public static function genGravity(gravity : Gravity) : String {
+        return '{ horizontalType : ${genGravityType(gravity.horizontalType)}, verticalType : ${genGravityType(gravity.verticalType)} }';
     }
 
-    public static function genDimensionType(type:DimensionType):String {
+    public static function genDimensionType(type : DimensionType) : String {
         switch (type) {
             case UNSPECIFIED:
                 return "DimensionType.UNSPECIFIED";
@@ -125,8 +128,8 @@ class HaxeCode {
         }
     }
 
-    public static function genDimension(dimen:Dimension):String {
-        switch(dimen) {
+    public static function genDimension(dimen : Dimension) : String {
+        switch (dimen) {
             case MATCH_PARENT:
                 return "Dimension.MATCH_PARENT";
 
@@ -144,13 +147,35 @@ class HaxeCode {
         };
     }
 
-    public static function genStringArray(value:Array<String>):String {
+    public static function genQuantity(quantity : Quantity) : String {
+        switch (quantity) {
+            case ZERO:
+                return "Quantity.ZERO";
+
+            case ONE:
+                return "Quantity.ONE";
+
+            case TWO:
+                return "Quantity.TWO";
+
+            case FEW:
+                return "Quantity.FEW";
+
+            case MANY:
+                return "Quantity.MANY";
+
+            case OTHER:
+                return "Quantity.OTHER";
+        }
+    }
+
+    public static function genStringArray(value : Array<String>) : String {
         return "[" + value.map(function(v) {
             return genString(v);
         }).join(", ") + "]";
     }
 
-    public static function genTextAlign(value:TextAlignExt):String {
+    public static function genTextAlign(value : TextAlignExt) : String {
         switch (value) {
             case CENTER:
                 return "TextAlignExt.CENTER";
@@ -166,7 +191,7 @@ class HaxeCode {
         }
     }
 
-    public static function genViewVisibility(value:ViewVisibility):String {
+    public static function genViewVisibility(value : ViewVisibility) : String {
         switch (value) {
             case VISIBLE:
                 return "ViewVisibility.VISIBLE";
@@ -179,7 +204,7 @@ class HaxeCode {
         }
     }
 
-    public static function genLinearLayoutOrientation(value:LinearLayoutOrientation):String {
+    public static function genLinearLayoutOrientation(value : LinearLayoutOrientation) : String {
         switch (value) {
             case VERTICAL:
                 return "LinearLayoutOrientation.VERTICAL";
@@ -189,18 +214,21 @@ class HaxeCode {
         }
     }
 
-    public static function genResolvedValue(textValue:String, type:StyleableType):String {
+    public static function genResolvedValue(textValue : String, type : StyleableType, pos : GenPosition) : String {
         var refInfo = ParseHelper.parseRef(textValue);
         var typeRef = getRefByType(type);
 
         if (refInfo != null) {
             if (refInfo.type != typeRef) {
-                throw new UiParseError('${textValue} is not a ${typeRef}');
+                throw new UiParseError('"${textValue}" is not a "${typeRef}"', pos);
             }
 
-            refInfo.name = validateIdentifier(refInfo.name);
+            refInfo.name = validateIdentifier(refInfo.name, pos);
 
             switch (type) {
+                case IDENTIFIER:
+                    return 'id.${refInfo.name}';
+
                 case COLOR:
                     return 'r.colorMap[color.${refInfo.name}]';
 
@@ -216,11 +244,11 @@ class HaxeCode {
                 case DRAWABLE:
                     return 'r.drawableMap[drawable.${refInfo.name}]';
 
-                case SELECTOR:
-                    return 'r.selectorMap[selector.${refInfo.name}]';
+                case STYLE:
+                    return 'r.styleMap[style.${refInfo.name}]';
 
                 default:
-                    throw new UiParseError('reference for ${typeRef} is not supported (${textValue})');
+                    throw new UiParseError('Reference for "${typeRef}" is not supported ("${textValue}")', pos);
             }
         } else {
             switch (type) {
@@ -234,7 +262,7 @@ class HaxeCode {
                     return genString(textValue);
 
                 case FLOAT:
-                    return Std.string(ParseHelper.parseFloat(textValue));
+                    return Std.string(ParseHelper.parseFloat(textValue, pos));
 
                 case BOOL:
                     return genBool(ParseHelper.parseBool(textValue));
@@ -246,22 +274,25 @@ class HaxeCode {
                     return genGravity(GravityTools.parse(textValue));
 
                 case TEXT_ALIGN:
-                    return genTextAlign(ParseHelper.parseTextAlign(textValue));
+                    return genTextAlign(ParseHelper.parseTextAlign(textValue, pos));
 
                 case VIEW_VISIBILITY:
-                    return genViewVisibility(ParseHelper.parseViewVisibility(textValue));
+                    return genViewVisibility(ParseHelper.parseViewVisibility(textValue, pos));
 
                 case LINEAR_LAYOUT_ORIENTATION:
-                    return genLinearLayoutOrientation(ParseHelper.parseLinearLayoutOrientation(textValue));
+                    return genLinearLayoutOrientation(ParseHelper.parseLinearLayoutOrientation(textValue, pos));
 
                 default:
-                    throw new UiParseError('direct ${typeRef} value is not supported (${textValue})');
+                    throw new UiParseError('Direct "${typeRef}" value is not supported ("${textValue}")', pos);
             }
         }
     }
 
-    private static function getRefByType(type:StyleableType):String {
+    private static function getRefByType(type : StyleableType) : String {
         switch (type) {
+            case IDENTIFIER:
+                return "id";
+
             case COLOR:
                 return "color";
 
@@ -277,8 +308,8 @@ class HaxeCode {
             case DRAWABLE:
                 return "drawable";
 
-            case SELECTOR:
-                return "selector";
+            case STYLE:
+                return "style";
 
             case FLOAT:
                 return "float";

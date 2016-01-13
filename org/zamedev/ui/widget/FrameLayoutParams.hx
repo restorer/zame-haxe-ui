@@ -7,29 +7,29 @@ import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.LayoutParams;
 
 class FrameLayoutParams extends LayoutParams {
-    public var gravity:Gravity;
-    public var marginLeft:Dimension;
-    public var marginRight:Dimension;
-    public var marginTop:Dimension;
-    public var marginBottom:Dimension;
+    public var gravity : Gravity;
+    public var marginLeft : Dimension;
+    public var marginRight : Dimension;
+    public var marginTop : Dimension;
+    public var marginBottom : Dimension;
 
-    public var _marginLeftComputed:Float;
-    public var _marginRightComputed:Float;
-    public var _marginTopComputed:Float;
-    public var _marginBottomComputed:Float;
+    public var _marginLeftComputed : Float;
+    public var _marginRightComputed : Float;
+    public var _marginTopComputed : Float;
+    public var _marginBottomComputed : Float;
 
     public function new(
-        width:Dimension = null,
-        height:Dimension = null,
-        gravity:Gravity = null,
-        marginTop:Dimension = null,
-        marginRight:Dimension = null,
-        marginBottom:Dimension = null,
-        marginLeft:Dimension = null
+        ?width : Dimension,
+        ?height : Dimension,
+        ?gravity : Gravity,
+        ?marginTop : Dimension,
+        ?marginRight : Dimension,
+        ?marginBottom : Dimension,
+        ?marginLeft : Dimension
     ) {
         super(width, height);
 
-        this.gravity = (gravity == null ? { horizontalType: GravityType.NONE, verticalType: GravityType.NONE } : gravity);
+        this.gravity = (gravity == null ? { horizontalType : GravityType.NONE, verticalType : GravityType.NONE } : gravity);
         this.marginLeft = (marginLeft == null ? Dimension.EXACT(0.0) : marginLeft);
         this.marginRight = (marginRight == null ? Dimension.EXACT(0.0) : marginRight);
         this.marginTop = (marginTop == null ? Dimension.EXACT(0.0) : marginTop);
@@ -41,7 +41,7 @@ class FrameLayoutParams extends LayoutParams {
         _marginBottomComputed = 0.0;
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }

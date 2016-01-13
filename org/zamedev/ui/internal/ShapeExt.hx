@@ -8,11 +8,11 @@ import openfl._internal.renderer.RenderSession;
 import openfl.display.DisplayObject;
 
 class ShapeExt extends Shape {
-    public var buttonMode(default, set):Bool = false;
-    public var interactiveMode(default, set):Bool = true;
+    public var buttonMode(default, set) : Bool = false;
+    public var interactiveMode(default, set) : Bool = true;
 
     @:noCompletion
-    public override function __renderDOM(renderSession:RenderSession):Void {
+    public override function __renderDOM(renderSession : RenderSession) : Void {
         if (__canvas == null) {
             super.__renderDOM(renderSession);
 
@@ -26,7 +26,7 @@ class ShapeExt extends Shape {
     }
 
     @:noCompletion
-    private function set_buttonMode(value:Bool):Bool {
+    private function set_buttonMode(value : Bool) : Bool {
         buttonMode = value;
 
         if (__canvas != null) {
@@ -37,7 +37,7 @@ class ShapeExt extends Shape {
     }
 
     @:noCompletion
-    private function set_interactiveMode(value:Bool):Bool {
+    private function set_interactiveMode(value : Bool) : Bool {
         interactiveMode = value;
 
         if (__canvas != null) {
@@ -48,7 +48,7 @@ class ShapeExt extends Shape {
     }
 
     @:noCompletion
-    override private function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool):Bool {
+    override private function __hitTest(x : Float, y : Float, shapeFlag : Bool, stack : Array<DisplayObject>, interactiveOnly : Bool) : Bool {
         if (interactiveMode) {
             return super.__hitTest(x, y, shapeFlag, stack, interactiveOnly);
         } else {

@@ -2,20 +2,21 @@ package org.zamedev.ui.tools.styleable;
 
 import org.zamedev.lib.ds.LinkedMap;
 import org.zamedev.ui.errors.UiParseError;
+import org.zamedev.ui.tools.generator.GenPosition;
 
 class StyleableMap {
-    private static var _nameToTypeMap:LinkedMap<String, StyleableType> = null;
+    private static var _nameToTypeMap : LinkedMap<String, StyleableType> = null;
 
-    public static function getNameToTypeMap():LinkedMap<String, StyleableType> {
+    public static function getNameToTypeMap() : LinkedMap<String, StyleableType> {
         if (_nameToTypeMap != null) {
             return _nameToTypeMap;
         }
 
         var m = new LinkedMap<String, StyleableType>();
 
-        m["id"] = StyleableType.STRING;
+        m["id"] = StyleableType.IDENTIFIER;
         m["tags"] = StyleableType.STRING_ARRAY;
-        m["selector"] = StyleableType.SELECTOR;
+        m["style"] = StyleableType.STYLE;
         m["widthWeightSum"] = StyleableType.DIMENSION;
         m["heightWeightSum"] = StyleableType.DIMENSION;
         m["visibility"] = StyleableType.VIEW_VISIBILITY;
@@ -105,11 +106,11 @@ class StyleableMap {
         return _nameToTypeMap;
     }
 
-    public static function getTypeByName(name:String):StyleableType {
+    public static function getTypeByName(name : String, pos : GenPosition) : StyleableType {
         var type = getNameToTypeMap()[name];
 
         if (type == null) {
-            throw new UiParseError('unknown styleable name "${name}"');
+            throw new UiParseError('Unknown styleable name "${name}"', pos);
         }
 
         return type;

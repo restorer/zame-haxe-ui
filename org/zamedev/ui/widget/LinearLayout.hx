@@ -11,21 +11,21 @@ import org.zamedev.ui.view.ViewVisibility;
 using StringTools;
 
 class LinearLayout extends ViewGroup {
-    private var _orientation:LinearLayoutOrientation;
+    private var _orientation : LinearLayoutOrientation;
 
-    public var orientation(get, set):LinearLayoutOrientation;
+    public var orientation(get, set) : LinearLayoutOrientation;
 
     @:keep
-    public function new(context:Context, orientation:LinearLayoutOrientation = null) {
+    public function new(context : Context, ?orientation : LinearLayoutOrientation) {
         super(context);
         this.orientation = (orientation == null ? LinearLayoutOrientation.VERTICAL : orientation);
     }
 
-    override public function createLayoutParams():LayoutParams {
+    override public function createLayoutParams() : LayoutParams {
         return new LinearLayoutParams();
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -40,7 +40,7 @@ class LinearLayout extends ViewGroup {
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -63,7 +63,7 @@ class LinearLayout extends ViewGroup {
 
         measureSelf(widthSpec, heightSpec);
 
-        var position:Float = 0.0;
+        var position : Float = 0.0;
 
         for (child in children) {
             var layoutParams = cast(child.layoutParams, LinearLayoutParams);
@@ -104,7 +104,7 @@ class LinearLayout extends ViewGroup {
         return true;
     }
 
-    override private function refineSelfMeasure(measureWidth:Bool, measureHeight:Bool):Void {
+    override private function refineSelfMeasure(measureWidth : Bool, measureHeight : Bool) : Void {
         if (measureWidth) {
             _width = 0.0;
         }
@@ -148,7 +148,7 @@ class LinearLayout extends ViewGroup {
         }
     }
 
-    override private function computeMatchParentMeasureSpec(childLayoutParams:LayoutParams, size:Float, vertical:Bool):MeasureSpec {
+    override private function computeMatchParentMeasureSpec(childLayoutParams : LayoutParams, size : Float, vertical : Bool) : MeasureSpec {
         var layoutParams = cast(childLayoutParams, LinearLayoutParams);
 
         return MeasureSpec.EXACT(size - (vertical
@@ -158,12 +158,12 @@ class LinearLayout extends ViewGroup {
     }
 
     @:noCompletion
-    private function get_orientation():LinearLayoutOrientation {
+    private function get_orientation() : LinearLayoutOrientation {
         return _orientation;
     }
 
     @:noCompletion
-    private function set_orientation(value:LinearLayoutOrientation):LinearLayoutOrientation {
+    private function set_orientation(value : LinearLayoutOrientation) : LinearLayoutOrientation {
         _orientation = value;
         requestLayout();
         return value;

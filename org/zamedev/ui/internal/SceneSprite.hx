@@ -5,11 +5,11 @@ import openfl.events.Event;
 import openfl.events.MouseEvent;
 
 class SceneSprite extends Sprite {
-    private var applicationStage:ApplicationStage;
+    private var applicationStage : ApplicationStage;
 
-    public var dispatchEvents:Bool;
+    public var dispatchEvents : Bool;
 
-    public function new(applicationStage:ApplicationStage) {
+    public function new(applicationStage : ApplicationStage) {
         super();
 
         this.applicationStage = applicationStage;
@@ -37,7 +37,7 @@ class SceneSprite extends Sprite {
         #end
     }
 
-    private function onEvent(e:Event) {
+    private function onEvent(e : Event) : Void {
         if (!dispatchEvents) {
             e.stopImmediatePropagation();
         }
@@ -46,43 +46,43 @@ class SceneSprite extends Sprite {
     #if flash
         @:noCompletion
         @:getter(width)
-        private function get_width():Float {
+        private function get_width() : Float {
             return applicationStage.width;
         }
 
         @:noCompletion
         @:setter(width)
-        private function set_width(value:Float):Void {
+        private function set_width(value : Float) : Void {
         }
 
         @:noCompletion
         @:getter(height)
-        private function get_height():Float {
+        private function get_height() : Float {
             return applicationStage.height;
         }
 
         @:noCompletion
         @:setter(height)
-        private function set_height(value:Float):Void {
+        private function set_height(value : Float) : Void {
         }
     #else
         @:noCompletion
-        override private function get_width():Float {
+        override private function get_width() : Float {
             return applicationStage.width;
         }
 
         @:noCompletion
-        override private function set_width(value:Float):Float {
+        override private function set_width(value : Float) : Float {
             return value;
         }
 
         @:noCompletion
-        override private function get_height():Float {
+        override private function get_height() : Float {
             return applicationStage.height;
         }
 
         @:noCompletion
-        override private function set_height(value:Float):Float {
+        override private function set_height(value : Float) : Float {
             return value;
         }
     #end

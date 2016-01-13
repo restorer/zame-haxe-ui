@@ -10,15 +10,15 @@ import openfl.display.DisplayObject;
 import openfl.display.PixelSnapping;
 
 class BitmapExt extends Bitmap {
-    public var interactiveMode(default, set):Bool = false;
+    public var interactiveMode(default, set) : Bool = false;
 
-    public function new(bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) {
+    public function new(?bitmapData : BitmapData, ?pixelSnapping : PixelSnapping, smoothing : Bool = false) {
         super(bitmapData, pixelSnapping, smoothing);
         // mouseEnabled = false;
     }
 
     @:noCompletion
-    public override function __renderDOM(renderSession:RenderSession):Void {
+    public override function __renderDOM(renderSession : RenderSession) : Void {
         if (__style == null) {
             super.__renderDOM(renderSession);
 
@@ -32,7 +32,7 @@ class BitmapExt extends Bitmap {
     }
 
     @:noCompletion
-    private function set_interactiveMode(value:Bool):Bool {
+    private function set_interactiveMode(value : Bool) : Bool {
         interactiveMode = value;
         // mouseEnabled = value;
 
@@ -45,7 +45,7 @@ class BitmapExt extends Bitmap {
     }
 
     @:noCompletion
-    private override function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool):Bool {
+    private override function __hitTest(x : Float, y : Float, shapeFlag : Bool, stack : Array<DisplayObject>, interactiveOnly : Bool) : Bool {
         if (!interactiveMode) {
             return false;
         }

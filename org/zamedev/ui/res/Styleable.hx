@@ -1,10 +1,12 @@
 package org.zamedev.ui.res;
 
+// This file is generated automatically
+
 @:enum
 abstract Styleable(Int) from Int to Int {
-    var id = 1; // STRING
+    var id = 1; // IDENTIFIER
     var tags = 2; // STRING_ARRAY
-    var selector = 3; // SELECTOR
+    var style = 3; // STYLE
     var widthWeightSum = 4; // DIMENSION
     var heightWeightSum = 5; // DIMENSION
     var visibility = 6; // VIEW_VISIBILITY

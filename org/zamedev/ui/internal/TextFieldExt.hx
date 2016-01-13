@@ -21,11 +21,11 @@ import openfl.text.TextFormat;
 using StringTools;
 
 class TextFieldExt extends TextField {
-    private var _escapedText:String;
-    private var _originalText:String;
+    private var _escapedText : String;
+    private var _originalText : String;
 
     #if (openfl <= "3.2.2")
-        private var _isMeasurementsDirty:Bool;
+        private var _isMeasurementsDirty : Bool;
     #end
 
     public function new() {
@@ -40,7 +40,7 @@ class TextFieldExt extends TextField {
     }
 
     @:noCompletion
-    override public function get_text():String {
+    override public function get_text() : String {
         if (type == TextFieldType.INPUT) {
             _escapedText = htmlText;
 
@@ -52,7 +52,7 @@ class TextFieldExt extends TextField {
     }
 
     @:noCompletion
-    override public function set_text(value:String):String {
+    override public function set_text(value : String) : String {
         if (__isHTML || _originalText != value) {
             _originalText = value;
             _escapedText = value.htmlEscape().replace(" ", "&nbsp;").replace("\n", "<br>");
@@ -72,7 +72,7 @@ class TextFieldExt extends TextField {
     }
 
     @:noCompletion
-    override private function set_htmlText(value:String):String {
+    override private function set_htmlText(value : String) : String {
         if (!__isHTML || _originalText != value) {
             _originalText = value;
             _escapedText = value;
@@ -92,7 +92,7 @@ class TextFieldExt extends TextField {
     }
 
     #if (openfl > "3.2.2")
-        private function setHtmlTextInternal(value:String):String {
+        private function setHtmlTextInternal(value : String) : String {
             if (!__isHTML || __textEngine.text != value) {
                 __dirty = true;
                 __layoutDirty = true;
@@ -119,7 +119,7 @@ class TextFieldExt extends TextField {
     #end
 
     #if (openfl <= "3.2.2")
-        override public function setTextFormat(format:TextFormat, beginIndex:Int = 0, endIndex:Int = 0):Void {
+        override public function setTextFormat(format : TextFormat, beginIndex : Int = 0, endIndex : Int = 0) : Void {
             if (format.font != __textFormat.font
                 || format.size != __textFormat.size
                 || format.bold != __textFormat.bold
@@ -133,7 +133,7 @@ class TextFieldExt extends TextField {
         }
 
         @:noCompletion
-        override private function set_defaultTextFormat(value:TextFormat):TextFormat {
+        override private function set_defaultTextFormat(value : TextFormat) : TextFormat {
             if (value.font != __textFormat.font
                 || value.size != __textFormat.size
                 || value.bold != __textFormat.bold
@@ -148,25 +148,25 @@ class TextFieldExt extends TextField {
         }
 
         @:noCompletion
-        override public function set_width(value:Float):Float {
+        override public function set_width(value : Float) : Float {
             _isMeasurementsDirty = true;
             return super.set_width(value);
         }
 
         @:noCompletion
-        override public function set_height(value:Float):Float {
+        override public function set_height(value : Float) : Float {
             _isMeasurementsDirty = true;
             return super.set_height(value);
         }
 
         @:noCompletion
-        override public function get_textWidth():Float {
+        override public function get_textWidth() : Float {
             DOMTextFieldExt.measureText(this);
             return __measuredWidth;
         }
 
         @:noCompletion
-        override public function get_textHeight():Float {
+        override public function get_textHeight() : Float {
             DOMTextFieldExt.measureText(this);
             return __measuredHeight;
         }
@@ -174,7 +174,7 @@ class TextFieldExt extends TextField {
 
     #if (openfl > "3.2.2")
         @:noCompletion
-        override private function this_onMouseDown(event:MouseEvent):Void {
+        override private function this_onMouseDown(event : MouseEvent) : Void {
             if (type == TextFieldType.INPUT) {
                 return;
             }
@@ -183,7 +183,7 @@ class TextFieldExt extends TextField {
         }
 
         @:noCompletion
-        override public function __renderDOM(renderSession:RenderSession):Void {
+        override public function __renderDOM(renderSession : RenderSession) : Void {
             var shouldUpdate = (stage != null
                 && __worldVisible
                 && __renderable
@@ -214,7 +214,7 @@ class TextFieldExt extends TextField {
             }
         }
 
-        private function handleKeyEventInternal(event:KeyboardEvent):Void {
+        private function handleKeyEventInternal(event : KeyboardEvent) : Void {
             if (event.keyCode == 9) {
                 event.preventDefault();
             }
@@ -225,9 +225,9 @@ class TextFieldExt extends TextField {
 #if (openfl <= "3.2.2")
     @:access(openfl.text.TextField)
     class DOMTextFieldExt {
-        private static var _divExt:DOMElement = null;
+        private static var _divExt : DOMElement = null;
 
-        private static function initialize():Void {
+        private static function initialize() : Void {
             _divExt = Browser.document.createElement("div");
             _divExt.style.position = "absolute";
             _divExt.style.top = "0";
@@ -237,7 +237,7 @@ class TextFieldExt extends TextField {
             Browser.document.body.appendChild(_divExt);
         }
 
-        public static function measureText(textField:TextFieldExt):Void {
+        public static function measureText(textField : TextFieldExt) : Void {
             if (!textField._isMeasurementsDirty) {
                 return;
             }

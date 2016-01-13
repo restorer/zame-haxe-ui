@@ -5,22 +5,22 @@ import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.LayoutParams;
 
 class AbsoluteLayoutParams extends LayoutParams {
-    public var x:Dimension;
-    public var y:Dimension;
-    public var cx:Dimension;
-    public var cy:Dimension;
-    public var ex:Dimension;
-    public var ey:Dimension;
+    public var x : Dimension;
+    public var y : Dimension;
+    public var cx : Dimension;
+    public var cy : Dimension;
+    public var ex : Dimension;
+    public var ey : Dimension;
 
     public function new(
-        width:Dimension = null,
-        height:Dimension = null,
-        x:Dimension = null,
-        y:Dimension = null,
-        cx:Dimension = null,
-        cy:Dimension = null,
-        ex:Dimension = null,
-        ey:Dimension = null
+        ?width : Dimension,
+        ?height : Dimension,
+        ?x : Dimension,
+        ?y : Dimension,
+        ?cx : Dimension,
+        ?cy : Dimension,
+        ?ex : Dimension,
+        ?ey : Dimension
     ) {
         super(width, height);
 
@@ -32,7 +32,7 @@ class AbsoluteLayoutParams extends LayoutParams {
         this.ey = ey;
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }

@@ -5,10 +5,10 @@ import org.zamedev.ui.Context;
 import org.zamedev.ui.errors.UiError;
 
 class ViewContainer extends BaseViewContainer {
-    public var children:Array<View>;
+    public var children : Array<View>;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
         children = new Array<View>();
 
@@ -16,7 +16,7 @@ class ViewContainer extends BaseViewContainer {
         addEventListener(Event.REMOVED_FROM_STAGE, onViewContainerRemovedFromApplicationStage);
     }
 
-    private function _addChild(view:View, reLayout:Bool = false):Void {
+    private function _addChild(view : View, reLayout : Bool = false) : Void {
         if (view._parent != null) {
             throw new UiError("View already added to another ViewContainer");
         }
@@ -34,7 +34,7 @@ class ViewContainer extends BaseViewContainer {
         }
     }
 
-    private function _removeChild(view:View, reLayout:Bool = false):Void {
+    private function _removeChild(view : View, reLayout : Bool = false) : Void {
         if (!children.remove(view)) {
             throw new UiError("View is not added to this ViewContainer");
         }
@@ -51,13 +51,13 @@ class ViewContainer extends BaseViewContainer {
         }
     }
 
-    private function onViewContainerAddedToApplicationStage(e:Event):Void {
+    private function onViewContainerAddedToApplicationStage(e : Event) : Void {
         for (child in children) {
             child.dispatchEvent(e);
         }
     }
 
-    private function onViewContainerRemovedFromApplicationStage(e:Event):Void {
+    private function onViewContainerRemovedFromApplicationStage(e : Event) : Void {
         for (child in children) {
             child.dispatchEvent(e);
         }

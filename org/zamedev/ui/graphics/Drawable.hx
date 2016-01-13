@@ -10,19 +10,19 @@ import openfl.geom.Point;
 import openfl.geom.Rectangle;
 
 class Drawable {
-    private static var int64one:Int64 = Int64.make(0, 1);
-    private static var customDrawableIndex:Int64 = Int64.make(0, 0);
+    private static var int64one : Int64 = Int64.make(0, 1);
+    private static var customDrawableIndex : Int64 = Int64.make(0, 0);
 
-    public var type(default, null):DrawableType;
+    public var type(default, null) : DrawableType;
 
-    private var id:String;
-    private var packedX:Int;
-    private var packedY:Int;
-    private var packedW:Int;
-    private var packedH:Int;
-    private var bitmapData:BitmapData = null;
+    private var id : String;
+    private var packedX : Int;
+    private var packedY : Int;
+    private var packedW : Int;
+    private var packedH : Int;
+    private var bitmapData : BitmapData = null;
 
-    private function new(type:DrawableType):Void {
+    private function new(type : DrawableType) : Void {
         this.type = type;
     }
 
@@ -34,11 +34,11 @@ class Drawable {
         return '${Std.string(type)}:${id}:${packedX}:${packedY}:${packedW}:${packedH}';
     }
 
-    public function resolve():DisplayObject {
+    public function resolve() : DisplayObject {
         return new Bitmap(resolveBitmapData(), PixelSnapping.AUTO, true);
     }
 
-    public function resolveBitmapData():BitmapData {
+    public function resolveBitmapData() : BitmapData {
         switch (type) {
             case ASSET_BITMAP: {
                 return Assets.getBitmapData(id);
@@ -67,7 +67,7 @@ class Drawable {
         }
     }
 
-    public static function eq(a:Drawable, b:Drawable):Bool {
+    public static function equals(a : Drawable, b : Drawable) : Bool {
         if (a == null && b == null) {
             return true;
         }
@@ -88,7 +88,7 @@ class Drawable {
         return true;
     }
 
-    public static function fromAssetBitmap(assetId:String):Drawable {
+    public static function fromAssetBitmap(assetId : String) : Drawable {
         var result = new Drawable(DrawableType.ASSET_BITMAP);
 
         result.id = assetId;
@@ -100,7 +100,7 @@ class Drawable {
         return result;
     }
 
-    public static function fromAssetPacked(assetId:String, packedX:Int, packedY:Int, packedW:Int, packedH:Int):Drawable {
+    public static function fromAssetPacked(assetId : String, packedX : Int, packedY : Int, packedW : Int, packedH : Int) : Drawable {
         var result = new Drawable(DrawableType.ASSET_PACKED);
 
         result.id = assetId;
@@ -112,7 +112,7 @@ class Drawable {
         return result;
     }
 
-    public static function fromBitmapData(bitmapData:BitmapData):Drawable {
+    public static function fromBitmapData(bitmapData : BitmapData) : Drawable {
         var result = new Drawable(DrawableType.BITMAP_DATA);
 
         customDrawableIndex = Int64.add(customDrawableIndex, int64one);
@@ -122,11 +122,11 @@ class Drawable {
         return result;
     }
 
-    public static function createEmpty(width:Int, height:Int):Drawable {
+    public static function createEmpty(width : Int, height : Int) : Drawable {
         return fromBitmapData(new BitmapData(width, height, true, 0));
     }
 
-    public static function bitmapFromBitmapData(bitmapData:BitmapData, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {
+    public static function bitmapFromBitmapData(bitmapData : BitmapData, ?pixelSnapping : PixelSnapping, smoothing : Bool = true) : Bitmap {
         if (pixelSnapping == null) {
             pixelSnapping = PixelSnapping.AUTO;
         }
@@ -134,7 +134,7 @@ class Drawable {
         return new Bitmap(bitmapData, pixelSnapping, smoothing);
     }
 
-    public static function bitmapFromAsset(assetId:String, pixelSnapping:PixelSnapping = null, smoothing:Bool = true):Bitmap {
+    public static function bitmapFromAsset(assetId : String, ?pixelSnapping : PixelSnapping, smoothing : Bool = true) : Bitmap {
         return bitmapFromBitmapData(Assets.getBitmapData(assetId));
     }
 }

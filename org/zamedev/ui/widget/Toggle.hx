@@ -7,12 +7,12 @@ import org.zamedev.ui.res.Styleable;
 
 class Toggle extends Button {
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
         addEventListener(MouseEvent.CLICK, onMouseClick);
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -28,12 +28,12 @@ class Toggle extends Button {
     }
 
     @:noCompletion
-    private function onMouseClick(_):Void {
+    private function onMouseClick(_) : Void {
         updateState("selected", !hasState("selected"));
     }
 
     @:noCompletion
-    override private function set_textOffsetX(value:Float):Float {
+    override private function set_textOffsetX(value : Float) : Float {
         if (isInLayout || !isAddedToApplicationStage) {
             textView.offsetX = value;
         } else {

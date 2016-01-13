@@ -6,22 +6,22 @@ import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
 
 class Rect extends View {
-    private var shape:ShapeExt;
-    private var _fillColor:UInt;
-    private var _ellipseWidth:Float;
-    private var _ellipseHeight:Float;
+    private var shape : ShapeExt;
+    private var _fillColor : Int;
+    private var _ellipseWidth : Float;
+    private var _ellipseHeight : Float;
 
-    public var fillColor(get, set):UInt;
-    public var ellipseWidth(get, set):Float;
-    public var ellipseHeight(get, set):Float;
-    public var ellipseSize(never, set):Float;
+    public var fillColor(get, set) : Int;
+    public var ellipseWidth(get, set) : Float;
+    public var ellipseHeight(get, set) : Float;
+    public var ellipseSize(never, set) : Float;
 
     #if dom
         public var buttonMode(get, set):Bool;
     #end
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _sprite.addChild(shape = new ShapeExt());
@@ -30,7 +30,7 @@ class Rect extends View {
         _ellipseHeight = 0.0;
     }
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -57,7 +57,7 @@ class Rect extends View {
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -96,43 +96,43 @@ class Rect extends View {
     }
 
     @:noCompletion
-    private function get_fillColor():UInt {
+    private function get_fillColor() : Int {
         return _fillColor;
     }
 
     @:noCompletion
-    private function set_fillColor(value:UInt):UInt {
+    private function set_fillColor(value : Int) : Int {
         _fillColor = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function get_ellipseWidth():Float {
+    private function get_ellipseWidth() : Float {
         return _ellipseWidth;
     }
 
     @:noCompletion
-    private function set_ellipseWidth(value:Float):Float {
+    private function set_ellipseWidth(value : Float) : Float {
         _ellipseWidth = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function get_ellipseHeight():Float {
+    private function get_ellipseHeight() : Float {
         return _ellipseHeight;
     }
 
     @:noCompletion
-    private function set_ellipseHeight(value:Float):Float {
+    private function set_ellipseHeight(value : Float) : Float {
         _ellipseHeight = value;
         requestLayout();
         return value;
     }
 
     @:noCompletion
-    private function set_ellipseSize(value:Float):Float {
+    private function set_ellipseSize(value : Float) : Float {
         _ellipseWidth = value;
         _ellipseHeight = value;
         requestLayout();
@@ -141,12 +141,12 @@ class Rect extends View {
 
     #if dom
         @:noCompletion
-        private function get_buttonMode():Bool {
+        private function get_buttonMode() : Bool {
             return shape.buttonMode;
         }
 
         @:noCompletion
-        private function set_buttonMode(value:Bool):Bool {
+        private function set_buttonMode(value : Bool) : Bool {
             shape.buttonMode = value;
             return value;
         }

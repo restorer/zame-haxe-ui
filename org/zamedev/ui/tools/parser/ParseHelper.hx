@@ -2,13 +2,15 @@ package org.zamedev.ui.tools.parser;
 
 import org.zamedev.ui.errors.UiParseError;
 import org.zamedev.ui.graphics.TextAlignExt;
+import org.zamedev.ui.i18n.Quantity;
+import org.zamedev.ui.tools.generator.GenPosition;
 import org.zamedev.ui.view.ViewVisibility;
 import org.zamedev.ui.widget.LinearLayoutOrientation;
 
 using StringTools;
 
 class ParseHelper {
-    public static function parseRef(textValue:String):RefInfo {
+    public static function parseRef(textValue : String) : RefInfo {
         var re = ~/^\s*@([a-z]+)\/([a-zA-Z0-9_]+)\s*$/;
 
         if (!re.match(textValue)) {
@@ -21,17 +23,17 @@ class ParseHelper {
         };
     }
 
-    public static function parseFloat(textValue:String):Float {
+    public static function parseFloat(textValue : String, pos : GenPosition) : Float {
         var value = Std.parseFloat(textValue.trim());
 
         if (Math.isNaN(value)) {
-            throw new UiParseError('${textValue} is not a float');
+            throw new UiParseError('"${textValue}" is not a float', pos);
         }
 
         return value;
     }
 
-    public static function parseBool(textValue:String):Bool {
+    public static function parseBool(textValue : String) : Bool {
         switch (textValue.trim().toLowerCase()) {
             case "1" | "true" | "on" | "yes":
                 return true;
@@ -41,7 +43,7 @@ class ParseHelper {
         }
     }
 
-    public static function parseStringArray(textValue:String):Array<String> {
+    public static function parseStringArray(textValue : String) : Array<String> {
         return textValue.split("|").map(function (v) {
             return v.trim();
         }).filter(function (v) {
@@ -49,7 +51,7 @@ class ParseHelper {
         });
     }
 
-    public static function parseTextAlign(textValue:String):TextAlignExt {
+    public static function parseTextAlign(textValue : String, pos : GenPosition) : TextAlignExt {
         switch (textValue) {
             case "center":
                 return TextAlignExt.CENTER;
@@ -64,11 +66,11 @@ class ParseHelper {
                 return TextAlignExt.LEFT;
 
             default:
-                throw new UiParseError('unknown text align "${textValue}"');
+                throw new UiParseError('Unknown text align "${textValue}"', pos);
         }
     }
 
-    public static function parseViewVisibility(textValue:String):ViewVisibility {
+    public static function parseViewVisibility(textValue : String, pos : GenPosition) : ViewVisibility {
         switch (textValue) {
             case "visible":
                 return ViewVisibility.VISIBLE;
@@ -80,11 +82,11 @@ class ParseHelper {
                 return ViewVisibility.GONE;
 
             default:
-                throw new UiParseError('unknown view visibility "${textValue}"');
+                throw new UiParseError('Unknown view visibility "${textValue}"', pos);
         }
     }
 
-    public static function parseLinearLayoutOrientation(textValue:String):LinearLayoutOrientation {
+    public static function parseLinearLayoutOrientation(textValue : String, pos : GenPosition) : LinearLayoutOrientation {
         switch (textValue) {
             case "vertical":
                 return LinearLayoutOrientation.VERTICAL;
@@ -93,7 +95,32 @@ class ParseHelper {
                 return LinearLayoutOrientation.HORIZONTAL;
 
             default:
-                throw new UiParseError('unknown linear layout orientation "${textValue}"');
+                throw new UiParseError('Unknown linear layout orientation "${textValue}"', pos);
+        }
+    }
+
+    public static function parseQuantity(textValue : String, pos : GenPosition) : Quantity {
+        switch (textValue) {
+            case "zero":
+                return Quantity.ZERO;
+
+            case "one":
+                return Quantity.ONE;
+
+            case "two":
+                return Quantity.TWO;
+
+            case "few":
+                return Quantity.FEW;
+
+            case "many":
+                return Quantity.MANY;
+
+            case "other":
+                return Quantity.OTHER;
+
+            default:
+                throw new UiParseError('Unknown quantity "${textValue}"', pos);
         }
     }
 }
