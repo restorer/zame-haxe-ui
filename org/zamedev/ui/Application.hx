@@ -4,6 +4,7 @@ import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.system.Capabilities;
 import org.zamedev.ui.internal.ApplicationStage;
+import org.zamedev.ui.res.Configuration;
 import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
 
@@ -16,7 +17,7 @@ class Application extends Sprite implements Context {
     #end
 
     private var _applicationStage : ApplicationStage;
-    private var _locale : String;
+    private var _configuration : Configuration;
     private var _resourceManager : ResourceManager;
     private var _inflater : Inflater;
     private var _sceneStack : List<Scene>;
@@ -24,7 +25,7 @@ class Application extends Sprite implements Context {
     public var context(get, null) : Context;
     public var application(get, null) : Application;
     public var applicationStage(get, null) : ApplicationStage;
-    public var locale(get, set) : String;
+    public var configuration(get, set) : Configuration;
     public var resourceManager(get, null) : ResourceManager;
     public var inflater(get, null) : Inflater;
 
@@ -32,12 +33,13 @@ class Application extends Sprite implements Context {
         super();
 
         _applicationStage = new ApplicationStage();
+        _configuration = new Configuration();
 
         #if ios
             // work-around for bug in lime legacy
-            _locale = "en-US";
+            _configuration.locale = "en-US";
         #else
-            _locale = Capabilities.language;
+            _configuration.locale = Capabilities.language;
         #end
 
         _resourceManager = new ResourceManager(this);
@@ -126,13 +128,13 @@ class Application extends Sprite implements Context {
     }
 
     @:noCompletion
-    private function get_locale() : String {
-        return _locale;
+    private function get_configuration() : Configuration {
+        return _configuration;
     }
 
     @:noCompletion
-    private function set_locale(value : String) : String {
-        _locale = value;
+    private function set_configuration(value : Configuration) : Configuration {
+        _configuration = value;
         _resourceManager.reload();
         return value;
     }

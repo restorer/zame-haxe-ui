@@ -11,6 +11,8 @@ import org.zamedev.ui.i18n.Quantity;
 */
 
 class RuLocaleRules implements LocaleRules {
+    public function new() {
+    }
 
     /*
     <pluralRule count="one">v = 0 and i % 10 = 1 and i % 100 != 11</pluralRule>

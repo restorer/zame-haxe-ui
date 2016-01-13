@@ -32,14 +32,14 @@ class ResourceManager {
         colorMap = new Map<Int, Int>();
         dimenMap = new Map<Int, Dimension>();
         stringMap = new Map<Int, String>();
-        pluralMap = new Map<String, Plural>;
+        pluralMap = new Map<Int, Plural>();
         fontMap = new Map<Int, FontExt>();
         drawableMap = new Map<Int, Drawable>();
         styleMap = new Map<Int, Style>();
         layoutMap = new Map<Int, LayoutParams -> ResourceManager -> View>();
 
         localeRules = null;
-        R._loadInto(this, context.locale);
+        R._loadInto(this, context.configuration);
     }
 
     public function findIdByName(resName : String) : Null<Int> {
@@ -105,7 +105,7 @@ class ResourceManager {
             return result;
         }
 
-        throw new UiError('Plural "${getResDisplayName(resId)}" was not found for quantity="${qualtity}" and locale="${plural.locale}"');
+        throw new UiError('Plural "${getResDisplayName(resId)}" was not found for quantity="${quantity}" and locale="${plural.locale}"');
     }
 
     public function getStyle(resId : Int) : Style {

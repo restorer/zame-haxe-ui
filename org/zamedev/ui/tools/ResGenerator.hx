@@ -159,7 +159,6 @@ class ResGenerator {
             "org.zamedev.ui.i18n.Quantity" => true,
             "org.zamedev.ui.res.Configuration" => true,
             "org.zamedev.ui.res.ResourceManager" => true,
-            "org.zamedev.ui.res.Selector" => true,
             "org.zamedev.ui.res.Style" => true,
             "org.zamedev.ui.res.Styleable" => true,
             "org.zamedev.ui.view.LayoutParams" => true,
@@ -199,7 +198,7 @@ class ResGenerator {
         });
 
         generateLoadValues(sb, pluralMap, function(key : String, value : GenPlural, pos : GenPosition) : String {
-            var result = 'r.pluralMap[string.${key}] = { locale : ${HaxeCode.genString(pos.configuration.locale)}, valueMap : [';
+            var result = 'r.pluralMap[plurals.${key}] = { locale : ${HaxeCode.genString(pos.configuration.locale)}, valueMap : [';
             var sep = false;
 
             for (quantity in value.keys()) {

@@ -11,6 +11,8 @@ import org.zamedev.ui.i18n.Quantity;
 */
 
 class EnLocaleRules implements LocaleRules {
+    public function new() {
+    }
 
     /*
     <pluralRule count="one">i = 1 and v = 0</pluralRule>
