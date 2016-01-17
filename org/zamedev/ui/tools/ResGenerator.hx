@@ -252,7 +252,19 @@ class ResGenerator {
             sbPrepend.add('import ${name};\n');
         }
 
-        return sbPrepend.toString() + sb.toString().replace("\n\n\n", "\n\n");
+        var codeString = sb.toString();
+
+        while (true) {
+            var newCodeString = codeString.replace("\n\n\n", "\n\n");
+
+            if (codeString == newCodeString) {
+                break;
+            }
+
+            codeString = newCodeString;
+        }
+
+        return (sbPrepend.toString() + codeString).replace("\t", "    ");
     }
 
     private function putToMap<T>(
@@ -325,24 +337,36 @@ class ResGenerator {
     ) : Void {
         sb.add("\n");
 
-        for (key in map.keys()) {
-            var genItem = map[key];
+        for (resKey in map.keys()) {
+            var genItem = map[resKey];
 
-            var posList = ConfigurationHelper.sortPositions(genItem.map.map(function(v : GenItemValue<T>) : GenPosition {
+            var posList = genItem.map.map(function(v : GenItemValue<T>) : GenPosition {
                 return v.pos;
-            }).array());
+            }).array();
+
+            if (posList.length == 0) {
+                throw new UiParseError('Internal error while generating R.hx (empty configuration list)');
+                continue;
+            }
 
             if (posList.length == 1 && posList[0].configuration.isEmpty()) {
+                var genItemValue = genItem.map[""];
+
                 sb.add("\t\t");
-                sb.add(func(key, genItem.map[""].value, posList[0]));
+                sb.add(func(resKey, genItemValue.value, genItemValue.pos));
                 sb.add("\n");
                 continue;
             }
 
+            posList.sort(function(a : GenPosition, b : GenPosition) : Int {
+                return - a.configuration.compareTo(b.configuration);
+            });
+
             var isFirst = true;
+            sb.add("\n");
 
             for (pos in posList) {
-                sb.add("\n\t\t");
+                sb.add("\t\t");
 
                 if (!pos.configuration.isEmpty()) {
                     sb.add(isFirst ? "if (" : "} else if (");
@@ -361,13 +385,15 @@ class ResGenerator {
 
                     sb.add(") {\n");
                 } else if (isFirst) {
-                    throw new UiParseError('Internal error');
+                    throw new UiParseError('Internal error while generating R.hx (incorrect sort by qualifiers)');
                 } else {
                     sb.add("} else {\n");
                 }
 
+                var genItemValue = genItem.map[pos.configuration.toQualifierString()];
+
                 sb.add("\t\t\t");
-                sb.add(func(key, genItem.map[pos.configuration.toQualifierString()].value, pos));
+                sb.add(func(resKey, genItemValue.value, genItemValue.pos));
                 sb.add("\n");
 
                 isFirst = false;

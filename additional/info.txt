@@ -1,0 +1,17 @@
+# Try variant with macro
+
+@:layout
+public function helloLayout() {
+    AbsoluteLayout(
+        layout_width = MATCH_PARENT,
+        layout_height = MATCH_PARENT,
+    ) {
+        TextView(
+            layout_x = 0,
+            layout_y = 0,
+            layout_width = MATCH_PARENT,
+            layout_height = 25%,
+            text = R.string.hello,
+        )
+    }
+}

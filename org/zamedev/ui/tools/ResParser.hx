@@ -1,5 +1,6 @@
 package org.zamedev.ui.tools;
 
+import haxe.io.Path;
 import org.zamedev.lib.ds.LinkedMap;
 import org.zamedev.ui.errors.UiParseError;
 import org.zamedev.ui.graphics.Color;
@@ -35,12 +36,8 @@ class ResParser {
 
         for (node in root.elements()) {
             // TODO: somehow get line number in xml file
-            var name = node.get("name");
 
-            if (name == null) {
-                throw new UiParseError("Node with empty name found", pos);
-            }
-
+            var name = getResName(node.get("name"), pos);
             var resPath = node.nodeName + "/" + name;
             var qKey = pos.configuration.toQualifierString();
 
@@ -60,13 +57,31 @@ class ResParser {
         }
     }
 
+    private function getResName(name : String, pos : GenPosition) : String {
+        if (name == null) {
+            throw new UiParseError("Node with empty name found", pos);
+        }
+
+        if (name == '@auto') {
+            var path = new Path(pos.fileName);
+
+            if (path.file == "") {
+                throw new UiParseError("Invalid file name for \"@auto\" resource name", pos);
+            }
+
+            return path.file;
+        }
+
+        return name;
+    }
+
     public function toGenerator(resGenerator : ResGenerator) : Void {
         var styleParser = new StyleParser();
 
         for (itemMap in resourceMap) {
             for (item in itemMap) {
                 var resolved = resolveResourceValue(item.node, null, item.pos);
-                var name = item.node.get("name");
+                var name = getResName(item.node.get("name"), item.pos);
 
                 switch (item.node.nodeName) {
                     case "color":

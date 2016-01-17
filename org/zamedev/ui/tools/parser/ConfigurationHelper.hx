@@ -62,12 +62,4 @@ class ConfigurationHelper {
         result.push("");
         return result;
     }
-
-    public static function sortPositions(list : Array<GenPosition>) : Array<GenPosition> {
-        list.sort(function(a : GenPosition, b : GenPosition) : Int {
-            return a.configuration.compareTo(b.configuration);
-        });
-
-        return list;
-    }
 }
