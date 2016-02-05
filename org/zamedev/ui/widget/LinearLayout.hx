@@ -12,13 +12,16 @@ using StringTools;
 
 class LinearLayout extends ViewGroup {
     private var _orientation : LinearLayoutOrientation;
+    private var _marginBetween : Float;
 
     public var orientation(get, set) : LinearLayoutOrientation;
+    public var marginBetween(get, set) : Float;
 
     @:keep
     public function new(context : Context, ?orientation : LinearLayoutOrientation) {
         super(context);
-        this.orientation = (orientation == null ? LinearLayoutOrientation.VERTICAL : orientation);
+        this._orientation = (orientation == null ? LinearLayoutOrientation.VERTICAL : orientation);
+        this._marginBetween = 0.0;
     }
 
     override public function createLayoutParams() : LayoutParams {
@@ -33,6 +36,10 @@ class LinearLayout extends ViewGroup {
         switch (attId) {
             case Styleable.orientation:
                 orientation = cast value;
+                return true;
+
+            case Styleable.marginBetween:
+                marginBetween = computeDimension(cast value, false);
                 return true;
 
             default:
@@ -64,12 +71,13 @@ class LinearLayout extends ViewGroup {
         measureSelf(widthSpec, heightSpec);
 
         var position : Float = 0.0;
+        var currentMarginBetween : Float = 0.0;
 
         for (child in children) {
-            var layoutParams = cast(child.layoutParams, LinearLayoutParams);
+            var layoutParams : LinearLayoutParams = cast child.layoutParams;
 
-            if (orientation == LinearLayoutOrientation.HORIZONTAL) {
-                position += layoutParams._marginLeftComputed;
+            if (_orientation == LinearLayoutOrientation.HORIZONTAL) {
+                position += layoutParams._marginLeftComputed + currentMarginBetween;
                 child.x = position;
                 position += child.width + layoutParams._marginRightComputed;
 
@@ -84,7 +92,7 @@ class LinearLayout extends ViewGroup {
                         child.y = layoutParams._marginTopComputed;
                 }
             } else {
-                position += layoutParams._marginTopComputed;
+                position += layoutParams._marginTopComputed + currentMarginBetween;
                 child.y = position;
                 position += child.height + layoutParams._marginBottomComputed;
 
@@ -99,6 +107,8 @@ class LinearLayout extends ViewGroup {
                         child.x = layoutParams._marginLeftComputed;
                 }
             }
+
+            currentMarginBetween = _marginBetween;
         }
 
         return true;
@@ -113,38 +123,46 @@ class LinearLayout extends ViewGroup {
             _height = 0.0;
         }
 
+        var currentMarginBetween : Float = 0.0;
+
         for (child in children) {
-            var layoutParams = cast(child.layoutParams, LinearLayoutParams);
+            var layoutParams : LinearLayoutParams = cast child.layoutParams;
 
             if (measureWidth) {
-                if (orientation == LinearLayoutOrientation.HORIZONTAL && layoutParams._measuredWidth < 0.0) {
+                if (_orientation == LinearLayoutOrientation.HORIZONTAL && layoutParams._measuredWidth < 0.0) {
                     _width = -1.0;
                     measureWidth = false;
-                }
-
-                var size = layoutParams._measuredWidth + layoutParams._marginLeftComputed + layoutParams._marginRightComputed;
-
-                if (orientation == LinearLayoutOrientation.HORIZONTAL) {
-                    _width += size;
                 } else {
-                    _width = Math.max(_width, size);
+                    var size = layoutParams._measuredWidth + layoutParams._marginLeftComputed + layoutParams._marginRightComputed;
+
+                    if (_orientation == LinearLayoutOrientation.HORIZONTAL) {
+                        _width += size + currentMarginBetween;
+                    } else {
+                        _width = Math.max(_width, size);
+                    }
                 }
             }
 
             if (measureHeight) {
-                if (orientation == LinearLayoutOrientation.VERTICAL && layoutParams._measuredHeight < 0.0) {
+                if (_orientation == LinearLayoutOrientation.VERTICAL && layoutParams._measuredHeight < 0.0) {
                     _height = -1.0;
                     measureHeight = false;
-                }
-
-                var size = layoutParams._measuredHeight + layoutParams._marginTopComputed + layoutParams._marginBottomComputed;
-
-                if (orientation == LinearLayoutOrientation.VERTICAL) {
-                    _height += size;
                 } else {
-                    _height = Math.max(_height, size);
+                    var size = layoutParams._measuredHeight + layoutParams._marginTopComputed + layoutParams._marginBottomComputed;
+
+                    if (_orientation == LinearLayoutOrientation.VERTICAL) {
+                        _height += size + currentMarginBetween;
+                    } else {
+                        _height = Math.max(_height, size);
+                    }
                 }
             }
+
+            if (!measureWidth && !measureHeight) {
+                break;
+            }
+
+            currentMarginBetween = _marginBetween;
         }
     }
 
@@ -165,6 +183,18 @@ class LinearLayout extends ViewGroup {
     @:noCompletion
     private function set_orientation(value : LinearLayoutOrientation) : LinearLayoutOrientation {
         _orientation = value;
+        requestLayout();
+        return value;
+    }
+
+    @:noCompletion
+    private function get_marginBetween() : Float {
+        return _marginBetween;
+    }
+
+    @:noCompletion
+    private function set_marginBetween(value : Float) : Float {
+        _marginBetween = value;
         requestLayout();
         return value;
     }

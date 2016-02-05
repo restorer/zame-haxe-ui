@@ -48,9 +48,16 @@ class ShapeExt extends Shape {
     }
 
     @:noCompletion
-    override private function __hitTest(x : Float, y : Float, shapeFlag : Bool, stack : Array<DisplayObject>, interactiveOnly : Bool) : Bool {
+    override private function __hitTest(
+        x : Float,
+        y : Float,
+        shapeFlag : Bool,
+        stack : Array<DisplayObject>,
+        interactiveOnly : Bool,
+        hitObject : DisplayObject
+    ) : Bool {
         if (interactiveMode) {
-            return super.__hitTest(x, y, shapeFlag, stack, interactiveOnly);
+            return super.__hitTest(x, y, shapeFlag, stack, interactiveOnly, hitObject);
         } else {
             return false;
         }

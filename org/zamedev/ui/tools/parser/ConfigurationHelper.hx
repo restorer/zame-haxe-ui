@@ -9,22 +9,20 @@ class ConfigurationHelper {
         var configuration = new Configuration();
 
         for (item in qualifiers) {
-            if (item == '') {
+            if (item == "") {
                 continue;
             }
 
-            if (item == 'long' || item == 'notlong') {
-                if (configuration.aspect != "") {
-                    throw new UiParseError('Duplicate qualifier "${item}" in "${path}"', new GenPosition(null, path));
-                }
-
-                configuration.aspect = item;
+            if (item == "long" || item == "notlong") {
+                checkAndSet(configuration, "aspect", item, path);
+            } else if (item == "port" || item == "land") {
+                checkAndSet(configuration, "orientation", item, path);
+            } else if (item == "android" || item == "ios" || item == "html5") {
+                checkAndSet(configuration, "target", item, path);
+            } else if (item == "dom" || item == "canvas" || item == "webgl") {
+                checkAndSet(configuration, "subTarget", item, path);
             } else if (item.length == 2) {
-                if (configuration.locale != "") {
-                    throw new UiParseError('Duplicate qualifier "${item}" in "${path}"', new GenPosition(null, path));
-                }
-
-                configuration.locale = item;
+                checkAndSet(configuration, "locale", item, path);
             } else {
                 throw new UiParseError('Invalid qualifier "${item}" in "${path}"', new GenPosition(null, path));
             }
@@ -61,5 +59,13 @@ class ConfigurationHelper {
 
         result.push("");
         return result;
+    }
+
+    private static function checkAndSet(configuration : Configuration, field : String, value : String, path : String) : Void {
+        if (cast(Reflect.getProperty(configuration, field), String) != "") {
+            throw new UiParseError('Duplicate qualifier "${field}" in "${path}"', new GenPosition(null, path));
+        }
+
+        Reflect.setProperty(configuration, field, value);
     }
 }

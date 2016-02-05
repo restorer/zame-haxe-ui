@@ -74,6 +74,7 @@ abstract Styleable(Int) from Int to Int {
     var displayAsPassword = 68; // BOOL
     var placeholderFont = 69; // FONT
     var editableFont = 70; // FONT
+    var marginBetween = 71; // DIMENSION
 
     var _custom = 500000000;
     var _layout = 1000000000;

@@ -82,6 +82,7 @@ class StyleableNameMap {
         m[Styleable.displayAsPassword] = "displayAsPassword";
         m[Styleable.placeholderFont] = "placeholderFont";
         m[Styleable.editableFont] = "editableFont";
+        m[Styleable.marginBetween] = "marginBetween";
 
         m[Styleable.layout_width] = "layout_width";
         m[Styleable.layout_height] = "layout_height";

@@ -34,6 +34,24 @@ class ViewContainer extends BaseViewContainer {
         }
     }
 
+    private function _addChildAt(view : View, index : Int, reLayout : Bool = false) : Void {
+        if (view._parent != null) {
+            throw new UiError("View already added to another ViewContainer");
+        }
+
+        view._parent = this;
+        children.insert(index, view);
+        _sprite.addChildAt(view._sprite, index);
+
+        if (reLayout) {
+            requestLayout();
+        }
+
+        if (isAddedToApplicationStage) {
+            view.dispatchEvent(new Event(Event.ADDED_TO_STAGE));
+        }
+    }
+
     private function _removeChild(view : View, reLayout : Bool = false) : Void {
         if (!children.remove(view)) {
             throw new UiError("View is not added to this ViewContainer");

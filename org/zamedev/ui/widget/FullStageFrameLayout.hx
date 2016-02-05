@@ -26,11 +26,11 @@ class FullStageFrameLayout extends FrameLayout {
     }
 
     private function onFullStageFrameLayoutAddedToApplicationStage(_) : Void {
-        context.applicationStage.addEventListener(Event.RESIZE, onRootResize);
+        _context.applicationStage.addEventListener(Event.RESIZE, onRootResize);
     }
 
     private function onFullStageFrameLayoutRemovedFromApplicationStage(_) : Void {
-        context.applicationStage.removeEventListener(Event.RESIZE, onRootResize);
+        _context.applicationStage.removeEventListener(Event.RESIZE, onRootResize);
     }
 
     private function onRootResize(_) : Void {

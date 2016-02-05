@@ -1,8 +1,8 @@
 <?php
 
 class TexmapGenerator {
-	const WIDTH = 1024;
-	const HEIGHT = 1024;
+	const WIDTH = 2048;
+	const HEIGHT = 2048;
 
 	public $img = null;
 	protected $rows = array();
@@ -241,13 +241,52 @@ class TexmapGenerator {
 		$resData .= "</resources>\n";
 		file_put_contents($resXmlName, $resData);
 	}
+
+	public function cleanup($toDir, $resXmlName, $packedDrawablePrefix) {
+		if (file_exists($resXmlName)) {
+			unlink($resXmlName);
+		}
+
+		if (!is_dir($toDir)) {
+			return;
+		}
+
+		$dh = @opendir($toDir);
+
+		if ($dh === false) {
+			echo "Can't open \"${toDir}\"\n";
+			return;
+		}
+
+		while (($name = readdir($dh)) !== false) {
+			if (preg_match('/' . preg_quote($packedDrawablePrefix, '/') . '\d+\.png$/i', $name)) {
+				unlink("{$toDir}/{$name}");
+			}
+		}
+
+		closedir($dh);
+	}
+
+	public function process($fromDir, $toDir, $resXmlName, $packedDrawablePrefix) {
+		$this->cleanup($toDir, $resXmlName, $packedDrawablePrefix);
+		$this->generate($fromDir, $toDir, $resXmlName, $packedDrawablePrefix);
+	}
 }
 
 $gen = new TexmapGenerator();
 
-$gen->generate(
-	__DIR__ . '/drawable-parts',
+$gen->process(
+	__DIR__ . '/../assets-gen/drawable',
 	__DIR__ . '/../assets/drawable',
 	__DIR__ . '/../assets/resource/drawable.xml',
 	'packed_'
 );
+
+/*
+$gen->process(
+	__DIR__ . '/../assets-gen/drawable-port',
+	__DIR__ . '/../assets/drawable-port',
+	__DIR__ . '/../assets/resource-port/drawable.xml',
+	'packed_port_'
+);
+*/

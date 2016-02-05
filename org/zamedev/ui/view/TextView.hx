@@ -38,7 +38,7 @@ class TextView extends View {
     private var _textFormat:TextFormat;
     private var _listenersAdded:Bool;
 
-    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
         private var _cachedBitmap:Bitmap;
     #end
 
@@ -74,7 +74,7 @@ class TextView extends View {
         _textFormat = null;
         _listenersAdded = false;
 
-        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
             _cachedBitmap = null;
         #end
 
@@ -98,7 +98,7 @@ class TextView extends View {
             _sprite.removeChild(_textField);
         }
 
-        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
             if (_cachedBitmap != null && _cachedBitmap.parent != null) {
                 _sprite.removeChild(_cachedBitmap);
             }
@@ -143,14 +143,14 @@ class TextView extends View {
                 _textField = new TextFieldExt();
                 _textField.embedFonts = true;
 
-                #if debug_ui
+                #if ui_debug
                     _textField.borderColor = 0x800000;
                     _textField.border = true;
                 #end
 
                 _textFormat = new TextFormat();
 
-                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
                     _cachedBitmap = new Bitmap();
                 #end
             }
@@ -167,7 +167,7 @@ class TextView extends View {
                 _textField.type = TextFieldType.DYNAMIC;
             }
 
-            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
                 if (_editable) {
                     _sprite.addChild(_textField);
                 } else {
@@ -199,7 +199,7 @@ class TextView extends View {
                 _listenersAdded = true;
             }
 
-            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
                 if (!_editable) {
                     updateCache();
                 }
@@ -413,11 +413,17 @@ class TextView extends View {
                     _textField.autoSize = TextFieldAutoSize.NONE;
 
                 default:
+                    #if (native && openfl_legacy)
+                        if (_textField.numLines == 1) {
+                            _textField.autoSize = TextFieldAutoSize.NONE;
+                            _textField.width = _width * 1.15;
+                        }
+                    #end
             }
 
             _textField.height = _height;
 
-            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
                 if (!_editable) {
                     updateCache();
                 }
@@ -427,7 +433,7 @@ class TextView extends View {
         return true;
     }
 
-    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
         private function updateCache():Void {
             var cachedBitmapData = new BitmapData(
                 Std.int(Math.max(1, Math.ceil(_width))),
@@ -483,7 +489,7 @@ class TextView extends View {
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
 
-                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
                     if (!_editable) {
                         updateCache();
                     }
@@ -585,7 +591,7 @@ class TextView extends View {
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
 
-                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !debug_ui_noTextViewCache)
+                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
                     if (!_editable) {
                         updateCache();
                     }

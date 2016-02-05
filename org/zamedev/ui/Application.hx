@@ -7,6 +7,7 @@ import org.zamedev.ui.internal.ApplicationStage;
 import org.zamedev.ui.res.Configuration;
 import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
+import extension.eightsines.EsOrientation;
 
 // TODO:
 // http://www.yiiframework.com/doc-2.0/guide-tutorial-i18n.html
@@ -18,7 +19,7 @@ class Application extends Sprite implements Context {
 
     private var _applicationStage : ApplicationStage;
     private var _configuration : Configuration;
-    private var _resourceManager : ResourceManager;
+    private var _resourceManager : ResourceManager = null;
     private var _inflater : Inflater;
     private var _sceneStack : List<Scene>;
 
@@ -35,18 +36,99 @@ class Application extends Sprite implements Context {
         _applicationStage = new ApplicationStage();
         _configuration = new Configuration();
 
-        #if ios
-            // work-around for bug in lime legacy
-            _configuration.locale = "en-US";
-        #else
-            _configuration.locale = Capabilities.language;
-        #end
+        detectConfiguration();
 
         _resourceManager = new ResourceManager(this);
         _inflater = new Inflater(this);
         _sceneStack = new List<Scene>();
 
         create();
+    }
+
+    private function detectConfiguration() : Void {
+        var stageWidth = (stage.stageWidth < 1 ? 1 : stage.stageWidth);
+        var stageHeight = (stage.stageHeight < 1 ? 1 : stage.stageHeight);
+
+        #if ios
+            // work-around for bug in lime legacy
+            _configuration.locale = "en";
+        #else
+            _configuration.locale = ~/\-.*$/.replace(Capabilities.language, "");
+        #end
+
+        // Phones:
+        // iPhone 3G - 320 x 480 -> 1.5
+        // iPhone 4 - 640 x 960 -> 1.5
+        // iPhone 5 - 640 x 1136 -> 1.775
+        // iPhone 6 - 750 x 1334 -> ~ 1.7787
+        // iPhone 6+ - 1080 x 1920 -> ~ 1.778
+
+        // Tablets:
+        // iPad - 1024 x 768 -> ~ 1.334
+        // iPad Pro - 2732 x 2048 -> ~ 1.334
+        // iPad Air - 2048 x 1536 -> ~ 1.334
+
+        // https://design.google.com/devices/
+
+        // Phones:
+        // HTC One M8 / M9 - 1080 x 1920 -> ~ 1.778
+        // LG G2 - 1080 x 1920 -> ~ 1.778
+        // LG G3 - 1440 x 2560 -> ~ 1.778
+        // Moto G / X - 720 x 1280 -> ~ 1.778
+        // Moto X 2nd Gen - 1080 x 1920 -> ~ 1.778
+        // Nexus 4 - 768 x 1280 -> ~ 1.667
+        // Nexus 5 / 5X - 1080 x 1920 -> ~ 1.778
+        // Nexus 6 / 6P - 1440 x 2560 -> ~ 1.778
+        // Nexus 7 ('12) - 800 x 1280 -> 1.6 (actually tablet, but with port orientation)
+        // Nexus 7 ('13) - 1200 x 1920 -> 1.6 (actually tablet, but with port orientation)
+        // Samsung Galaxy Note 4 - 1440 x 2560 -> ~ 1.778
+        // Samsung Galaxy S5 - 1080 x 1920 -> ~ 1.778
+        // Samsung Galaxy S6 - 1440 x 2560 -> ~ 1.778
+        //
+
+        // Tablets:
+        // Nexus 10 - 1280 x 800 -> 1.6
+        // Nexus 9 - 2048 x 1536 -> ~ 1.334
+        // Samsung Galaxy Tab 10 - 1280 x 800 -> 1.6
+
+        _configuration.aspect = (Math.max(stageWidth, stageHeight) / Math.min(stageWidth, stageHeight) > 1.49 ? "long" : "notlong");
+
+        #if html5
+            _configuration.orientation = "land";
+        #else
+            _configuration.orientation = (stageWidth > stageHeight ? "land" : "port");
+        #end
+
+        #if android
+            _configuration.target = "android";
+        #elseif ios
+            _configuration.target = "ios";
+        #elseif html5
+            _configuration.target = "html5";
+
+            #if dom
+                _configuration.subTarget = "dom";
+            #elseif canvas
+                _configuration.subTarget = "canvas";
+            #elseif webgl
+                _configuration.subTarget = "webgl";
+            #end
+        #end
+    }
+
+    private function usePhoneAsPortTabletAsLong() : Void {
+        #if ios
+            _configuration.orientation = (_configuration.aspect == "long" ? "port" : "land");
+        #end
+
+        EsOrientation.setScreenOrientation(_configuration.orientation == "port"
+            ? EsOrientation.ORIENTATION_PORTRAIT
+            : EsOrientation.ORIENTATION_LANDSCAPE
+        );
+
+        if (_resourceManager != null) {
+            _resourceManager.reload();
+        }
     }
 
     private function create() : Void {

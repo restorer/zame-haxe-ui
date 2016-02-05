@@ -8,56 +8,44 @@ import org.zamedev.ui.tools.generator.GenStyleRuntimeItem;
 using org.zamedev.lib.XmlExt;
 
 class StyleParser {
-    private var styleSpecMap : Map<String, StyleSpec>;
-
-    public function new() {
-        styleSpecMap = new Map<String, StyleSpec>();
-    }
-
-    public function parse(name : String, node : Xml, pos : GenPosition) : Void {
-        var styleSpec = {
-            origName : name,
-            name : "@style/" + name,
+    public static function parse(name : String, node : Xml, pos : GenPosition) : GenStyle {
+        var genStyle : GenStyle = {
             includeList : new Array<String>(),
-            genStyle : {
-                staticMap : new Map<String, String>(),
-                runtimeMap : new Map<String, Array<GenStyleRuntimeItem>>(),
-            },
-            pos : pos,
+            staticMap : new Map<String, String>(),
+            runtimeMap : new Map<String, Array<GenStyleRuntimeItem>>(),
         };
 
         for (innerNode in node.elements()) {
             var innerName = innerNode.get("name");
 
             if (innerName == null || innerName == "") {
-                throw new UiParseError('Item without name for style "${styleSpec.name}"', pos);
+                throw new UiParseError('Item without name in "@style/${name}"', pos);
             }
 
             switch (innerNode.nodeName) {
                 case "include":
-                    styleSpec.includeList.push(innerName);
+                    genStyle.includeList.push(innerName);
 
                 case "item":
-                    parseStyleItem(styleSpec, innerName, innerNode, pos);
+                    parseStyleItem(genStyle, name, innerName, innerNode, pos);
 
                 default:
-                    throw new UiParseError('Invalid inner node "${innerNode.nodeName}" for style "${styleSpec.name}"', pos);
+                    throw new UiParseError('Invalid inner node "${innerNode.nodeName}" in "@style/${name}"', pos);
             }
         }
 
-        styleSpecMap[styleSpec.name] = styleSpec;
+        return genStyle;
     }
 
-    public function toGenerator(resGenerator : ResGenerator) : Void {
-        for (name in styleSpecMap.keys()) {
-            var styleSpec = styleSpecMap[name];
-            resGenerator.putStyle(styleSpec.origName, resolveStyle(styleSpec, null, styleSpec.pos), styleSpec.pos);
+    public static function postProcess(resGenerator : ResGenerator) : Void {
+        for (styleName in resGenerator.styleMap.keys()) {
+            for (genItemValue in resGenerator.styleMap[styleName].map) {
+                genItemValue.value = resolveStyle(resGenerator, styleName, genItemValue.value, new Map<String, Bool>(), genItemValue.pos);
+            }
         }
     }
 
-    private function parseStyleItem(styleSpec : StyleSpec, itemName : String, node : Xml, pos : GenPosition) : Void {
-        var genStyle = styleSpec.genStyle;
-
+    private static function parseStyleItem(genStyle : GenStyle, name : String, itemName : String, node : Xml, pos : GenPosition) : Void {
         if (node.firstElement() == null) {
             var innerChild = node.firstChild();
 
@@ -73,7 +61,7 @@ class StyleParser {
 
         for (stateNode in node.elements()) {
             if (stateNode.nodeName != "state") {
-                throw new UiParseError('Invalid inner node "${stateNode.nodeName}" for item "${itemName}" for style "${styleSpec.name}"', pos);
+                throw new UiParseError('Invalid inner node "${stateNode.nodeName}" for item "${itemName}" in "@style/${name}"', pos);
             }
 
             var styleRuntimeItem : GenStyleRuntimeItem = {
@@ -89,48 +77,57 @@ class StyleParser {
         }
     }
 
-    private function resolveStyle(styleSpec : StyleSpec, visitedMap:Map<String, Bool>, pos : GenPosition) : GenStyle {
-        var resolvedStyle = {
+    private static function resolveStyle(
+        resGenerator : ResGenerator,
+        styleName : String,
+        genStyle : GenStyle,
+        visitedMap:Map<String, Bool>,
+        pos : GenPosition
+    ) : GenStyle {
+        var resGenStyle = {
+            includeList : new Array<String>(),
             staticMap : new Map<String, String>(),
             runtimeMap : new Map<String, Array<GenStyleRuntimeItem>>(),
         };
 
-        if (visitedMap == null) {
-            visitedMap = new Map<String, Bool>();
-        }
+        visitedMap[styleName] = true;
 
-        visitedMap[styleSpec.name] = true;
+        for (includeName in genStyle.includeList) {
+            var refInfo = ParseHelper.parseRef(includeName);
 
-        for (includeName in styleSpec.includeList) {
-            if (visitedMap.exists(includeName)) {
+            if (refInfo == null || refInfo.type != "style") {
+                throw new UiParseError('Invalid style reference "${includeName}" in "@style/${styleName}"', pos);
+            }
+
+            if (visitedMap.exists(refInfo.name)) {
                 continue;
             }
 
-            var includeSpec = styleSpecMap[includeName];
+            var incGenItem = resGenerator.styleMap[refInfo.name];
 
-            if (includeSpec == null) {
-                throw new UiParseError('Included style "${includeName}" not found in "${styleSpec.name}"', pos);
+            if (incGenItem == null) {
+                throw new UiParseError('Included style "${includeName}" not found in "@style/${styleName}"', pos);
             }
 
-            var includedStyle = resolveStyle(includeSpec, visitedMap, pos);
+            var incGenStyle = resolveStyle(resGenerator, refInfo.name, resGenerator.findQualifiedValue(incGenItem.map, pos), visitedMap, pos);
 
-            for (name in includedStyle.staticMap.keys()) {
-                resolvedStyle.staticMap[name] = includedStyle.staticMap[name];
+            for (name in incGenStyle.staticMap.keys()) {
+                resGenStyle.staticMap[name] = incGenStyle.staticMap[name];
             }
 
-            for (name in includedStyle.runtimeMap.keys()) {
-                resolvedStyle.runtimeMap[name] = includedStyle.runtimeMap[name];
+            for (name in incGenStyle.runtimeMap.keys()) {
+                resGenStyle.runtimeMap[name] = incGenStyle.runtimeMap[name];
             }
         }
 
-        for (name in styleSpec.genStyle.staticMap.keys()) {
-            resolvedStyle.staticMap[name] = styleSpec.genStyle.staticMap[name];
+        for (name in genStyle.staticMap.keys()) {
+            resGenStyle.staticMap[name] = genStyle.staticMap[name];
         }
 
-        for (name in styleSpec.genStyle.runtimeMap.keys()) {
-            resolvedStyle.runtimeMap[name] = styleSpec.genStyle.runtimeMap[name];
+        for (name in genStyle.runtimeMap.keys()) {
+            resGenStyle.runtimeMap[name] = genStyle.runtimeMap[name];
         }
 
-        return resolvedStyle;
+        return resGenStyle;
     }
 }

@@ -84,6 +84,7 @@ class StyleableMap {
         m["displayAsPassword"] = StyleableType.BOOL;
         m["placeholderFont"] = StyleableType.FONT;
         m["editableFont"] = StyleableType.FONT;
+        m["marginBetween"] = StyleableType.DIMENSION;
 
         m["layout_width"] = StyleableType.DIMENSION;
         m["layout_height"] = StyleableType.DIMENSION;

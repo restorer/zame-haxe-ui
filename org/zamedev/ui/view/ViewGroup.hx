@@ -168,6 +168,10 @@ class ViewGroup extends ViewContainer {
         _addChild(view, reLayout);
     }
 
+    public function addChildAt(view : View, index : Int, reLayout : Bool = true) : Void {
+        _addChildAt(view, index, reLayout);
+    }
+
     public function removeChild(view : View, reLayout : Bool = true) : Void {
         _removeChild(view, reLayout);
     }

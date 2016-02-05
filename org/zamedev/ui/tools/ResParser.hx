@@ -76,8 +76,6 @@ class ResParser {
     }
 
     public function toGenerator(resGenerator : ResGenerator) : Void {
-        var styleParser = new StyleParser();
-
         for (itemMap in resourceMap) {
             for (item in itemMap) {
                 var resolved = resolveResourceValue(item.node, null, item.pos);
@@ -103,7 +101,7 @@ class ResParser {
                         resGenerator.putDrawable(name, parseDrawable(name, item.node, resGenerator, item.pos), item.pos);
 
                     case "style":
-                        styleParser.parse(name, item.node, item.pos);
+                        resGenerator.putStyle(name, StyleParser.parse(name, item.node, item.pos), item.pos);
 
                     case "layout":
                         resGenerator.putLayout(name, parseLayout(resGenerator, name, item.node, item.pos), item.pos);
@@ -117,7 +115,7 @@ class ResParser {
             }
         }
 
-        styleParser.toGenerator(resGenerator);
+        StyleParser.postProcess(resGenerator);
     }
 
     private function resolveResourceValue(node : Xml, visitedMap : Map<String, Bool>, pos : GenPosition) : Xml {

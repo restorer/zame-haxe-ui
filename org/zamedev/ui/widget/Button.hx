@@ -91,7 +91,7 @@ class Button extends ViewContainer {
             hitTestView.buttonMode = true;
         #end
 
-        #if debug_ui
+        #if ui_debug
             hitTestView.fillColor = 0xff0000;
             hitTestView.alpha = 0.25;
         #else

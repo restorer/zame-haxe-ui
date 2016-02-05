@@ -5,6 +5,9 @@ import org.zamedev.lib.ds.LinkedMap;
 class Configuration {
     public var locale : String = "";
     public var aspect : String = "";
+    public var orientation : String = "";
+    public var target : String = "";
+    public var subTarget : String = "";
 
     public function new() {
     }
@@ -18,6 +21,18 @@ class Configuration {
 
         if (aspect != "") {
             result.push(aspect);
+        }
+
+        if (orientation != "") {
+            result.push(orientation);
+        }
+
+        if (target != "") {
+            result.push(target);
+        }
+
+        if (subTarget != "") {
+            result.push(subTarget);
         }
 
         return result;
@@ -34,11 +49,23 @@ class Configuration {
             result["aspect"] = aspect;
         }
 
+        if (orientation != "") {
+            result["orientation"] = orientation;
+        }
+
+        if (target != "") {
+            result["target"] = target;
+        }
+
+        if (subTarget != "") {
+            result["subTarget"] = subTarget;
+        }
+
         return result;
     }
 
     public function isEmpty() : Bool {
-        return (locale == "" && aspect == "");
+        return (locale == "" && aspect == "" && orientation == "" && target == "" && subTarget == "");
     }
 
     public function toQualifierString() : String {
@@ -50,6 +77,18 @@ class Configuration {
 
         if (result == 0) {
             result = Reflect.compare(aspect, other.aspect);
+        }
+
+        if (result == 0) {
+            result = Reflect.compare(orientation, other.orientation);
+        }
+
+        if (result == 0) {
+            result = Reflect.compare(target, other.target);
+        }
+
+        if (result == 0) {
+            result = Reflect.compare(subTarget, other.subTarget);
         }
 
         return result;
