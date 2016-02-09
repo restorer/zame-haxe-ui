@@ -145,8 +145,8 @@ class ImageView extends View {
 
             _sprite.addChild(displayObject);
 
-            displayObject.scaleX = _scaleX;
-            displayObject.scaleY = _scaleY;
+            displayObject.scaleX = _scaleX * _context.hints.imageViewScale;
+            displayObject.scaleY = _scaleY * _context.hints.imageViewScale;
 
             imageWidth = displayObject.width;
             imageHeight = displayObject.height;
@@ -172,7 +172,7 @@ class ImageView extends View {
             _scaleX = value;
 
             if (displayObject != null) {
-                displayObject.scaleX = value;
+                displayObject.scaleX = value * _context.hints.imageViewScale;
                 imageWidth = displayObject.width;
                 requestLayout();
             }
@@ -194,7 +194,7 @@ class ImageView extends View {
             _scaleY = value;
 
             if (displayObject != null) {
-                displayObject.scaleY = value;
+                displayObject.scaleY = value * _context.hints.imageViewScale;
                 imageHeight = displayObject.height;
                 requestLayout();
             }
@@ -210,8 +210,8 @@ class ImageView extends View {
             _scaleY = value;
 
             if (displayObject != null) {
-                displayObject.scaleX = value;
-                displayObject.scaleY = value;
+                displayObject.scaleX = value * _context.hints.imageViewScale;
+                displayObject.scaleY = value * _context.hints.imageViewScale;
 
                 imageWidth = displayObject.width;
                 imageHeight = displayObject.height;

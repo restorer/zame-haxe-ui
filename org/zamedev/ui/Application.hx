@@ -1,13 +1,14 @@
 package org.zamedev.ui;
 
+import extension.eightsines.EsOrientation;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.system.Capabilities;
 import org.zamedev.ui.internal.ApplicationStage;
 import org.zamedev.ui.res.Configuration;
+import org.zamedev.ui.res.Hints;
 import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
-import extension.eightsines.EsOrientation;
 
 // TODO:
 // http://www.yiiframework.com/doc-2.0/guide-tutorial-i18n.html
@@ -21,6 +22,7 @@ class Application extends Sprite implements Context {
     private var _configuration : Configuration;
     private var _resourceManager : ResourceManager = null;
     private var _inflater : Inflater;
+    private var _hints : Hints;
     private var _sceneStack : List<Scene>;
 
     public var context(get, null) : Context;
@@ -29,6 +31,7 @@ class Application extends Sprite implements Context {
     public var configuration(get, set) : Configuration;
     public var resourceManager(get, null) : ResourceManager;
     public var inflater(get, null) : Inflater;
+    public var hints(get, null) : Hints;
 
     public function new() {
         super();
@@ -40,6 +43,7 @@ class Application extends Sprite implements Context {
 
         _resourceManager = new ResourceManager(this);
         _inflater = new Inflater(this);
+        _hints = new Hints();
         _sceneStack = new List<Scene>();
 
         create();
@@ -229,5 +233,10 @@ class Application extends Sprite implements Context {
     @:noCompletion
     private function get_inflater() : Inflater {
         return _inflater;
+    }
+
+    @:noCompletion
+    private function get_hints() : Hints {
+        return _hints;
     }
 }

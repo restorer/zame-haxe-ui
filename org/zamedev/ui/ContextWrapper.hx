@@ -3,6 +3,7 @@ package org.zamedev.ui;
 import openfl.events.EventDispatcher;
 import org.zamedev.ui.internal.ApplicationStage;
 import org.zamedev.ui.res.Configuration;
+import org.zamedev.ui.res.Hints;
 import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
 
@@ -13,6 +14,7 @@ class ContextWrapper extends EventDispatcher implements Context {
     public var configuration(get, set) : Configuration;
     public var resourceManager(get, null) : ResourceManager;
     public var inflater(get, null) : Inflater;
+    public var hints(get, null) : Hints;
 
     public function new(context : Context) {
         super();
@@ -48,5 +50,10 @@ class ContextWrapper extends EventDispatcher implements Context {
     @:noCompletion
     private function get_inflater() : Inflater {
         return context.inflater;
+    }
+
+    @:noCompletion
+    private function get_hints() : Hints {
+        return context.hints;
     }
 }

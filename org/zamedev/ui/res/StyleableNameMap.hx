@@ -83,6 +83,11 @@ class StyleableNameMap {
         m[Styleable.placeholderFont] = "placeholderFont";
         m[Styleable.editableFont] = "editableFont";
         m[Styleable.marginBetween] = "marginBetween";
+        m[Styleable.hitAreaExtend] = "hitAreaExtend";
+        m[Styleable.hitAreaExtendX] = "hitAreaExtendX";
+        m[Styleable.hitAreaExtendY] = "hitAreaExtendY";
+        m[Styleable.singleLine] = "singleLine";
+        m[Styleable.ellipsize] = "ellipsize";
 
         m[Styleable.layout_width] = "layout_width";
         m[Styleable.layout_height] = "layout_height";

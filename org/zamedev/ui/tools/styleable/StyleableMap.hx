@@ -85,6 +85,11 @@ class StyleableMap {
         m["placeholderFont"] = StyleableType.FONT;
         m["editableFont"] = StyleableType.FONT;
         m["marginBetween"] = StyleableType.DIMENSION;
+        m["hitAreaExtend"] = StyleableType.DIMENSION;
+        m["hitAreaExtendX"] = StyleableType.DIMENSION;
+        m["hitAreaExtendY"] = StyleableType.DIMENSION;
+        m["singleLine"] = StyleableType.BOOL;
+        m["ellipsize"] = StyleableType.BOOL;
 
         m["layout_width"] = StyleableType.DIMENSION;
         m["layout_height"] = StyleableType.DIMENSION;

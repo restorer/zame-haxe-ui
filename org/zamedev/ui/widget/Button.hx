@@ -15,7 +15,7 @@ import org.zamedev.ui.view.TextView;
 import org.zamedev.ui.view.ViewContainer;
 
 class Button extends ViewContainer {
-    private static inline var HIT_AREA_OFFSET = 15;
+    private static inline var MIN_HIT_AREA_SHIFT = 15;
 
     private var backgroundView : ImageView;
     private var leftIconView : ImageView;
@@ -26,6 +26,12 @@ class Button extends ViewContainer {
     private var hitTestView : Rect;
 
     private var listenersAdded : Bool;
+    private var _leftIconMargin : Float;
+    private var _rightIconMargin : Float;
+    private var _upIconMargin : Float;
+    private var _downIconMargin : Float;
+    private var _hitAreaExtendX : Float;
+    private var _hitAreaExtendY : Float;
     private var _disabled : Bool;
 
     public var background(get, set) : Drawable;
@@ -56,15 +62,18 @@ class Button extends ViewContainer {
     public var textAlign(get, set) : TextAlignExt;
     public var font(get, set) : FontExt;
     public var text(get, set) : String;
-    public var leftIconMargin(default, set) : Float;
-    public var rightIconMargin(default, set) : Float;
-    public var upIconMargin(default, set) : Float;
-    public var downIconMargin(default, set) : Float;
+    public var leftIconMargin(get, set) : Float;
+    public var rightIconMargin(get, set) : Float;
+    public var upIconMargin(get, set) : Float;
+    public var downIconMargin(get, set) : Float;
     public var disabled(get, set) : Bool;
     public var leftIconAlpha(get, set) : Float;
     public var rightIconAlpha(get, set) : Float;
     public var upIconAlpha(get, set) : Float;
     public var downIconAlpha(get, set) : Float;
+    public var hitAreaExtend(never, set) : Float;
+    public var hitAreaExtendX(get, set) : Float;
+    public var hitAreaExtendY(get, set) : Float;
 
     @:keep
     public function new(context : Context) {
@@ -79,10 +88,12 @@ class Button extends ViewContainer {
         _addChild(hitTestView = new Rect(context));
 
         listenersAdded = false;
-        leftIconMargin = 0.0;
-        rightIconMargin = 0.0;
-        upIconMargin = 0.0;
-        downIconMargin = 0.0;
+        _leftIconMargin = 0.0;
+        _rightIconMargin = 0.0;
+        _upIconMargin = 0.0;
+        _downIconMargin = 0.0;
+        _hitAreaExtendX = 0.0;
+        _hitAreaExtendY = 0.0;
         _disabled = false;
 
         #if flash
@@ -232,6 +243,18 @@ class Button extends ViewContainer {
                 downIconAlpha = cast value;
                 return true;
 
+            case Styleable.hitAreaExtend:
+                hitAreaExtend = computeDimension(cast value, false);
+                return true;
+
+            case Styleable.hitAreaExtendX:
+                hitAreaExtendX = computeDimension(cast value, false);
+                return true;
+
+            case Styleable.hitAreaExtendY:
+                hitAreaExtendY = computeDimension(cast value, true);
+                return true;
+
             default:
                 return false;
         }
@@ -293,9 +316,9 @@ class Button extends ViewContainer {
     }
 
     private function layoutHitTestView() : Void {
-        hitTestView.offsetX = 0.0;
-        hitTestView.offsetY = 0.0;
-        hitTestView.selfLayout(MeasureSpec.EXACT(_width), MeasureSpec.EXACT(_height));
+        hitTestView.offsetX = - _hitAreaExtendX;
+        hitTestView.offsetY = - _hitAreaExtendY;
+        hitTestView.selfLayout(MeasureSpec.EXACT(_width + _hitAreaExtendX * 2.0), MeasureSpec.EXACT(_height + _hitAreaExtendY * 2.0));
     }
 
     @:noCompletion
@@ -308,9 +331,12 @@ class Button extends ViewContainer {
             listenersAdded = true;
             updateState("pressed", true);
 
-            hitTestView.offsetX = - HIT_AREA_OFFSET;
-            hitTestView.offsetY = - HIT_AREA_OFFSET;
-            hitTestView.selfLayout(MeasureSpec.EXACT(_width + HIT_AREA_OFFSET * 2.0), MeasureSpec.EXACT(_height + HIT_AREA_OFFSET * 2.0));
+            var hitAreaShiftX = Math.max(MIN_HIT_AREA_SHIFT, _hitAreaExtendX + _context.applicationStage.width * 0.1);
+            var hitAreaShiftY = Math.max(MIN_HIT_AREA_SHIFT, _hitAreaExtendY + _context.applicationStage.height * 0.1);
+
+            hitTestView.offsetX = - hitAreaShiftX;
+            hitTestView.offsetY = - hitAreaShiftY;
+            hitTestView.selfLayout(MeasureSpec.EXACT(_width + hitAreaShiftX * 2.0), MeasureSpec.EXACT(_height + hitAreaShiftY * 2.0));
 
             if (_sprite.stage != null) {
                 _sprite.stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove, true);
@@ -663,30 +689,62 @@ class Button extends ViewContainer {
     }
 
     @:noCompletion
+    private function get_leftIconMargin() : Float {
+        return _leftIconMargin;
+    }
+
+    @:noCompletion
     private function set_leftIconMargin(value : Float) : Float {
-        leftIconMargin = value;
-        requestLayout();
+        if (_leftIconMargin != value) {
+            _leftIconMargin = value;
+            requestLayout();
+        }
+
         return value;
+    }
+
+    @:noCompletion
+    private function get_rightIconMargin() : Float {
+        return _rightIconMargin;
     }
 
     @:noCompletion
     private function set_rightIconMargin(value : Float) : Float {
-        rightIconMargin = value;
-        requestLayout();
+        if (_rightIconMargin != value) {
+            _rightIconMargin = value;
+            requestLayout();
+        }
+
         return value;
+    }
+
+    @:noCompletion
+    private function get_upIconMargin() : Float {
+        return _upIconMargin;
     }
 
     @:noCompletion
     private function set_upIconMargin(value : Float) : Float {
-        upIconMargin = value;
-        requestLayout();
+        if (_upIconMargin != value) {
+            _upIconMargin = value;
+            requestLayout();
+        }
+
         return value;
     }
 
     @:noCompletion
+    private function get_downIconMargin() : Float {
+        return _downIconMargin;
+    }
+
+    @:noCompletion
     private function set_downIconMargin(value : Float) : Float {
-        downIconMargin = value;
-        requestLayout();
+        if (_downIconMargin != value) {
+            _downIconMargin = value;
+            requestLayout();
+        }
+
         return value;
     }
 
@@ -697,8 +755,11 @@ class Button extends ViewContainer {
 
     @:noCompletion
     private function set_disabled(value : Bool) : Bool {
-        _disabled = value;
-        updateState("disabled", value);
+        if (_disabled != value) {
+            _disabled = value;
+            updateState("disabled", value);
+        }
+
         return value;
     }
 
@@ -743,6 +804,47 @@ class Button extends ViewContainer {
     @:noCompletion
     private function set_downIconAlpha(value : Float) : Float {
         downIconView.alpha = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function set_hitAreaExtend(value : Float) : Float {
+        if (_hitAreaExtendX != value || _hitAreaExtendX != value) {
+            _hitAreaExtendX = value;
+            _hitAreaExtendY = value;
+            layoutHitTestView();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_hitAreaExtendX() : Float {
+        return _hitAreaExtendX;
+    }
+
+    @:noCompletion
+    private function set_hitAreaExtendX(value : Float) : Float {
+        if (_hitAreaExtendX != value) {
+            _hitAreaExtendX = value;
+            layoutHitTestView();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_hitAreaExtendY() : Float {
+        return _hitAreaExtendY;
+    }
+
+    @:noCompletion
+    private function set_hitAreaExtendY(value : Float) : Float {
+        if (_hitAreaExtendY != value) {
+            _hitAreaExtendY = value;
+            layoutHitTestView();
+        }
+
         return value;
     }
 }

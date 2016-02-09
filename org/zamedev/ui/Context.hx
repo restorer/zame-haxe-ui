@@ -2,6 +2,7 @@ package org.zamedev.ui;
 
 import org.zamedev.ui.internal.ApplicationStage;
 import org.zamedev.ui.res.Configuration;
+import org.zamedev.ui.res.Hints;
 import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
 
@@ -11,4 +12,5 @@ interface Context {
     public var configuration(get, set) : Configuration;
     public var resourceManager(get, null) : ResourceManager;
     public var inflater(get, null) : Inflater;
+    public var hints(get, null) : Hints;
 }

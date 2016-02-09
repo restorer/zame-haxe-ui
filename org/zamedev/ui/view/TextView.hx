@@ -1,5 +1,6 @@
 package org.zamedev.ui.view;
 
+import haxe.Utf8;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.events.FocusEvent;
@@ -24,40 +25,44 @@ using StringTools;
 #end
 
 class TextView extends View {
-    private var _font:FontExt;
-    private var _textColor:Null<Int>;
-    private var _textSize:Null<Int>;
-    private var _textLeading:Null<Int>;
-    private var _textAlign:TextAlignExt;
-    private var _text:String;
-    private var _htmlText:String;
-    private var _editable:Bool;
-    private var _displayAsPassword:Bool;
+    private var _font : FontExt;
+    private var _textColor : Null<Int>;
+    private var _textSize : Null<Int>;
+    private var _textLeading : Null<Int>;
+    private var _textAlign : TextAlignExt;
+    private var _text : String;
+    private var _htmlText : String;
+    private var _editable : Bool;
+    private var _displayAsPassword : Bool;
+    private var _singleLine : Bool;
+    private var _ellipsize : Bool;
 
-    private var _textField:TextFieldExt;
-    private var _textFormat:TextFormat;
-    private var _listenersAdded:Bool;
+    private var _textField : TextFieldExt;
+    private var _textFormat : TextFormat;
+    private var _listenersAdded : Bool;
 
     #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
-        private var _cachedBitmap:Bitmap;
+        private var _cachedBitmap : Bitmap;
     #end
 
     #if bitmapFont
-        private var _bitmapTextField:BitmapTextField;
+        private var _bitmapTextField : BitmapTextField;
     #end
 
-    public var font(get, set):FontExt;
-    public var textColor(get, set):Null<Int>;
-    public var textSize(get, set):Null<Int>;
-    public var textLeading(get, set):Null<Int>;
-    public var textAlign(get, set):TextAlignExt;
-    public var text(get, set):String;
-    public var htmlText(never, set):String;
-    public var editable(get, set):Bool;
-    public var displayAsPassword(get, set):Bool;
+    public var font(get, set) : FontExt;
+    public var textColor(get, set) : Null<Int>;
+    public var textSize(get, set) : Null<Int>;
+    public var textLeading(get, set) : Null<Int>;
+    public var textAlign(get, set) : TextAlignExt;
+    public var text(get, set) : String;
+    public var htmlText(never, set) : String;
+    public var editable(get, set) : Bool;
+    public var displayAsPassword(get, set) : Bool;
+    public var singleLine(get, set) : Bool;
+    public var ellipsize(get, set) : Bool;
 
     @:keep
-    public function new(context:Context) {
+    public function new(context : Context) {
         super(context);
 
         _font = null;
@@ -69,6 +74,8 @@ class TextView extends View {
         _htmlText = null;
         _editable = false;
         _displayAsPassword = false;
+        _singleLine = false;
+        _ellipsize = false;
 
         _textField = null;
         _textFormat = null;
@@ -83,7 +90,7 @@ class TextView extends View {
         #end
     }
 
-    private function reConfigure():Void {
+    private function reConfigure() : Void {
         if (_textField != null && _textField.parent != null) {
             if (_editable) {
                 updateEditedText();
@@ -162,8 +169,8 @@ class TextView extends View {
                 _textField.type = TextFieldType.INPUT;
             } else {
                 _textField.selectable = false;
-                _textField.wordWrap = true;
-                _textField.multiline = true;
+                _textField.wordWrap = !_singleLine;
+                _textField.multiline = !_singleLine;
                 _textField.type = TextFieldType.DYNAMIC;
             }
 
@@ -207,7 +214,7 @@ class TextView extends View {
         }
     }
 
-    private function getAlignForTextField(): #if legacy String #else TextFormatAlign #end {
+    private function getAlignForTextField() : #if legacy String #else TextFormatAlign #end {
         if (_textAlign == null) {
             return null;
         }
@@ -227,12 +234,12 @@ class TextView extends View {
         }
     }
 
-    private function getHtmlTextForTextField():String {
+    private function getHtmlTextForTextField() : String {
         if (_htmlText == null) {
             return null;
         }
 
-        var result = ~/"@(font\/[^"]+)"/g.map(_htmlText, function(re:EReg):String {
+        var result = ~/"@(font\/[^"]+)"/g.map(_htmlText, function(re : EReg) : String {
             #if bitmapFont
                 if (_font.bitmapFont != null) {
                     return re.matched(0);
@@ -245,14 +252,14 @@ class TextView extends View {
             return "\"" + font.ttfFontName + "\"";
         });
 
-        result = ~/"@(color\/[^"]+)"/g.map(result, function(re:EReg):String {
+        result = ~/"@(color\/[^"]+)"/g.map(result, function(re : EReg) : String {
             var resId = _context.resourceManager.findIdByName(re.matched(1));
             var color = _context.resourceManager.getColor(resId == null ? 0 : resId);
 
             return "\"" + Color.toHexString(color) + "\"";
         });
 
-        result = ~/"@(dimen\/[^"]+)"/g.map(result, function(re:EReg):String {
+        result = ~/"@(dimen\/[^"]+)"/g.map(result, function(re : EReg) : String {
             var resId = _context.resourceManager.findIdByName(re.matched(1));
             var dimen = _context.resourceManager.getDimension(resId == null ? 0 : resId);
 
@@ -266,7 +273,7 @@ class TextView extends View {
     }
 
     #if bitmapFont
-        private function updateBitmapTextFieldColor():Void {
+        private function updateBitmapTextFieldColor() : Void {
             if (_textColor == null) {
                 _bitmapTextField.useTextColor = false;
             } else {
@@ -275,7 +282,7 @@ class TextView extends View {
             }
         }
 
-        private function getAlignForBitmapTextField():BitmapTextAlign {
+        private function getAlignForBitmapTextField() : BitmapTextAlign {
             if (_textAlign == null) {
                 return BitmapTextAlign.LEFT;
             }
@@ -293,7 +300,7 @@ class TextView extends View {
         }
     #end
 
-    override private function _inflate(attId:Styleable, value:Dynamic):Bool {
+    override private function _inflate(attId : Styleable, value : Dynamic) : Bool {
         if (super._inflate(attId, value)) {
             return true;
         }
@@ -331,12 +338,20 @@ class TextView extends View {
                 displayAsPassword = cast value;
                 return true;
 
+            case Styleable.singleLine:
+                singleLine = cast value;
+                return true;
+
+            case Styleable.ellipsize:
+                ellipsize = cast value;
+                return true;
+
             default:
                 return false;
         }
     }
 
-    override private function measureAndLayout(widthSpec:MeasureSpec, heightSpec:MeasureSpec):Bool {
+    override private function measureAndLayout(widthSpec : MeasureSpec, heightSpec : MeasureSpec) : Bool {
         if (super.measureAndLayout(widthSpec, heightSpec)) {
             return true;
         }
@@ -374,19 +389,21 @@ class TextView extends View {
             _textField.wordWrap = false;
             _textField.autoSize = TextFieldAutoSize.LEFT;
 
+            if (_text != null) {
+                _textField.text = _text;
+            }
+
             switch (widthSpec) {
                 case MeasureSpec.UNSPECIFIED:
                     _width = (_textField.textWidth + #if flash 8 #else 4 #end);
 
                 case MeasureSpec.AT_MOST(size):
                     _width = Math.min(size, (_textField.textWidth + #if flash 8 #else 4 #end));
-                    _textField.wordWrap = true;
-                    _textField.width = size;
+                    setWidthAndEllipsize(size);
 
                 case MeasureSpec.EXACT(size):
                     _width = size;
-                    _textField.wordWrap = true;
-                    _textField.width = size;
+                    setWidthAndEllipsize(size);
             }
 
             switch (heightSpec) {
@@ -401,9 +418,7 @@ class TextView extends View {
             }
 
             #if html5
-                // if (_textLeading != null && _textField.textHeight > (_textSize == null ? 0 : _textSize) + _textLeading) {
-
-                if (_textLeading != null && _textField.numLines > 1) {
+                if (!_singleLine && _textLeading != null && _textField.numLines > 1) {
                     _height += _textLeading;
                 }
             #end
@@ -433,8 +448,35 @@ class TextView extends View {
         return true;
     }
 
+    private function setWidthAndEllipsize(size : Float) : Void {
+        _textField.wordWrap = !_singleLine;
+        _textField.width = size;
+
+        if (!_singleLine || _text == null || _textField.text == null || (_textField.textWidth + #if flash 8 #else 4 #end) <= size) {
+            return;
+        }
+
+        var str = _text;
+
+        if (_ellipsize) {
+            str += "...";
+            _textField.text = str;
+
+            while (_textField.text != "" && (_textField.textWidth + #if flash 8 #else 4 #end) > size) {
+                str = Utf8.sub(str, 0, Utf8.length(str) - 4) + "...";
+                _textField.text = str;
+            }
+        } else {
+            // to fix legacy mode rendering
+            while (_textField.text != "" && (_textField.textWidth + #if flash 8 #else 4 #end) > size) {
+                str = Utf8.sub(str, 0, Utf8.length(str) - 1);
+                _textField.text = str;
+            }
+        }
+    }
+
     #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
-        private function updateCache():Void {
+        private function updateCache() : Void {
             var cachedBitmapData = new BitmapData(
                 Std.int(Math.max(1, Math.ceil(_width))),
                 Std.int(Math.max(1, Math.ceil(_height))),
@@ -448,28 +490,28 @@ class TextView extends View {
         }
     #end
 
-    private function onFocusIn(_):Void {
+    private function onFocusIn(_) : Void {
         if (_textField != null && _textField.stage != null #if !legacy && _textField.stage.focus == _textField #end) {
             dispatchEvent(new FocusEvent(FocusEvent.FOCUS_IN));
         }
     }
 
-    private function onFocusOut(_):Void {
+    private function onFocusOut(_) : Void {
         dispatchEvent(new FocusEvent(FocusEvent.FOCUS_OUT));
     }
 
-    private function updateEditedText():Void {
+    private function updateEditedText() : Void {
         _htmlText = null;
         _text = _textField.text;
     }
 
     @:noCompletion
-    private function get_textColor():Null<Int> {
+    private function get_textColor() : Null<Int> {
         return _textColor;
     }
 
     @:noCompletion
-    private function set_textColor(value:Null<Int>):Null<Int> {
+    private function set_textColor(value : Null<Int>) : Null<Int> {
         if (_textColor != value) {
             _textColor = value;
 
@@ -501,12 +543,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_textSize():Null<Int> {
+    private function get_textSize() : Null<Int> {
         return _textSize;
     }
 
     @:noCompletion
-    private function set_textSize(value:Null<Int>):Null<Int> {
+    private function set_textSize(value : Null<Int>) : Null<Int> {
         if (_textSize != value) {
             _textSize = value;
 
@@ -534,12 +576,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_textLeading():Null<Int> {
+    private function get_textLeading() : Null<Int> {
         return _textLeading;
     }
 
     @:noCompletion
-    private function set_textLeading(value:Null<Int>):Null<Int> {
+    private function set_textLeading(value : Null<Int>) : Null<Int> {
         if (_textLeading != value) {
             _textLeading = value;
 
@@ -566,12 +608,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_textAlign():TextAlignExt {
+    private function get_textAlign() : TextAlignExt {
         return _textAlign;
     }
 
     @:noCompletion
-    private function set_textAlign(value:TextAlignExt):TextAlignExt {
+    private function set_textAlign(value : TextAlignExt) : TextAlignExt {
         if (_textAlign != value) {
             _textAlign = value;
 
@@ -603,12 +645,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_font():FontExt {
+    private function get_font() : FontExt {
         return _font;
     }
 
     @:noCompletion
-    private function set_font(value:FontExt):FontExt {
+    private function set_font(value : FontExt) : FontExt {
         if (!FontExt.equals(_font, value)) {
             _font = value;
             reConfigure();
@@ -632,7 +674,7 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_text():String {
+    private function get_text() : String {
         if (_editable && _textField != null) {
             updateEditedText();
         }
@@ -641,7 +683,7 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function set_text(value:String):String {
+    private function set_text(value : String) : String {
         if (_text != value || _htmlText != null) {
             _text = value;
             _htmlText = null;
@@ -668,7 +710,7 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function set_htmlText(value:String):String {
+    private function set_htmlText(value : String) : String {
         if (_htmlText != value || _text != null) {
             _htmlText = value;
             _text = null;
@@ -695,12 +737,12 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_editable():Bool {
+    private function get_editable() : Bool {
         return _editable;
     }
 
     @:noCompletion
-    private function set_editable(value:Bool):Bool {
+    private function set_editable(value : Bool) : Bool {
         if (_editable != value) {
             _editable = value;
             reConfigure();
@@ -710,15 +752,46 @@ class TextView extends View {
     }
 
     @:noCompletion
-    private function get_displayAsPassword():Bool {
+    private function get_displayAsPassword() : Bool {
         return _displayAsPassword;
     }
 
     @:noCompletion
-    private function set_displayAsPassword(value:Bool):Bool {
+    private function set_displayAsPassword(value : Bool) : Bool {
         if (_displayAsPassword != value) {
             _displayAsPassword = value;
             reConfigure();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_singleLine() : Bool {
+        return _singleLine;
+    }
+
+    @:noCompletion
+    private function set_singleLine(value : Bool) : Bool {
+        if (_singleLine != value) {
+            _singleLine = value;
+            reConfigure();
+            requestLayout();
+        }
+
+        return value;
+    }
+
+    @:noCompletion
+    private function get_ellipsize() : Bool {
+        return _ellipsize;
+    }
+
+    @:noCompletion
+    private function set_ellipsize(value : Bool) : Bool {
+        if (_ellipsize != value) {
+            _ellipsize = value;
+            requestLayout();
         }
 
         return value;

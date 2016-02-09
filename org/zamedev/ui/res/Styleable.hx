@@ -75,6 +75,11 @@ abstract Styleable(Int) from Int to Int {
     var placeholderFont = 69; // FONT
     var editableFont = 70; // FONT
     var marginBetween = 71; // DIMENSION
+    var hitAreaExtend = 72; // DIMENSION
+    var hitAreaExtendX = 73; // DIMENSION
+    var hitAreaExtendY = 74; // DIMENSION
+    var singleLine = 75; // BOOL
+    var ellipsize = 76; // BOOL
 
     var _custom = 500000000;
     var _layout = 1000000000;
