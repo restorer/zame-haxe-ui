@@ -23,6 +23,16 @@ class ParseHelper {
         };
     }
 
+    public static function parseInt(textValue : String, pos : GenPosition) : Int {
+        var value = Std.parseInt(textValue.trim());
+
+        if (value == null) {
+            throw new UiParseError('"${textValue}" is not an int', pos);
+        }
+
+        return value;
+    }
+
     public static function parseFloat(textValue : String, pos : GenPosition) : Float {
         var value = Std.parseFloat(textValue.trim());
 

@@ -109,6 +109,15 @@ class ResParser {
                     case "layoutpart":
                         resGenerator.putLayoutPart(name, parseLayout(resGenerator, name, item.node, item.pos), item.pos);
 
+                    case "bool":
+                        resGenerator.putBool(name, ParseHelper.parseBool(resolved.innerText()), item.pos);
+
+                    case "int":
+                        resGenerator.putInt(name, ParseHelper.parseInt(resolved.innerText(), item.pos), item.pos);
+
+                    case "float":
+                        resGenerator.putFloat(name, ParseHelper.parseFloat(resolved.innerText(), item.pos), item.pos);
+
                     default:
                         throw new UiParseError('Unknown resource of type "${item.node.nodeName}"', item.pos);
                 }

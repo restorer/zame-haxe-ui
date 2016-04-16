@@ -39,6 +39,9 @@ class ResGenerator {
     public var styleMap : LinkedMap<String, GenItem<GenStyle>> = new LinkedMap<String, GenItem<GenStyle>>();
     public var layoutMap : LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
     public var layoutPartMap : LinkedMap<String, GenItem<Xml>> = new LinkedMap<String, GenItem<Xml>>();
+    public var boolMap : LinkedMap<String, GenItem<Bool>> = new LinkedMap<String, GenItem<Bool>>();
+    public var intMap : LinkedMap<String, GenItem<Int>> = new LinkedMap<String, GenItem<Int>>();
+    public var floatMap : LinkedMap<String, GenItem<Float>> = new LinkedMap<String, GenItem<Float>>();
 
     public var classMap : Map<String, String> = [
         "ImageView" => "org.zamedev.ui.view.ImageView",
@@ -99,6 +102,18 @@ class ResGenerator {
 
     public function putLayoutPart(name : String, value : Xml, pos : GenPosition) : Void {
         putIfNotExists("layoutpart", layoutPartMap, name, value, pos);
+    }
+
+    public function putBool(name : String, value : Bool, pos : GenPosition) : Void {
+        putIfNotExists("bool", boolMap, name, value, pos);
+    }
+
+    public function putInt(name : String, value : Int, pos : GenPosition) : Void {
+        putIfNotExists("int", intMap, name, value, pos);
+    }
+
+    public function putFloat(name : String, value : Float, pos : GenPosition) : Void {
+        putIfNotExists("float", floatMap, name, value, pos);
     }
 
     public function getPackedDrawable(name : String, pos : GenPosition) : Drawable {
@@ -182,6 +197,9 @@ class ResGenerator {
         generateIds(sb, "drawable", drawableMap);
         generateIds(sb, "style", styleMap);
         generateIds(sb, "layout", layoutMap);
+        generateIds(sb, "bool", boolMap);
+        generateIds(sb, "int", intMap);
+        generateIds(sb, "float", floatMap);
 
         sb.add("\tpublic static function _loadInto(r : ResourceManager, c : Configuration) : Void {");
 
@@ -230,6 +248,18 @@ class ResGenerator {
 
         generateLoadValues(sb, layoutMap, function(key : String, value : Xml, pos : GenPosition) : String {
             return 'r.layoutMap[layout.${key}] = _inflateLayout_${pos.configuration.toArray().join("_")}_${key};';
+        });
+
+        generateLoadValues(sb, boolMap, function(key : String, value : Bool, pos : GenPosition) : String {
+            return 'r.boolMap[bool.${key}] = ${HaxeCode.genBool(value)};';
+        });
+
+        generateLoadValues(sb, intMap, function(key : String, value : Int, pos : GenPosition) : String {
+            return 'r.intMap[int.${key}] = ${HaxeCode.genInt(value)};';
+        });
+
+        generateLoadValues(sb, floatMap, function(key : String, value : Float, pos : GenPosition) : String {
+            return 'r.floatMap[float.${key}] = ${HaxeCode.genFloat(value)};';
         });
 
         sb.add("\t}\n");
@@ -313,7 +343,7 @@ class ResGenerator {
         sb.add('\tpublic static var nameToIdMap : Map<String, Int> = [\n');
 
         for (key in nameToIdMap.keys()) {
-            sb.add('\t\t${HaxeCode.genString(key)} => ${HaxeCode.getInt(nameToIdMap[key])},\n');
+            sb.add('\t\t${HaxeCode.genString(key)} => ${HaxeCode.genInt(nameToIdMap[key])},\n');
         }
 
         sb.add("\t];\n\n");

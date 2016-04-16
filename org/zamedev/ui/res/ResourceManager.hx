@@ -21,6 +21,9 @@ class ResourceManager {
     private var drawableMap : Map<Int, Drawable>;
     private var styleMap : Map<Int, Style>;
     private var layoutMap : Map<Int, LayoutParams -> ResourceManager -> View>;
+    private var boolMap : Map<Int, Bool>;
+    private var intMap : Map<Int, Int>;
+    private var floatMap : Map<Int, Float>;
     private var localeRules : LocaleRules;
 
     public function new(context : Context) {
@@ -37,6 +40,9 @@ class ResourceManager {
         drawableMap = new Map<Int, Drawable>();
         styleMap = new Map<Int, Style>();
         layoutMap = new Map<Int, LayoutParams -> ResourceManager -> View>();
+        boolMap = new Map<Int, Bool>();
+        intMap = new Map<Int, Int>();
+        floatMap = new Map<Int, Float>();
 
         localeRules = null;
         R._loadInto(this, context.configuration);
@@ -110,6 +116,18 @@ class ResourceManager {
 
     public function getStyle(resId : Int) : Style {
         return ensureFound(styleMap[resId], resId, "style");
+    }
+
+    public function getBool(resId : Int) : Bool {
+        return ensureFound(boolMap[resId], resId, "bool");
+    }
+
+    public function getInt(resId : Int) : Int {
+        return ensureFound(intMap[resId], resId, "int");
+    }
+
+    public function getFloat(resId : Int) : Float {
+        return ensureFound(floatMap[resId], resId, "float");
     }
 
     private function _getInflateFunc(resId : Int) : LayoutParams -> ResourceManager -> View {

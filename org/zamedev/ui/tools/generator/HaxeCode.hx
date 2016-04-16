@@ -43,7 +43,11 @@ class HaxeCode {
         }
     }
 
-    public static function getInt(value : Int) : String {
+    public static function genInt(value : Int) : String {
+        return Std.string(value);
+    }
+
+    public static function genFloat(value : Float) : String {
         return Std.string(value);
     }
 
