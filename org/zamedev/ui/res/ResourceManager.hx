@@ -70,7 +70,7 @@ class ResourceManager {
         return ensureFound(dimenMap[resId], resId, "dimen", "dimension");
     }
 
-    public function getFloat(resId : Int) : Float {
+    public function getDimensionValue(resId : Int) : Float {
         var value = ensureFound(dimenMap[resId], resId, "dimen", "dimension");
 
         switch (value) {
