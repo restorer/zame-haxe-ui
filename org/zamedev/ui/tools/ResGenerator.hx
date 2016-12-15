@@ -29,7 +29,7 @@ class ResGenerator {
     private var nameToIdMap : LinkedMap<String, Int> = new LinkedMap<String, Int>();
 
     public var includeMap : Map<String, Bool>;
-    public var identifierMap : LinkedMap<String, GenItem<Void>> = new LinkedMap<String, GenItem<Void>>();
+    public var identifierMap : LinkedMap<String, GenItem<Nothing>> = new LinkedMap<String, GenItem<Nothing>>();
     public var colorMap : LinkedMap<String, GenItem<Int>> = new LinkedMap<String, GenItem<Int>>();
     public var dimenMap : LinkedMap<String, GenItem<Dimension>> = new LinkedMap<String, GenItem<Dimension>>();
     public var stringMap : LinkedMap<String, GenItem<String>> = new LinkedMap<String, GenItem<String>>();

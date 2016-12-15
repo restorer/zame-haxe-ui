@@ -114,6 +114,10 @@ class TextFieldExt extends TextField {
             range.start = 0;
             range.end = value.length;
 
+            #if (openfl > "4.0.0")
+                __text = value;
+            #end
+
             return __textEngine.text = value;
         }
     #end

@@ -45,12 +45,19 @@ class BitmapExt extends Bitmap {
     }
 
     @:noCompletion
-    private override function __hitTest(x : Float, y : Float, shapeFlag : Bool, stack : Array<DisplayObject>, interactiveOnly : Bool) : Bool {
+    private override function __hitTest(
+        x : Float,
+        y : Float,
+        shapeFlag : Bool,
+        stack : Array<DisplayObject>,
+        interactiveOnly : Bool,
+        hitObject : DisplayObject
+    ) : Bool {
         if (!interactiveMode) {
             return false;
         }
 
-        return super.__hitTest(x, y, shapeFlag, stack, interactiveOnly);
+        return super.__hitTest(x, y, shapeFlag, stack, interactiveOnly, hitObject);
     }
 }
 

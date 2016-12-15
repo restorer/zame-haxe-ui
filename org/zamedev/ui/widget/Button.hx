@@ -106,7 +106,7 @@ class Button extends ViewContainer {
             hitTestView.fillColor = 0xff0000;
             hitTestView.alpha = 0.25;
         #else
-            hitTestView.alpha = 0.0;
+            hitTestView.alpha = 0.01; // 0.01 instead of 0.0 for newer openfl
         #end
 
         _sprite.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
