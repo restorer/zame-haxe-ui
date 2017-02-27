@@ -6,6 +6,7 @@ import org.zamedev.ui.graphics.DimensionTools;
 import org.zamedev.ui.graphics.DimensionType;
 import org.zamedev.ui.res.MeasureSpec;
 
+// TODO: Rename to BaseViewCollection
 class BaseViewContainer extends View {
     @:keep
     public function new(context : Context) {

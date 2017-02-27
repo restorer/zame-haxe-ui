@@ -41,7 +41,7 @@ class TextView extends View {
     private var _textFormat : TextFormat;
     private var _listenersAdded : Bool;
 
-    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+    #if (html5 && canvas && !ui_noTextViewCache)
         private var _cachedBitmap : Bitmap;
     #end
 
@@ -81,7 +81,7 @@ class TextView extends View {
         _textFormat = null;
         _listenersAdded = false;
 
-        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+        #if (html5 && canvas && !ui_noTextViewCache)
             _cachedBitmap = null;
         #end
 
@@ -105,7 +105,7 @@ class TextView extends View {
             _sprite.removeChild(_textField);
         }
 
-        #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+        #if (html5 && canvas && !ui_noTextViewCache)
             if (_cachedBitmap != null && _cachedBitmap.parent != null) {
                 _sprite.removeChild(_cachedBitmap);
             }
@@ -157,7 +157,7 @@ class TextView extends View {
 
                 _textFormat = new TextFormat();
 
-                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+                #if (html5 && canvas && !ui_noTextViewCache)
                     _cachedBitmap = new Bitmap();
                 #end
             }
@@ -174,7 +174,7 @@ class TextView extends View {
                 _textField.type = TextFieldType.DYNAMIC;
             }
 
-            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+            #if (html5 && canvas && !ui_noTextViewCache)
                 if (_editable) {
                     _sprite.addChild(_textField);
                 } else {
@@ -206,7 +206,7 @@ class TextView extends View {
                 _listenersAdded = true;
             }
 
-            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+            #if (html5 && canvas && !ui_noTextViewCache)
                 if (!_editable) {
                     updateCache();
                 }
@@ -214,7 +214,7 @@ class TextView extends View {
         }
     }
 
-    private function getAlignForTextField() : #if legacy String #else TextFormatAlign #end {
+    private function getAlignForTextField() : TextFormatAlign {
         if (_textAlign == null) {
             return null;
         }
@@ -428,17 +428,17 @@ class TextView extends View {
                     _textField.autoSize = TextFieldAutoSize.NONE;
 
                 default:
-                    #if (native && openfl_legacy)
+                    #if ui_debug
                         if (_textField.numLines == 1) {
                             _textField.autoSize = TextFieldAutoSize.NONE;
-                            _textField.width = _width * 1.15;
+                            _textField.width = _width;
                         }
                     #end
             }
 
             _textField.height = _height;
 
-            #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+            #if (html5 && canvas && !ui_noTextViewCache)
                 if (!_editable) {
                     updateCache();
                 }
@@ -475,7 +475,7 @@ class TextView extends View {
         }
     }
 
-    #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+    #if (html5 && canvas && !ui_noTextViewCache)
         private function updateCache() : Void {
             var cachedBitmapData = new BitmapData(
                 Std.int(Math.max(1, Math.ceil(_width))),
@@ -491,7 +491,7 @@ class TextView extends View {
     #end
 
     private function onFocusIn(_) : Void {
-        if (_textField != null && _textField.stage != null #if !legacy && _textField.stage.focus == _textField #end) {
+        if (_textField != null && _textField.stage != null && _textField.stage.focus == _textField) {
             dispatchEvent(new FocusEvent(FocusEvent.FOCUS_IN));
         }
     }
@@ -531,7 +531,7 @@ class TextView extends View {
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
 
-                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+                #if (html5 && canvas && !ui_noTextViewCache)
                     if (!_editable) {
                         updateCache();
                     }
@@ -633,7 +633,7 @@ class TextView extends View {
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
 
-                #if (!flash && !webgl && !dom && !(native && openfl_legacy) && !ui_noTextViewCache)
+                #if (html5 && canvas && !ui_noTextViewCache)
                     if (!_editable) {
                         updateCache();
                     }

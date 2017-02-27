@@ -1,6 +1,7 @@
 package org.zamedev.ui.graphics;
 
 import openfl.display.DisplayObject;
+import openfl.geom.Point;
 
 class DisplayObjectExt {
     public static function setX<T:DisplayObject>(v : T, x : Float) : T {
@@ -62,6 +63,12 @@ class DisplayObjectExt {
     public static function setCxy<T : DisplayObject>(v : T, cx : Float, cy : Float) : T {
         v.x = cx - v.width / 2;
         v.y = cy - v.height / 2;
+        return v;
+    }
+
+    public static function setScale<T : DisplayObject>(v : T, value : Float) : T {
+        v.scaleX = value;
+        v.scaleY = value;
         return v;
     }
 }

@@ -4,6 +4,7 @@ import openfl.events.Event;
 import org.zamedev.ui.Context;
 import org.zamedev.ui.errors.UiError;
 
+// TODO: Rename to ViewCollection
 class ViewContainer extends BaseViewContainer {
     public var children : Array<View>;
 
