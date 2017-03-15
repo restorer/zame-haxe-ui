@@ -123,6 +123,10 @@ class TextFieldExt extends TextField {
                 __div.style.setProperty("-moz-user-select", "none", null);
                 __div.style.setProperty("-ms-user-select", "none", null);
                 __div.style.setProperty("-o-user-select", "none", null);
+
+                // to prevent blurred fonts on macOS
+                __div.style.setProperty("-webkit-font-smoothing", "antialiased"); // "subpixel-antialiased" is by default
+                __div.style.setProperty("-moz-osx-font-smoothing", "grayscale");
             }
         }
     }
