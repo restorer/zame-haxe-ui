@@ -62,6 +62,7 @@ class View extends EventDispatcher implements Inflatable {
     public var rotation(get, set) : Float;
     public var visibility(get, set) : ViewVisibility;
     public var alpha(get, set) : Float;
+    public var interactive(get, set) : Bool;
 
     @:keep
     public function new(context:Context) {
@@ -545,6 +546,17 @@ class View extends EventDispatcher implements Inflatable {
     @:noCompletion
     private function set_alpha(value : Float) : Float {
         _sprite.alpha = value;
+        return value;
+    }
+
+    @:noCompletion
+    private function get_interactive() : Bool {
+        return _sprite.mouseEnabled;
+    }
+
+    @:noCompletion
+    private function set_interactive(value : Bool) : Bool {
+        _sprite.mouseEnabled = value;
         return value;
     }
 }
