@@ -53,7 +53,7 @@ class LinearLayout extends ViewGroup {
         }
 
         for (child in children) {
-            var layoutParams = cast(child.layoutParams, LinearLayoutParams);
+            var layoutParams : LinearLayoutParams = cast child.layoutParams;
 
             if (child.visibility != ViewVisibility.GONE) {
                 layoutParams._marginLeftComputed = computeDimension(layoutParams.marginLeft, false);
@@ -167,7 +167,7 @@ class LinearLayout extends ViewGroup {
     }
 
     override private function computeMatchParentMeasureSpec(childLayoutParams : LayoutParams, size : Float, vertical : Bool) : MeasureSpec {
-        var layoutParams = cast(childLayoutParams, LinearLayoutParams);
+        var layoutParams : LinearLayoutParams = cast childLayoutParams;
 
         return MeasureSpec.EXACT(size - (vertical
             ? (layoutParams._marginTopComputed + layoutParams._marginBottomComputed)

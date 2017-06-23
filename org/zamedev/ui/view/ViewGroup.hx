@@ -196,7 +196,7 @@ class ViewGroup extends ViewContainer {
         if (deep) {
             for (child in children) {
                 if (Std.is(child, ViewGroup)) {
-                    var innerChild = cast(child, ViewGroup).findViewById(id);
+                    var innerChild = (cast child : ViewGroup).findViewById(id);
 
                     if (innerChild != null) {
                         return innerChild;
@@ -227,7 +227,7 @@ class ViewGroup extends ViewContainer {
             }
 
             if (deep && Std.is(child, ViewGroup)) {
-                for (innerChild in cast(child, ViewGroup).findViewsByTag(tag)) {
+                for (innerChild in (cast child : ViewGroup).findViewsByTag(tag)) {
                     result.push(innerChild);
                 }
             }

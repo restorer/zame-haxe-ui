@@ -62,7 +62,7 @@ class ConfigurationHelper {
     }
 
     private static function checkAndSet(configuration : Configuration, field : String, value : String, path : String) : Void {
-        if (cast(Reflect.getProperty(configuration, field), String) != "") {
+        if ((cast Reflect.getProperty(configuration, field) : String) != "") {
             throw new UiParseError('Duplicate qualifier "${field}" in "${path}"', new GenPosition(null, path));
         }
 

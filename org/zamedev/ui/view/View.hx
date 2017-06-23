@@ -205,8 +205,8 @@ class View extends EventDispatcher implements Inflatable {
 
         isInLayout = true;
 
-        var prevWidth = _width;
-        var prevHeight = _height;
+        // var prevWidth = _width;
+        // var prevHeight = _height;
         var widthSpec = this.widthSpec;
         var heightSpec = this.heightSpec;
 
@@ -215,7 +215,13 @@ class View extends EventDispatcher implements Inflatable {
 
         measureAndLayout(widthSpec, heightSpec);
 
-        if (_parent != null && (prevWidth != _width || prevHeight != _height)) {
+        // Идея кажется хорошей, что если ширина и высота не изменилась, то не надо делать reLayout,
+        // но на самом деле могут поменяться и другие layoutParams, например, координаты,
+        // и reLayout делать таки нужно.
+        //
+        // TODO: подумать, как реально можно прооптимизировать этот момент.
+
+        if (_parent != null /* && (prevWidth != _width || prevHeight != _height) */) {
             _parent.requestLayout();
         }
 

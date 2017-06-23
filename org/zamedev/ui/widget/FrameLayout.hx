@@ -22,7 +22,7 @@ class FrameLayout extends ViewGroup {
         }
 
         for (child in children) {
-            var layoutParams = cast(child.layoutParams, FrameLayoutParams);
+            var layoutParams : FrameLayoutParams = cast child.layoutParams;
 
             if (child.visibility != ViewVisibility.GONE) {
                 layoutParams._marginLeftComputed = computeDimension(layoutParams.marginLeft, false);
@@ -40,7 +40,7 @@ class FrameLayout extends ViewGroup {
         measureSelf(widthSpec, heightSpec);
 
         for (child in children) {
-            var layoutParams = cast(child.layoutParams, FrameLayoutParams);
+            var layoutParams : FrameLayoutParams = cast child.layoutParams;
 
             switch (layoutParams.gravity.horizontalType) {
                 case GravityType.END:
@@ -83,7 +83,7 @@ class FrameLayout extends ViewGroup {
     }
 
     override private function computeMatchParentMeasureSpec(childLayoutParams : LayoutParams, size : Float, vertical : Bool) : MeasureSpec {
-        var layoutParams = cast(childLayoutParams, FrameLayoutParams);
+        var layoutParams : FrameLayoutParams = cast childLayoutParams;
 
         return MeasureSpec.EXACT(size - (vertical
             ? (layoutParams._marginTopComputed + layoutParams._marginBottomComputed)
