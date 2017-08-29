@@ -24,7 +24,7 @@ class ResourceManager {
     private var boolMap : Map<Int, Bool>;
     private var intMap : Map<Int, Int>;
     private var floatMap : Map<Int, Float>;
-    private var localeRules : LocaleRules;
+    private var localeRulesMap : Map<String, LocaleRules>;
 
     public function new(context : Context) {
         this.context = context;
@@ -43,8 +43,8 @@ class ResourceManager {
         boolMap = new Map<Int, Bool>();
         intMap = new Map<Int, Int>();
         floatMap = new Map<Int, Float>();
+        localeRulesMap = new Map<String, LocaleRules>();
 
-        localeRules = null;
         R._loadInto(this, context.configuration);
     }
 
@@ -96,9 +96,12 @@ class ResourceManager {
 
     public function getQuantityString(resId : Int, quantity : Float) : String {
         var plural = ensureFound(pluralMap[resId], resId, "plurals");
+        var locale = (plural.locale == "" ? context.configuration.locale : plural.locale);
+        var localeRules = localeRulesMap[locale];
 
         if (localeRules == null) {
-            localeRules = LocaleTools.rulesForLocale(plural.locale);
+            localeRules = LocaleTools.rulesForLocale(locale);
+            localeRulesMap[locale] = localeRules;
         }
 
         var result = plural.valueMap[localeRules.getQuantityForFloat(quantity)];

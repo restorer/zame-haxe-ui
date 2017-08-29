@@ -127,6 +127,11 @@ class TextFieldExt extends TextField {
                 // to prevent blurred fonts on macOS
                 __div.style.setProperty("-webkit-font-smoothing", "antialiased"); // "subpixel-antialiased" is by default
                 __div.style.setProperty("-moz-osx-font-smoothing", "grayscale");
+
+                // disable font boosting
+                __div.style.setProperty("max-height", "100000px");
+                __div.style.setProperty("-moz-text-size-adjust", "none");
+                __div.style.setProperty("-webkit-text-size-adjust", "100%");
             }
         }
     }

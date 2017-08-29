@@ -187,7 +187,7 @@ class TextView extends View {
             _textFormat.font = _font.ttfFontName;
             _textFormat.color = _textColor;
             _textFormat.size = _textSize;
-            _textFormat.leading = (_textLeading == null ? null : _textLeading #if html5 - 4 #end );
+            _textFormat.leading = (_textLeading == null ? null : getFixedLeading(_textLeading));
             _textFormat.align = getAlignForTextField();
 
             _textField.defaultTextFormat = _textFormat;
@@ -395,17 +395,16 @@ class TextView extends View {
 
             switch (widthSpec) {
                 case MeasureSpec.UNSPECIFIED:
-                    _width = (_textField.textWidth + #if flash 8 #else 4 #end);
+                    _width = getFixedWidth(_textField.textWidth);
 
                 case MeasureSpec.AT_MOST(size):
-                    _width = Math.min(size, (_textField.textWidth + #if flash 8 #else 4 #end));
+                    _width = Math.min(size, getFixedWidth(_textField.textWidth));
                     setWidthAndEllipsize(size);
 
                 case MeasureSpec.EXACT(size):
                     _width = size;
                     setWidthAndEllipsize(size);
             }
-
             switch (heightSpec) {
                 case MeasureSpec.UNSPECIFIED:
                     _height = _textField.textHeight + 4;
@@ -597,7 +596,7 @@ class TextView extends View {
             #end
 
             if (_font.ttfFontName != null) {
-                _textFormat.leading = (_textLeading == null ? null : _textLeading #if html5 - 4 #end );
+                _textFormat.leading = (_textLeading == null ? null : getFixedLeading(_textLeading));
                 _textField.defaultTextFormat = _textFormat;
                 _textField.setTextFormat(_textFormat);
                 requestLayout();
@@ -795,5 +794,21 @@ class TextView extends View {
         }
 
         return value;
+    }
+
+    private inline function getFixedWidth(width : Float) : Float {
+        #if flash
+            return width + 8;
+        #else
+            return width + 4;
+        #end
+    }
+
+    private inline function getFixedLeading(leading : Int) : Int {
+        #if html5
+            return (leading < 4 ? 0 : leading - 4);
+        #else
+            return leading;
+        #end
     }
 }

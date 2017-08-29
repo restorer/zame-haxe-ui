@@ -58,6 +58,11 @@ class Application extends Sprite implements Context {
             _configuration.locale = "en";
         #else
             _configuration.locale = ~/\-.*$/.replace(Capabilities.language, "");
+
+            // just for case
+            if (_configuration.locale == "") {
+                _configuration.locale = "en";
+            }
         #end
 
         // Phones:
