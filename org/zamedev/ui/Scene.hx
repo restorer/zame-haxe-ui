@@ -29,6 +29,7 @@ class Scene extends ContextWrapper {
 
         _contentView = null;
         sceneSprite = new SceneSprite(context.applicationStage);
+        sceneSprite._ownerClass = Type.getClass(this);
         maskShape = new Shape();
         addedToApplicationStage = false;
         isCovered = false;
@@ -80,7 +81,7 @@ class Scene extends ContextWrapper {
         dispatchEvent(new Event(ADDING_TO_STAGE));
 
         Actuate.tween(sceneSprite, TRANSITION_DURATION, { alpha: 1.0, y: 0.0 }).onComplete(function():Void {
-            sceneSprite.dispatchEvents = true;
+            sceneSprite.dispatchEvents = !isCovered;
             dispatchEvent(new Event(Event.ADDED_TO_STAGE));
         });
     }

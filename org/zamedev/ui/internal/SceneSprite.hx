@@ -8,6 +8,7 @@ class SceneSprite extends Sprite {
     private var applicationStage : ApplicationStage;
 
     public var dispatchEvents : Bool;
+    public var _ownerClass : Class<Dynamic>;
 
     public function new(applicationStage : ApplicationStage) {
         super();
