@@ -96,11 +96,11 @@ class Button extends ViewContainer {
         _hitAreaExtendY = 0.0;
         _disabled = false;
 
-        #if dom
-            hitTestView.buttonMode = true;
-        #elseif (flash || html5)
+        // #if dom
+        //     hitTestView.buttonMode = true;
+        // #elseif (flash || html5)
             _sprite.buttonMode = true;
-        #end
+        // #end
 
         #if ui_debug
             hitTestView.fillColor = 0xff0000;

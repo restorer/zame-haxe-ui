@@ -2,7 +2,8 @@ package org.zamedev.ui.internal;
 
 import openfl.text.TextField;
 
-#if (js && dom)
+#if false
+// #if (js && dom)
 
 import js.Browser;
 import js.html.DOMElement;

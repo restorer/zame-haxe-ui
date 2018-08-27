@@ -1,12 +1,15 @@
 package org.zamedev.ui.view;
 
+import openfl.display.Shape;
 import org.zamedev.ui.Context;
-import org.zamedev.ui.internal.ShapeExt;
 import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
 
+// import org.zamedev.ui.internal.ShapeExt;
+
 class Rect extends View {
-    private var shape : ShapeExt;
+    // private var shape : ShapeExt;
+    private var shape : Shape;
     private var _fillColor : Int;
     private var _ellipseWidth : Float;
     private var _ellipseHeight : Float;
@@ -24,7 +27,8 @@ class Rect extends View {
     public function new(context : Context) {
         super(context);
 
-        _sprite.addChild(shape = new ShapeExt());
+        // _sprite.addChild(shape = new ShapeExt());
+        _sprite.addChild(shape = new Shape());
         _fillColor = 0;
         _ellipseWidth = 0.0;
         _ellipseHeight = 0.0;
@@ -139,16 +143,27 @@ class Rect extends View {
         return value;
     }
 
-    #if dom
-        @:noCompletion
-        private function get_buttonMode() : Bool {
-            return shape.buttonMode;
-        }
+    // #if dom
+    //     @:noCompletion
+    //     private function get_buttonMode() : Bool {
+    //         return shape.buttonMode;
+    //     }
+    //     //
+    //     @:noCompletion
+    //     private function set_buttonMode(value : Bool) : Bool {
+    //         shape.buttonMode = value;
+    //         return value;
+    //     }
+    // #end
 
-        @:noCompletion
-        private function set_buttonMode(value : Bool) : Bool {
-            shape.buttonMode = value;
-            return value;
-        }
-    #end
+    @:noCompletion
+    private function get_buttonMode() : Bool {
+        return _sprite.buttonMode;
+    }
+
+    @:noCompletion
+    private function set_buttonMode(value : Bool) : Bool {
+        _sprite.buttonMode = value;
+        return value;
+    }
 }

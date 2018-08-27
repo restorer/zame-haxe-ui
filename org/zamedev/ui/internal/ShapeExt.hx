@@ -2,7 +2,8 @@ package org.zamedev.ui.internal;
 
 import openfl.display.Shape;
 
-#if (js && dom)
+#if false
+// #if (js && dom)
 
 import openfl._internal.renderer.RenderSession;
 import openfl.display.DisplayObject;
