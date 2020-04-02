@@ -10,7 +10,7 @@ haxelib git zame-ui https://github.com/restorer/zame-haxe-ui.git
 
 ## Dependencies
 
-- **openfl** - `haxelib install polygonal-printf`
+- **openfl** - `haxelib install openfl`
 - **lime** - `haxelib install lime`
 - **zame-miscutils** - `haxelib git zame-miscutils https://github.com/restorer/zame-haxe-miscutils.git`
 - **polygonal-printf** - `haxelib install polygonal-printf`
