@@ -16,7 +16,7 @@ import org.zamedev.ui.res.MeasureSpec;
 import org.zamedev.ui.res.Styleable;
 import org.zamedev.ui.view.TextView;
 
-#if (haxe_ver < "4.0.5")
+#if (haxe_ver < "4.0.0")
     import haxe.Utf8;
 #elseif neko
     import neko.Utf8;
@@ -467,7 +467,7 @@ class TextView extends View {
             _textField.text = str;
 
             while (_textField.text != "" && (_textField.textWidth + #if flash 8 #else 4 #end) > size) {
-                #if ((haxe_ver >= "4.0.5") && !neko)
+                #if ((haxe_ver >= "4.0.0") && !neko)
                     str = (str : UnicodeString).substr(0, (str : UnicodeString).length - 4) + "...";
                 #else
                     str = Utf8.sub(str, 0, Utf8.length(str) - 4) + "...";
@@ -478,7 +478,7 @@ class TextView extends View {
         } else {
             // to fix legacy mode rendering
             while (_textField.text != "" && (_textField.textWidth + #if flash 8 #else 4 #end) > size) {
-                #if ((haxe_ver >= "4.0.5") && !neko)
+                #if ((haxe_ver >= "4.0.0") && !neko)
                     str = (str : UnicodeString).substr(0, (str : UnicodeString) - 1);
                 #else
                     str = Utf8.sub(str, 0, Utf8.length(str) - 1);
