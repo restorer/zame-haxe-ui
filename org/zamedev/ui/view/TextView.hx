@@ -479,7 +479,7 @@ class TextView extends View {
             // to fix legacy mode rendering
             while (_textField.text != "" && (_textField.textWidth + #if flash 8 #else 4 #end) > size) {
                 #if ((haxe_ver >= "4.0.0") && !neko)
-                    str = (str : UnicodeString).substr(0, (str : UnicodeString) - 1);
+                    str = (str : UnicodeString).substr(0, (str : UnicodeString).length - 1);
                 #else
                     str = Utf8.sub(str, 0, Utf8.length(str) - 1);
                 #end
