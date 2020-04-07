@@ -3,5 +3,5 @@
     <haxelib name="openfl" />
     <haxelib name="zame-miscutils" />
     <haxelib name="polygonal-printf" />
-    <haxelib name="extension-orientation" />
+    <!-- <haxelib name="extension-orientation" /> -->
 </project>
