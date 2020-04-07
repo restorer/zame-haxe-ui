@@ -1,6 +1,5 @@
 package org.zamedev.ui;
 
-import extension.eightsines.EsOrientation;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.system.Capabilities;
@@ -9,6 +8,11 @@ import org.zamedev.ui.res.Configuration;
 import org.zamedev.ui.res.Hints;
 import org.zamedev.ui.res.Inflater;
 import org.zamedev.ui.res.ResourceManager;
+
+#if extension_orientation
+    import extension.eightsines.EsOrientation;
+#end
+
 
 // TODO:
 // http://www.yiiframework.com/doc-2.0/guide-tutorial-i18n.html
@@ -53,7 +57,7 @@ class Application extends Sprite implements Context {
         var stageWidth = (stage.stageWidth < 1 ? 1 : stage.stageWidth);
         var stageHeight = (stage.stageHeight < 1 ? 1 : stage.stageHeight);
 
-        #if ios
+        #if (ios && legacy)
             // work-around for bug in lime legacy
             _configuration.locale = "en";
         #else
@@ -125,15 +129,18 @@ class Application extends Sprite implements Context {
         #end
     }
 
+    // Doesn't actually change orientation if compiled without extension-orientation.
     private function usePhoneAsPortTabletAsLong() : Void {
         #if ios
             _configuration.orientation = (_configuration.aspect == "long" ? "port" : "land");
         #end
 
-        EsOrientation.setScreenOrientation(_configuration.orientation == "port"
-            ? EsOrientation.ORIENTATION_PORTRAIT
-            : EsOrientation.ORIENTATION_LANDSCAPE
-        );
+        #if extension_orientation
+            EsOrientation.setScreenOrientation(_configuration.orientation == "port"
+                ? EsOrientation.ORIENTATION_PORTRAIT
+                : EsOrientation.ORIENTATION_LANDSCAPE
+            );
+        #end
 
         if (_resourceManager != null) {
             _resourceManager.reload();

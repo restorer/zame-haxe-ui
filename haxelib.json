@@ -1,10 +1,12 @@
 {
-	"name": "zame-ui",
-	"url": "https://github.com/restorer/zame-haxe-ui",
-	"license": "MIT",
-	"tags": [],
-	"description": "Android-like layout manager for openfl",
-	"version": "0.0.0",
-	"releasenote": "Initial release",
-	"contributors": [ "restorer" ]
+    "name": "zame-ui",
+    "url": "https://github.com/restorer/zame-haxe-ui",
+    "license": "MIT",
+    "tags": [],
+    "description": "Android-like layout manager for openfl",
+    "version": "1.0.0",
+    "releasenote": "Initial release",
+    "contributors": [
+        "restorer"
+    ]
 }

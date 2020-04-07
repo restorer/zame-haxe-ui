@@ -410,6 +410,7 @@ class TextView extends View {
                     _width = size;
                     setWidthAndEllipsize(size);
             }
+
             switch (heightSpec) {
                 case MeasureSpec.UNSPECIFIED:
                     _height = _textField.textHeight + 4;

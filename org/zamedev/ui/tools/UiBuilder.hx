@@ -1,7 +1,6 @@
 package org.zamedev.ui.tools;
 
 import haxe.io.Path;
-import neko.Lib;
 import org.zamedev.ui.errors.UiParseError;
 import org.zamedev.ui.graphics.Drawable;
 import org.zamedev.ui.res.Configuration;
@@ -72,14 +71,24 @@ class UiBuilder {
         resGenerator = new ResGenerator();
         resParser = new ResParser();
 
-        Lib.println("Processing assets ...");
+        println("Processing assets ...");
         processAssets(assetsPath);
 
-        Lib.println("Process resources ...");
+        println("Process resources ...");
         resParser.toGenerator(resGenerator);
 
-        Lib.println("Saving R.hx ...");
+        println("Saving R.hx ...");
         FileSystem.createDirectory(sourcePath);
         File.saveContent(Path.join([sourcePath, "R.hx"]), resGenerator.generate());
+    }
+
+    private static function println(message : String) : Void {
+        #if sys
+            Sys.print(message + "\n");
+        #elseif neko
+            neko.Lib.println(message);
+        #else
+            trace(message);
+        #end
     }
 }

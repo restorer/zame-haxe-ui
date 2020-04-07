@@ -1,8 +1,6 @@
 -lib zame-miscutils
 -main org.zamedev.ui.tools.styleable.Generator
--neko styleable-generator.n
--cmd neko styleable-generator.n
--cmd rm styleable-generator.n
+--interp
 
 --next
 

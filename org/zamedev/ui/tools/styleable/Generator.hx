@@ -49,6 +49,7 @@ class Generator {
         sb.add("}\n");
 
         File.saveContent(resolveResDir() + "/Styleable.hx" , sb.toString());
+        println("org.zamedev.ui.res.Styleable.hx generated");
 
         var sb = new StringBuf();
 
@@ -70,5 +71,16 @@ class Generator {
         sb.add("}\n");
 
         File.saveContent(resolveResDir() + "/StyleableNameMap.hx", sb.toString());
+        println("org.zamedev.ui.res.StyleableNameMap.hx generated");
+    }
+
+    private static function println(message : String) : Void {
+        #if sys
+            Sys.print(message + "\n");
+        #elseif neko
+            neko.Lib.println(message);
+        #else
+            trace(message);
+        #end
     }
 }
