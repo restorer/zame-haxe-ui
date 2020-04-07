@@ -1,13 +1,16 @@
 package org.zamedev.ui.graphics;
 
 import haxe.Int64;
-import openfl.Assets;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
-import openfl.display.DisplayObject;
-import openfl.display.PixelSnapping;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
+
+#if (!compiling_builder)
+    import openfl.Assets;
+    import openfl.display.Bitmap;
+    import openfl.display.BitmapData;
+    import openfl.display.DisplayObject;
+    import openfl.display.PixelSnapping;
+    import openfl.geom.Point;
+    import openfl.geom.Rectangle;
+#end
 
 class Drawable {
     private static var int64one : Int64 = Int64.make(0, 1);
@@ -20,7 +23,10 @@ class Drawable {
     private var packedY : Int;
     private var packedW : Int;
     private var packedH : Int;
-    private var bitmapData : BitmapData = null;
+
+    #if (!compiling_builder)
+        private var bitmapData : BitmapData = null;
+    #end
 
     private function new(type : DrawableType) : Void {
         this.type = type;
@@ -34,38 +40,40 @@ class Drawable {
         return '${Std.string(type)}:${id}:${packedX}:${packedY}:${packedW}:${packedH}';
     }
 
-    public function resolve() : DisplayObject {
-        return new Bitmap(resolveBitmapData(), PixelSnapping.AUTO, true);
-    }
+    #if (!compiling_builder)
+        public function resolve() : DisplayObject {
+            return new Bitmap(resolveBitmapData(), PixelSnapping.AUTO, true);
+        }
 
-    public function resolveBitmapData() : BitmapData {
-        switch (type) {
-            case ASSET_BITMAP: {
-                return Assets.getBitmapData(id);
-            }
-
-            case ASSET_PACKED: {
-                if (bitmapData == null) {
-                    bitmapData = new BitmapData(packedW, packedH, true, 0);
-
-                    bitmapData.copyPixels(
-                        Assets.getBitmapData(id),
-                        new Rectangle(packedX, packedY, packedW, packedH),
-                        new Point(0, 0),
-                        null,
-                        null,
-                        true
-                    );
+        public function resolveBitmapData() : BitmapData {
+            switch (type) {
+                case ASSET_BITMAP: {
+                    return Assets.getBitmapData(id);
                 }
 
-                return bitmapData;
-            }
+                case ASSET_PACKED: {
+                    if (bitmapData == null) {
+                        bitmapData = new BitmapData(packedW, packedH, true, 0);
 
-            case BITMAP_DATA: {
-                return bitmapData;
+                        bitmapData.copyPixels(
+                            Assets.getBitmapData(id),
+                            new Rectangle(packedX, packedY, packedW, packedH),
+                            new Point(0, 0),
+                            null,
+                            null,
+                            true
+                        );
+                    }
+
+                    return bitmapData;
+                }
+
+                case BITMAP_DATA: {
+                    return bitmapData;
+                }
             }
         }
-    }
+    #end
 
     public static function equals(a : Drawable, b : Drawable) : Bool {
         if (a == null && b == null) {
@@ -112,29 +120,31 @@ class Drawable {
         return result;
     }
 
-    public static function fromBitmapData(bitmapData : BitmapData) : Drawable {
-        var result = new Drawable(DrawableType.BITMAP_DATA);
+    #if (!compiling_builder)
+        public static function fromBitmapData(bitmapData : BitmapData) : Drawable {
+            var result = new Drawable(DrawableType.BITMAP_DATA);
 
-        customDrawableIndex = Int64.add(customDrawableIndex, int64one);
-        result.id = Int64.toStr(customDrawableIndex);
-        result.bitmapData = bitmapData;
+            customDrawableIndex = Int64.add(customDrawableIndex, int64one);
+            result.id = Int64.toStr(customDrawableIndex);
+            result.bitmapData = bitmapData;
 
-        return result;
-    }
-
-    public static function createEmpty(width : Int, height : Int) : Drawable {
-        return fromBitmapData(new BitmapData(width, height, true, 0));
-    }
-
-    public static function bitmapFromBitmapData(bitmapData : BitmapData, ?pixelSnapping : PixelSnapping, smoothing : Bool = true) : Bitmap {
-        if (pixelSnapping == null) {
-            pixelSnapping = PixelSnapping.AUTO;
+            return result;
         }
 
-        return new Bitmap(bitmapData, pixelSnapping, smoothing);
-    }
+        public static function createEmpty(width : Int, height : Int) : Drawable {
+            return fromBitmapData(new BitmapData(width, height, true, 0));
+        }
 
-    public static function bitmapFromAsset(assetId : String, ?pixelSnapping : PixelSnapping, smoothing : Bool = true) : Bitmap {
-        return bitmapFromBitmapData(Assets.getBitmapData(assetId));
-    }
+        public static function bitmapFromBitmapData(bitmapData : BitmapData, ?pixelSnapping : PixelSnapping, smoothing : Bool = true) : Bitmap {
+            if (pixelSnapping == null) {
+                pixelSnapping = PixelSnapping.AUTO;
+            }
+
+            return new Bitmap(bitmapData, pixelSnapping, smoothing);
+        }
+
+        public static function bitmapFromAsset(assetId : String, ?pixelSnapping : PixelSnapping, smoothing : Bool = true) : Bitmap {
+            return bitmapFromBitmapData(Assets.getBitmapData(assetId));
+        }
+    #end
 }
